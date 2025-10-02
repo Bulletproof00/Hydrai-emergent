@@ -315,6 +315,146 @@ async def get_live_price(symbol: str = "BTC/USDT"):
         logging.error(f"Error fetching live price: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+async def get_macro_data():
+    """Fetch macro market data for correlation analysis"""
+    try:
+        macro_data = {}
+        
+        # Traditional Markets using yfinance (synchronous, run in thread)
+        def fetch_tradfi():
+            tickers = {
+                'NASDAQ': '^IXIC',
+                'SPX': '^GSPC',
+                'DXY': 'DX-Y.NYB',  # US Dollar Index
+                'Gold': 'GC=F',
+                'Russell2000': '^RUT'
+            }
+            
+            data = {}
+            for name, symbol in tickers.items():
+                try:
+                    ticker = yf.Ticker(symbol)
+                    hist = ticker.history(period='1d')
+                    if not hist.empty:
+                        current = hist['Close'].iloc[-1]
+                        prev = hist['Open'].iloc[-1]
+                        change = ((current - prev) / prev) * 100
+                        data[name] = {
+                            'price': float(current),
+                            'change_24h': float(change)
+                        }
+                except Exception as e:
+                    logging.warning(f"Error fetching {name}: {str(e)}")
+                    data[name] = {'price': 0, 'change_24h': 0}
+            return data
+        
+        # Run tradfi fetch in thread pool
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            tradfi_data = await asyncio.get_event_loop().run_in_executor(executor, fetch_tradfi)
+        
+        macro_data.update(tradfi_data)
+        
+        # Crypto market data from exchange
+        if exchange:
+            try:
+                # Bitcoin
+                btc_ticker = await exchange.fetch_ticker('BTC/USDT')
+                macro_data['Bitcoin'] = {
+                    'price': btc_ticker['last'],
+                    'change_24h': btc_ticker['percentage']
+                }
+                
+                # Ethereum
+                eth_ticker = await exchange.fetch_ticker('ETH/USDT')
+                macro_data['Ethereum'] = {
+                    'price': eth_ticker['last'],
+                    'change_24h': eth_ticker['percentage']
+                }
+                
+                # Calculate Total Crypto Market Cap (approximate)
+                btc_market_cap = btc_ticker['last'] * 19_500_000  # ~19.5M BTC
+                eth_market_cap = eth_ticker['last'] * 120_000_000  # ~120M ETH
+                total_market_cap = btc_market_cap + eth_market_cap * 1.5  # Rough estimate
+                
+                macro_data['TotalCryptoMarketCap'] = {
+                    'value': float(total_market_cap),
+                    'unit': 'USD'
+                }
+                
+                # Bitcoin Dominance (BTC market cap / Total market cap)
+                btc_dominance = (btc_market_cap / total_market_cap) * 100
+                macro_data['BitcoinDominance'] = {
+                    'percentage': float(btc_dominance)
+                }
+                
+                # USDT Market Cap (mock - would need CoinGecko API for real data)
+                macro_data['USDTDominance'] = {
+                    'percentage': 7.5  # Approximate
+                }
+                
+            except Exception as e:
+                logging.warning(f"Error fetching crypto data: {str(e)}")
+        
+        return macro_data
+        
+    except Exception as e:
+        logging.error(f"Error fetching macro data: {str(e)}")
+        return {}
+
+async def calculate_correlations(timeframe: str = "1d", period: int = 30):
+    """Calculate correlations between different assets"""
+    try:
+        correlations = {}
+        
+        # Fetch historical data for multiple assets
+        def fetch_historical_tradfi():
+            symbols = {
+                'BTC': yf.Ticker('BTC-USD'),
+                'ETH': yf.Ticker('ETH-USD'),
+                'SPX': yf.Ticker('^GSPC'),
+                'NASDAQ': yf.Ticker('^IXIC'),
+                'Gold': yf.Ticker('GC=F'),
+                'DXY': yf.Ticker('DX-Y.NYB')
+            }
+            
+            data = {}
+            for name, ticker in symbols.items():
+                try:
+                    hist = ticker.history(period='30d')
+                    if not hist.empty:
+                        data[name] = hist['Close'].values
+                except:
+                    pass
+            return data
+        
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            historical_data = await asyncio.get_event_loop().run_in_executor(executor, fetch_historical_tradfi)
+        
+        # Calculate correlations
+        if 'BTC' in historical_data:
+            btc_data = historical_data['BTC']
+            min_length = len(btc_data)
+            
+            for asset, asset_data in historical_data.items():
+                if asset != 'BTC' and len(asset_data) >= min_length:
+                    # Align lengths
+                    length = min(len(btc_data), len(asset_data))
+                    btc_aligned = btc_data[-length:]
+                    asset_aligned = asset_data[-length:]
+                    
+                    # Calculate Pearson correlation
+                    if length > 1:
+                        corr, _ = pearsonr(btc_aligned, asset_aligned)
+                        correlations[f'BTC_vs_{asset}'] = float(corr)
+        
+        return correlations
+        
+    except Exception as e:
+        logging.error(f"Error calculating correlations: {str(e)}")
+        return {}
+
 # ============= AI ANALYSIS =============
 async def analyze_with_ai(user_message: str, market_data: Optional[Dict] = None):
     """Use LLM to analyze trading data"""
