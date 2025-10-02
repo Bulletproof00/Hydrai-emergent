@@ -558,13 +558,15 @@ async def calculate_indicators(request: IndicatorRequest):
         }
         
         for indicator in request.indicators:
-            if indicator.lower() == 'rsi':
+            ind_lower = indicator.lower()
+            
+            if ind_lower == 'rsi':
                 rsi_value = await plugin_manager.calculate_rsi(data)
                 result['indicators']['rsi'] = float(rsi_value) if rsi_value else None
-            elif indicator.lower() == 'mfi':
+            elif ind_lower == 'mfi':
                 mfi_value = await plugin_manager.calculate_mfi(data)
                 result['indicators']['mfi'] = float(mfi_value) if mfi_value else None
-            elif indicator.lower() == 'bollinger':
+            elif ind_lower == 'bollinger':
                 bb_values = await plugin_manager.calculate_bollinger(data)
                 if bb_values:
                     result['indicators']['bollinger'] = {
@@ -572,6 +574,35 @@ async def calculate_indicators(request: IndicatorRequest):
                         'middle': float(bb_values['middle']),
                         'lower': float(bb_values['lower'])
                     }
+            elif ind_lower == 'stochastic':
+                stoch_values = await plugin_manager.calculate_stochastic(data)
+                if stoch_values:
+                    result['indicators']['stochastic'] = {
+                        'k': float(stoch_values['k']),
+                        'd': float(stoch_values['d'])
+                    }
+            elif ind_lower == 'stoch_rsi':
+                stoch_rsi_values = await plugin_manager.calculate_stoch_rsi(data)
+                if stoch_rsi_values:
+                    result['indicators']['stoch_rsi'] = {
+                        'k': float(stoch_rsi_values['k']),
+                        'd': float(stoch_rsi_values['d'])
+                    }
+            elif ind_lower == 'obv':
+                obv_value = await plugin_manager.calculate_obv(data)
+                result['indicators']['obv'] = float(obv_value) if obv_value else None
+            elif ind_lower == 'vwap':
+                vwap_value = await plugin_manager.calculate_vwap(data)
+                result['indicators']['vwap'] = float(vwap_value) if vwap_value else None
+            elif ind_lower == 'ema50':
+                ema50_value = await plugin_manager.calculate_ema(data, 50)
+                result['indicators']['ema50'] = float(ema50_value) if ema50_value else None
+            elif ind_lower == 'ema200':
+                ema200_value = await plugin_manager.calculate_ema(data, 200)
+                result['indicators']['ema200'] = float(ema200_value) if ema200_value else None
+            elif ind_lower == 'volume_pvsra':
+                pvsra_value = await plugin_manager.calculate_volume_pvsra(data)
+                result['indicators']['volume_pvsra'] = pvsra_value
         
         return result
     except Exception as e:
