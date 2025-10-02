@@ -88,12 +88,33 @@ function App() {
       const response = await axios.post(`${API}/indicators`, {
         symbol: "BTC/USDT",
         timeframe: "1h",
-        limit: 100,
-        indicators: ["rsi", "mfi", "bollinger"]
+        limit: 200,
+        indicators: ["rsi", "mfi", "bollinger", "stochastic", "stoch_rsi", "obv", "vwap", "ema50", "ema200", "volume_pvsra"]
       });
       setIndicators(response.data);
     } catch (error) {
       console.error("Error fetching indicators:", error);
+    }
+  };
+
+  const fetchMacroData = async () => {
+    try {
+      const response = await axios.get(`${API}/macro-data`);
+      setMacroData(response.data);
+    } catch (error) {
+      console.error("Error fetching macro data:", error);
+    }
+  };
+
+  const fetchMarketOverview = async () => {
+    try {
+      const response = await axios.get(`${API}/market-overview`);
+      setMarketOverview(response.data);
+      if (response.data.correlations) {
+        setCorrelations(response.data.correlations);
+      }
+    } catch (error) {
+      console.error("Error fetching market overview:", error);
     }
   };
 
