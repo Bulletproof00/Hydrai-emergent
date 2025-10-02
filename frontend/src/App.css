@@ -592,3 +592,116 @@ body {
   color: #64748b;
   font-weight: 500;
 }
+
+/* Section Titles */
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #10b981;
+  margin: 32px 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Macro Data */
+.macro-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #e4e4e7;
+  margin: 16px 0;
+}
+
+.macro-change {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.macro-change.positive {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.macro-change.negative {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Correlations */
+.correlation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.correlation-card {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.correlation-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.correlation-label {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.correlation-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.correlation-value.strong-positive {
+  color: #10b981;
+}
+
+.correlation-value.strong-negative {
+  color: #ef4444;
+}
+
+.correlation-value.weak {
+  color: #94a3b8;
+}
+
+.correlation-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.correlation-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Indicator Rows */
+.indicator-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 14px;
+}
+
+.indicator-row:last-child {
+  border-bottom: none;
+}
+
+.volume-class {
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #10b981;
+}
