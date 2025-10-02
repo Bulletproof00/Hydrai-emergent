@@ -203,6 +203,78 @@ class PluginManager:
                 'lower': bb.bollinger_lband().iloc[-1]
             }
         return None
+    
+    async def calculate_stochastic(self, data: pd.DataFrame, period: int = 14):
+        stoch = StochasticOscillator(
+            high=data['high'],
+            low=data['low'],
+            close=data['close'],
+            window=period
+        )
+        if len(data) > 0:
+            return {
+                'k': stoch.stoch().iloc[-1],
+                'd': stoch.stoch_signal().iloc[-1]
+            }
+        return None
+    
+    async def calculate_stoch_rsi(self, data: pd.DataFrame, period: int = 14):
+        stoch_rsi = StochRSIIndicator(close=data['close'], window=period)
+        if len(data) > 0:
+            return {
+                'k': stoch_rsi.stochrsi_k().iloc[-1],
+                'd': stoch_rsi.stochrsi_d().iloc[-1]
+            }
+        return None
+    
+    async def calculate_obv(self, data: pd.DataFrame):
+        obv = OnBalanceVolumeIndicator(close=data['close'], volume=data['volume'])
+        return obv.on_balance_volume().iloc[-1] if len(data) > 0 else None
+    
+    async def calculate_vwap(self, data: pd.DataFrame):
+        vwap = VolumeWeightedAveragePrice(
+            high=data['high'],
+            low=data['low'],
+            close=data['close'],
+            volume=data['volume']
+        )
+        return vwap.volume_weighted_average_price().iloc[-1] if len(data) > 0 else None
+    
+    async def calculate_ema(self, data: pd.DataFrame, period: int = 50):
+        ema = EMAIndicator(close=data['close'], window=period)
+        return ema.ema_indicator().iloc[-1] if len(data) > 0 else None
+    
+    async def calculate_volume_pvsra(self, data: pd.DataFrame):
+        """Volume Profile with Support and Resistance Areas"""
+        if len(data) < 20:
+            return None
+        
+        volumes = data['volume'].values
+        avg_volume = np.mean(volumes[-20:])
+        std_volume = np.std(volumes[-20:])
+        
+        current_volume = volumes[-1]
+        
+        # Classify volume
+        if current_volume > avg_volume + 2 * std_volume:
+            classification = 'climax'
+            strength = 'very_high'
+        elif current_volume > avg_volume + std_volume:
+            classification = 'rising'
+            strength = 'high'
+        elif current_volume > avg_volume:
+            classification = 'normal'
+            strength = 'medium'
+        else:
+            classification = 'low'
+            strength = 'low'
+        
+        return {
+            'current_volume': float(current_volume),
+            'average_volume': float(avg_volume),
+            'classification': classification,
+            'strength': strength
+        }
 
 plugin_manager = PluginManager()
 
