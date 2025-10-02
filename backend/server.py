@@ -431,10 +431,23 @@ async def startup_event():
     global exchange, redis_client
     logger.info("Starting Hydra AI...")
     
-    # Initialize exchange
-    exchange = ccxt.binance({
-        'enableRateLimit': True,
-    })
+    # Initialize exchange - Try Kraken as it has less restrictions
+    try:
+        exchange = ccxt.kraken({
+            'enableRateLimit': True,
+        })
+        logger.info("Kraken exchange initialized")
+    except Exception as e:
+        logger.warning(f"Kraken initialization failed, trying Binance: {str(e)}")
+        try:
+            exchange = ccxt.binance({
+                'enableRateLimit': True,
+            })
+            logger.info("Binance exchange initialized")
+        except Exception as e2:
+            logger.error(f"Exchange initialization failed: {str(e2)}")
+            # Use mock data as fallback
+            exchange = None
     
     # Initialize Redis
     try:
