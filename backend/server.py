@@ -107,6 +107,42 @@ class PluginManager:
                     'description': 'Volatility indicator with upper and lower bands',
                     'status': 'active',
                     'version': '1.0.0'
+                },
+                'stochastic': {
+                    'name': 'Stochastic Oscillator',
+                    'description': 'Momentum indicator comparing closing price to price range',
+                    'status': 'active',
+                    'version': '1.0.0'
+                },
+                'stoch_rsi': {
+                    'name': 'Stochastic RSI',
+                    'description': 'Stochastic applied to RSI values',
+                    'status': 'active',
+                    'version': '1.0.0'
+                },
+                'obv': {
+                    'name': 'OBV',
+                    'description': 'On Balance Volume - Cumulative volume indicator',
+                    'status': 'active',
+                    'version': '1.0.0'
+                },
+                'vwap': {
+                    'name': 'VWAP',
+                    'description': 'Volume Weighted Average Price',
+                    'status': 'active',
+                    'version': '1.0.0'
+                },
+                'ema50': {
+                    'name': 'EMA 50',
+                    'description': 'Exponential Moving Average (50 periods)',
+                    'status': 'active',
+                    'version': '1.0.0'
+                },
+                'ema200': {
+                    'name': 'EMA 200',
+                    'description': 'Exponential Moving Average (200 periods)',
+                    'status': 'active',
+                    'version': '1.0.0'
                 }
             },
             'strategies': {
@@ -118,9 +154,15 @@ class PluginManager:
                 }
             },
             'datasources': {
-                'binance': {
-                    'name': 'Binance',
-                    'description': 'Binance exchange data feed',
+                'kraken': {
+                    'name': 'Kraken',
+                    'description': 'Kraken exchange data feed',
+                    'status': 'active',
+                    'version': '1.0.0'
+                },
+                'tradfi': {
+                    'name': 'TradFi Markets',
+                    'description': 'Traditional finance markets (stocks, indices, commodities)',
                     'status': 'active',
                     'version': '1.0.0'
                 }
