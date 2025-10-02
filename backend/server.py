@@ -614,6 +614,44 @@ async def backtest(request: BacktestRequest):
     """Run a backtest"""
     return await run_backtest(request)
 
+@api_router.get("/macro-data")
+async def get_macro_data_endpoint():
+    """Get macro market data"""
+    return await get_macro_data()
+
+@api_router.get("/correlations")
+async def get_correlations_endpoint():
+    """Get asset correlations"""
+    return await calculate_correlations()
+
+@api_router.get("/market-overview")
+async def get_market_overview():
+    """Get comprehensive market overview"""
+    try:
+        # Fetch all data concurrently
+        macro_data_task = asyncio.create_task(get_macro_data())
+        correlations_task = asyncio.create_task(calculate_correlations())
+        btc_price_task = asyncio.create_task(get_live_price("BTC/USDT"))
+        
+        macro_data = await macro_data_task
+        correlations = await correlations_task
+        btc_price = await btc_price_task
+        
+        return {
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'bitcoin': btc_price,
+            'macro_data': macro_data,
+            'correlations': correlations,
+            'summary': {
+                'market_sentiment': 'bullish' if btc_price.get('change_24h', 0) > 0 else 'bearish',
+                'btc_dominance': macro_data.get('BitcoinDominance', {}).get('percentage', 0),
+                'correlation_with_spx': correlations.get('BTC_vs_SPX', 0)
+            }
+        }
+    except Exception as e:
+        logging.error(f"Market overview error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/sessions")
 async def get_sessions():
     """Get all chat sessions"""
