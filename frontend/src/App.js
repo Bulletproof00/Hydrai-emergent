@@ -15,6 +15,9 @@ function App() {
   const [indicators, setIndicators] = useState(null);
   const [plugins, setPlugins] = useState([]);
   const [activeView, setActiveView] = useState("chat");
+  const [macroData, setMacroData] = useState(null);
+  const [correlations, setCorrelations] = useState(null);
+  const [marketOverview, setMarketOverview] = useState(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
