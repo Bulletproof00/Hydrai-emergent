@@ -15,10 +15,14 @@ import json
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import pandas as pd
 import numpy as np
-from ta.momentum import RSIIndicator, StochasticOscillator
-from ta.volume import MFIIndicator
+from ta.momentum import RSIIndicator, StochasticOscillator, StochRSIIndicator
+from ta.volume import MFIIndicator, OnBalanceVolumeIndicator, VolumeWeightedAveragePrice
 from ta.volatility import BollingerBands
+from ta.trend import EMAIndicator
 import asyncio
+import yfinance as yf
+from scipy.stats import pearsonr
+from sklearn.preprocessing import StandardScaler
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
