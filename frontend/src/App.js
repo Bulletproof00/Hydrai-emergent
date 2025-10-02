@@ -263,6 +263,21 @@ function App() {
             )}
           </div>
         )}
+
+        {/* Correlations Widget */}
+        {correlations && Object.keys(correlations).length > 0 && (
+          <div className="indicators-widget" style={{marginTop: '16px'}}>
+            <div className="widget-title">Korrelationen</div>
+            {Object.entries(correlations).slice(0, 3).map(([key, value]) => (
+              <div key={key} className="indicator-item">
+                <span className="correlation-mini-label">{key.replace('BTC_vs_', '')}</span>
+                <span className={`indicator-value ${value > 0.5 ? 'positive' : value < -0.5 ? 'negative' : ''}`}>
+                  {value?.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Main Content */}
