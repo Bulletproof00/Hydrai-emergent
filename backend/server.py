@@ -881,6 +881,81 @@ async def get_market_overview():
         logging.error(f"Market overview error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/chart-data/{symbol}")
+async def get_chart_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit: int = 100):
+    """Get OHLCV chart data for candlestick display"""
+    try:
+        data = await get_market_data(symbol, timeframe, limit)
+        
+        # Convert to chart-friendly format
+        chart_data = []
+        for idx, row in data.iterrows():
+            chart_data.append({
+                'time': int(row['timestamp'].timestamp()),
+                'open': float(row['open']),
+                'high': float(row['high']),
+                'low': float(row['low']),
+                'close': float(row['close']),
+                'volume': float(row['volume'])
+            })
+        
+        return {
+            'symbol': symbol,
+            'timeframe': timeframe,
+            'data': chart_data
+        }
+    except Exception as e:
+        logging.error(f"Chart data error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/analyze-patterns")
+async def analyze_patterns_endpoint(request: IndicatorRequest):
+    """Analyze candlestick patterns, divergences, and chart patterns"""
+    try:
+        data = await get_market_data(request.symbol, request.timeframe, request.limit)
+        
+        # Detect patterns
+        candlestick_patterns = detect_candlestick_patterns(data)
+        divergences = detect_divergences(data)
+        chart_patterns = detect_chart_patterns(data)
+        
+        # Get indicators for context
+        indicators = {}
+        rsi = await plugin_manager.calculate_rsi(data)
+        if rsi:
+            indicators['rsi'] = float(rsi)
+        
+        ema50 = await plugin_manager.calculate_ema(data, 50)
+        if ema50:
+            indicators['ema50'] = float(ema50)
+        
+        ema200 = await plugin_manager.calculate_ema(data, 200)
+        if ema200:
+            indicators['ema200'] = float(ema200)
+        
+        # Gemini AI Analysis
+        gemini_analysis = await analyze_chart_with_gemini(data, indicators)
+        
+        return {
+            'symbol': request.symbol,
+            'timeframe': request.timeframe,
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'current_price': float(data['close'].iloc[-1]),
+            'candlestick_patterns': candlestick_patterns,
+            'divergences': divergences,
+            'chart_patterns': chart_patterns,
+            'indicators': indicators,
+            'ai_analysis': gemini_analysis,
+            'summary': {
+                'bullish_signals': len([p for p in candlestick_patterns if p['type'] == 'bullish']) + len([p for p in chart_patterns if p['type'] == 'bullish']),
+                'bearish_signals': len([p for p in candlestick_patterns if p['type'] == 'bearish']) + len([p for p in chart_patterns if p['type'] == 'bearish']),
+                'has_divergence': len(divergences) > 0
+            }
+        }
+    except Exception as e:
+        logging.error(f"Pattern analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/sessions")
 async def get_sessions():
     """Get all chat sessions"""
