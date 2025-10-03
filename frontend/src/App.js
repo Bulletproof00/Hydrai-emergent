@@ -232,6 +232,12 @@ function App() {
             <Brain className="logo-icon" />
             <span>HYDRA AI</span>
           </div>
+          <div className="user-info">
+            <span className="username">{user?.username}</span>
+            <button className="logout-btn" onClick={handleLogout} title="Abmelden">
+              <LogOut size={18} />
+            </button>
+          </div>
         </div>
 
         <nav className="nav-menu">
