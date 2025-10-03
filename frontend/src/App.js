@@ -213,6 +213,14 @@ function App() {
             <span>Analyse</span>
           </button>
           <button 
+            className={`nav-item ${activeView === 'chart' ? 'active' : ''}`}
+            onClick={() => setActiveView('chart')}
+            data-testid="nav-chart"
+          >
+            <LineChart size={20} />
+            <span>Chart</span>
+          </button>
+          <button 
             className={`nav-item ${activeView === 'plugins' ? 'active' : ''}`}
             onClick={() => setActiveView('plugins')}
             data-testid="nav-plugins"
