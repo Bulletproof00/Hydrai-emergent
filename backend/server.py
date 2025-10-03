@@ -63,6 +63,39 @@ exchange = None
 # Active WebSocket connections
 active_connections: List[WebSocket] = []
 
+# ============= AUTH HELPERS =============
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict):
+    from datetime import timedelta
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(days=30)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def decode_access_token(token: str):
+    try:
+        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except JWTError:
+        return None
+
+async def get_current_user(authorization: str = Header(None)):
+    if not authorization or not authorization.startswith('Bearer '):
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    token = authorization.split(' ')[1]
+    payload = decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    user_id = payload.get("sub")
+    user = await db.users.find_one({"_id": user_id})
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
 # ============= AUTH MODELS =============
 class UserCreate(BaseModel):
     email: EmailStr
