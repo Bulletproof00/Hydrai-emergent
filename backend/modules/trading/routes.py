@@ -30,8 +30,8 @@ def create_trading_router(db):
             raise HTTPException(status_code=401, detail="User not found")
         return user
 
-@router.post("/open-trade", response_model=Trade)
-async def open_trade(trade_data: TradeCreate, current_user = Depends(get_current_user), db = None):
+    @router.post("/open-trade", response_model=Trade)
+    async def open_trade(trade_data: TradeCreate, authorization: str = Header(None)):
     """Open a new paper trade"""
     exchange = get_exchange()
     
