@@ -650,7 +650,7 @@ async def analyze_chart_with_gemini(data: pd.DataFrame, indicators_data: dict):
             return "Gemini API key not configured"
         
         genai.configure(api_key=gemini_api_key)
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-2.5-pro')
         
         # Prepare analysis prompt
         prompt = f"""Analysiere diesen Bitcoin Trading-Chart professionell.
