@@ -459,6 +459,231 @@ async def calculate_correlations(timeframe: str = "1d", period: int = 30):
         logging.error(f"Error calculating correlations: {str(e)}")
         return {}
 
+# ============= PATTERN RECOGNITION =============
+def detect_candlestick_patterns(data: pd.DataFrame):
+    """Detect candlestick patterns"""
+    patterns = []
+    
+    if len(data) < 3:
+        return patterns
+    
+    # Get last 3 candles
+    last_3 = data.tail(3)
+    current = last_3.iloc[-1]
+    prev = last_3.iloc[-2]
+    prev_prev = last_3.iloc[-3] if len(last_3) > 2 else None
+    
+    body_current = abs(current['close'] - current['open'])
+    body_prev = abs(prev['close'] - prev['open'])
+    
+    # Doji
+    if body_current < (current['high'] - current['low']) * 0.1:
+        patterns.append({
+            'name': 'Doji',
+            'type': 'neutral',
+            'strength': 'medium',
+            'description': 'Indecision in the market'
+        })
+    
+    # Hammer
+    lower_shadow = min(current['open'], current['close']) - current['low']
+    upper_shadow = current['high'] - max(current['open'], current['close'])
+    if lower_shadow > body_current * 2 and upper_shadow < body_current * 0.3:
+        patterns.append({
+            'name': 'Hammer',
+            'type': 'bullish',
+            'strength': 'strong',
+            'description': 'Potential bullish reversal'
+        })
+    
+    # Shooting Star
+    if upper_shadow > body_current * 2 and lower_shadow < body_current * 0.3:
+        patterns.append({
+            'name': 'Shooting Star',
+            'type': 'bearish',
+            'strength': 'strong',
+            'description': 'Potential bearish reversal'
+        })
+    
+    # Bullish Engulfing
+    if (prev['close'] < prev['open'] and  # Previous bearish
+        current['close'] > current['open'] and  # Current bullish
+        current['open'] < prev['close'] and
+        current['close'] > prev['open']):
+        patterns.append({
+            'name': 'Bullish Engulfing',
+            'type': 'bullish',
+            'strength': 'very_strong',
+            'description': 'Strong bullish reversal signal'
+        })
+    
+    # Bearish Engulfing
+    if (prev['close'] > prev['open'] and  # Previous bullish
+        current['close'] < current['open'] and  # Current bearish
+        current['open'] > prev['close'] and
+        current['close'] < prev['open']):
+        patterns.append({
+            'name': 'Bearish Engulfing',
+            'type': 'bearish',
+            'strength': 'very_strong',
+            'description': 'Strong bearish reversal signal'
+        })
+    
+    # Three White Soldiers (bullish continuation)
+    if prev_prev is not None:
+        if (prev_prev['close'] > prev_prev['open'] and
+            prev['close'] > prev['open'] and
+            current['close'] > current['open'] and
+            current['close'] > prev['close'] > prev_prev['close']):
+            patterns.append({
+                'name': 'Three White Soldiers',
+                'type': 'bullish',
+                'strength': 'very_strong',
+                'description': 'Strong bullish continuation'
+            })
+    
+    return patterns
+
+def detect_divergences(data: pd.DataFrame):
+    """Detect RSI and price divergences"""
+    divergences = []
+    
+    if len(data) < 14:
+        return divergences
+    
+    # Calculate RSI
+    rsi = RSIIndicator(close=data['close'], window=14)
+    data_with_rsi = data.copy()
+    data_with_rsi['rsi'] = rsi.rsi()
+    
+    # Look for divergences in last 20 candles
+    recent = data_with_rsi.tail(20)
+    
+    # Bullish divergence: Price making lower lows, RSI making higher lows
+    price_lows = recent['low'].values
+    rsi_values = recent['rsi'].values
+    
+    if len(price_lows) > 5:
+        # Find local minima
+        for i in range(2, len(price_lows) - 2):
+            if price_lows[i] < price_lows[i-1] and price_lows[i] < price_lows[i+1]:
+                # Check if RSI is making higher low
+                if i > 5 and rsi_values[i] > rsi_values[i-5]:
+                    divergences.append({
+                        'type': 'Bullish Divergence',
+                        'indicator': 'RSI',
+                        'strength': 'strong',
+                        'description': 'Price lower low, RSI higher low - potential reversal'
+                    })
+                    break
+    
+    # Bearish divergence: Price making higher highs, RSI making lower highs
+    price_highs = recent['high'].values
+    for i in range(2, len(price_highs) - 2):
+        if price_highs[i] > price_highs[i-1] and price_highs[i] > price_highs[i+1]:
+            if i > 5 and rsi_values[i] < rsi_values[i-5]:
+                divergences.append({
+                    'type': 'Bearish Divergence',
+                    'indicator': 'RSI',
+                    'strength': 'strong',
+                    'description': 'Price higher high, RSI lower high - potential reversal'
+                })
+                break
+    
+    return divergences
+
+def detect_chart_patterns(data: pd.DataFrame):
+    """Detect chart patterns like triangles, head and shoulders, etc."""
+    patterns = []
+    
+    if len(data) < 20:
+        return patterns
+    
+    recent = data.tail(20)
+    highs = recent['high'].values
+    lows = recent['low'].values
+    closes = recent['close'].values
+    
+    # Ascending Triangle
+    upper_resistance = np.max(highs[-10:])
+    if np.std(highs[-10:]) < (upper_resistance * 0.02):  # Flat top
+        lower_lows = lows[-10:]
+        if lower_lows[-1] > lower_lows[0]:  # Rising lows
+            patterns.append({
+                'name': 'Ascending Triangle',
+                'type': 'bullish',
+                'description': 'Bullish continuation pattern'
+            })
+    
+    # Descending Triangle
+    lower_support = np.min(lows[-10:])
+    if np.std(lows[-10:]) < (lower_support * 0.02):  # Flat bottom
+        upper_highs = highs[-10:]
+        if upper_highs[-1] < upper_highs[0]:  # Falling highs
+            patterns.append({
+                'name': 'Descending Triangle',
+                'type': 'bearish',
+                'description': 'Bearish continuation pattern'
+            })
+    
+    # Simple trend detection
+    if closes[-1] > closes[-10] and all(closes[i] >= closes[i-1] for i in range(-5, 0, 1)):
+        patterns.append({
+            'name': 'Strong Uptrend',
+            'type': 'bullish',
+            'description': 'Consistent upward movement'
+        })
+    elif closes[-1] < closes[-10] and all(closes[i] <= closes[i-1] for i in range(-5, 0, 1)):
+        patterns.append({
+            'name': 'Strong Downtrend',
+            'type': 'bearish',
+            'description': 'Consistent downward movement'
+        })
+    
+    return patterns
+
+async def analyze_chart_with_gemini(data: pd.DataFrame, indicators_data: dict):
+    """Use Gemini Vision API to analyze chart patterns"""
+    try:
+        gemini_api_key = os.environ.get('GEMINI_API_KEY')
+        if not gemini_api_key:
+            return "Gemini API key not configured"
+        
+        genai.configure(api_key=gemini_api_key)
+        model = genai.GenerativeModel('gemini-2.5-pro-latest')
+        
+        # Prepare analysis prompt
+        prompt = f"""Analysiere diesen Bitcoin Trading-Chart professionell.
+
+Aktuelle Daten:
+- Preis: ${data['close'].iloc[-1]:.2f}
+- 24h Änderung: {((data['close'].iloc[-1] - data['close'].iloc[-2]) / data['close'].iloc[-2] * 100):.2f}%
+- Volumen: {data['volume'].iloc[-1]:.2f}
+
+Indikatoren:
+{json.dumps(indicators_data, indent=2)}
+
+Bitte analysiere:
+1. Candlestick-Muster (Doji, Hammer, Engulfing, etc.)
+2. Chart-Patterns (Triangles, Head & Shoulders, Wedges, Flags)
+3. Divergenzen zwischen Preis und Indikatoren
+4. Support/Resistance Levels
+5. Trend-Richtung und Stärke
+6. Trading-Empfehlung (Long/Short/Neutral)
+
+Gib eine präzise, professionelle Analyse auf Deutsch."""
+        
+        response = await asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: model.generate_content(prompt)
+        )
+        
+        return response.text
+        
+    except Exception as e:
+        logging.error(f"Gemini analysis error: {str(e)}")
+        return f"Fehler bei der KI-Analyse: {str(e)}"
+
 # ============= AI ANALYSIS =============
 async def analyze_with_ai(user_message: str, market_data: Optional[Dict] = None):
     """Use LLM to analyze trading data"""
