@@ -998,6 +998,11 @@ async def get_portfolio(authorization: str = Header(None)):
     user = await get_current_user(authorization)
     trades = await db.trades.find({"user_id": user["_id"]}).to_list(None)
     
+    # Remove MongoDB ObjectId
+    for trade in trades:
+        if '_id' in trade:
+            del trade['_id']
+    
     open_trades = [t for t in trades if t["status"] == "open"]
     closed_trades = [t for t in trades if t["status"] == "closed"]
     
