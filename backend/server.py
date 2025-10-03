@@ -63,7 +63,56 @@ exchange = None
 # Active WebSocket connections
 active_connections: List[WebSocket] = []
 
-# ============= MODELS =============
+# ============= AUTH MODELS =============
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=6)
+    username: str = Field(min_length=3)
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserResponse(BaseModel):
+    id: str
+    email: str
+    username: str
+    created_at: str
+    paper_trading_balance: float = 10000.0
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+# ============= TRADING MODELS =============
+class TradeCreate(BaseModel):
+    symbol: str
+    side: Literal["long", "short"]
+    leverage: int = Field(ge=1, le=125, default=1)
+    amount: float = Field(gt=0)
+    entry_price: Optional[float] = None
+    stop_loss: Optional[float] = None
+    take_profit: Optional[float] = None
+
+class Trade(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    symbol: str
+    side: Literal["long", "short"]
+    leverage: int
+    amount: float
+    entry_price: float
+    exit_price: Optional[float] = None
+    stop_loss: Optional[float] = None
+    take_profit: Optional[float] = None
+    status: Literal["open", "closed"] = "open"
+    pnl: Optional[float] = None
+    pnl_percentage: Optional[float] = None
+    opened_at: str
+    closed_at: Optional[str] = None
+
+# ============= EXISTING MODELS =============
 class ChatMessage(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     session_id: str
