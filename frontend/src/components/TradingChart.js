@@ -54,6 +54,38 @@ const TradingChart = ({ symbol = "BTC/USDT", timeframe = "1h" }) => {
     }
   };
 
+  const CustomCandlestick = (props) => {
+    const { x, y, width, height, payload } = props;
+    const isGreen = payload.close >= payload.open;
+    const color = isGreen ? '#10b981' : '#ef4444';
+    
+    const bodyHeight = Math.abs(payload.close - payload.open);
+    const bodyY = Math.min(payload.close, payload.open);
+    
+    return (
+      <g>
+        {/* Wick */}
+        <line
+          x1={x + width / 2}
+          y1={y}
+          x2={x + width / 2}
+          y2={y + height}
+          stroke={color}
+          strokeWidth="1"
+        />
+        {/* Body */}
+        <rect
+          x={x}
+          y={bodyY}
+          width={width}
+          height={bodyHeight || 1}
+          fill={color}
+          stroke={color}
+        />
+      </g>
+    );
+  };
+
   return (
     <div className="trading-chart-container">
       <div className="chart-header">
@@ -68,7 +100,78 @@ const TradingChart = ({ symbol = "BTC/USDT", timeframe = "1h" }) => {
         </button>
       </div>
 
-      <div ref={chartContainerRef} className="chart-wrapper" data-testid="trading-chart" />
+      <div className="chart-wrapper" data-testid="trading-chart">
+        <ResponsiveContainer width="100%" height={400}>
+          <ComposedChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+            <XAxis 
+              dataKey="time" 
+              stroke="#94a3b8"
+              tick={{ fill: '#94a3b8', fontSize: 12 }}
+            />
+            <YAxis 
+              stroke="#94a3b8"
+              tick={{ fill: '#94a3b8', fontSize: 12 }}
+              domain={['dataMin - 1000', 'dataMax + 1000']}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: 'rgba(30, 41, 59, 0.95)', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '8px',
+                color: '#e4e4e7'
+              }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="close" 
+              stroke="#10b981" 
+              strokeWidth={2}
+              dot={false}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="high" 
+              stroke="#3b82f6" 
+              strokeWidth={1}
+              dot={false}
+              opacity={0.3}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="low" 
+              stroke="#ef4444" 
+              strokeWidth={1}
+              dot={false}
+              opacity={0.3}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+
+        <ResponsiveContainer width="100%" height={150}>
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+            <XAxis 
+              dataKey="time" 
+              stroke="#94a3b8"
+              tick={{ fill: '#94a3b8', fontSize: 12 }}
+            />
+            <YAxis 
+              stroke="#94a3b8"
+              tick={{ fill: '#94a3b8', fontSize: 12 }}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: 'rgba(30, 41, 59, 0.95)', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '8px',
+                color: '#e4e4e7'
+              }}
+            />
+            <Bar dataKey="volume" fill={(entry) => entry.color} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
       {patterns && (
         <div className="patterns-panel">
