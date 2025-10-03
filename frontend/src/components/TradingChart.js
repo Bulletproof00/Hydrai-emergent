@@ -14,8 +14,10 @@ const TradingChart = ({ symbol = "BTC/USDT", timeframe = "1h" }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!chartContainerRef.current) return;
+
     // Create chart
-    chart.current = createChart(chartContainerRef.current, {
+    const newChart = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height: 600,
       layout: {
@@ -38,8 +40,10 @@ const TradingChart = ({ symbol = "BTC/USDT", timeframe = "1h" }) => {
       },
     });
 
+    chart.current = newChart;
+
     // Add candlestick series
-    candlestickSeries.current = chart.current.addCandlestickSeries({
+    const candleSeries = newChart.addCandlestickSeries({
       upColor: '#10b981',
       downColor: '#ef4444',
       borderUpColor: '#10b981',
@@ -48,8 +52,10 @@ const TradingChart = ({ symbol = "BTC/USDT", timeframe = "1h" }) => {
       wickDownColor: '#ef4444',
     });
 
+    candlestickSeries.current = candleSeries;
+
     // Add volume series
-    volumeSeries.current = chart.current.addHistogramSeries({
+    const volSeries = newChart.addHistogramSeries({
       color: '#3b82f6',
       priceFormat: {
         type: 'volume',
@@ -61,11 +67,15 @@ const TradingChart = ({ symbol = "BTC/USDT", timeframe = "1h" }) => {
       },
     });
 
+    volumeSeries.current = volSeries;
+
     // Handle resize
     const handleResize = () => {
-      chart.current.applyOptions({
-        width: chartContainerRef.current.clientWidth,
-      });
+      if (newChart) {
+        newChart.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+        });
+      }
     };
 
     window.addEventListener('resize', handleResize);
@@ -75,7 +85,9 @@ const TradingChart = ({ symbol = "BTC/USDT", timeframe = "1h" }) => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      chart.current.remove();
+      if (newChart) {
+        newChart.remove();
+      }
     };
   }, [symbol, timeframe]);
 
