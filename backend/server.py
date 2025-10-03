@@ -851,7 +851,177 @@ async def run_backtest(request: BacktestRequest):
         logging.error(f"Backtest error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ============= ROUTES =============
+# ============= AUTH ROUTES =============
+@api_router.post("/auth/register", response_model=Token)
+async def register(user_data: UserCreate):
+    existing_user = await db.users.find_one({"email": user_data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    existing_username = await db.users.find_one({"username": user_data.username})
+    if existing_username:
+        raise HTTPException(status_code=400, detail="Username already taken")
+    
+    user_id = str(uuid.uuid4())
+    user_dict = {
+        "_id": user_id,
+        "email": user_data.email,
+        "username": user_data.username,
+        "hashed_password": get_password_hash(user_data.password),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "paper_trading_balance": 10000.0,
+        "trades": [],
+        "saved_analyses": []
+    }
+    
+    await db.users.insert_one(user_dict)
+    access_token = create_access_token(data={"sub": user_id})
+    
+    user_response = UserResponse(
+        id=user_id,
+        email=user_data.email,
+        username=user_data.username,
+        created_at=user_dict["created_at"],
+        paper_trading_balance=10000.0
+    )
+    
+    return Token(access_token=access_token, user=user_response)
+
+@api_router.post("/auth/login", response_model=Token)
+async def login(user_data: UserLogin):
+    user = await db.users.find_one({"email": user_data.email})
+    
+    if not user or not verify_password(user_data.password, user["hashed_password"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    access_token = create_access_token(data={"sub": user["_id"]})
+    
+    user_response = UserResponse(
+        id=user["_id"],
+        email=user["email"],
+        username=user["username"],
+        created_at=user["created_at"],
+        paper_trading_balance=user.get("paper_trading_balance", 10000.0)
+    )
+    
+    return Token(access_token=access_token, user=user_response)
+
+@api_router.get("/auth/me", response_model=UserResponse)
+async def get_me(authorization: str = Header(None)):
+    user = await get_current_user(authorization)
+    return UserResponse(
+        id=user["_id"],
+        email=user["email"],
+        username=user["username"],
+        created_at=user["created_at"],
+        paper_trading_balance=user.get("paper_trading_balance", 10000.0)
+    )
+
+# ============= TRADING ROUTES =============
+@api_router.post("/trading/open", response_model=Trade)
+async def open_trade(trade_data: TradeCreate, authorization: str = Header(None)):
+    user = await get_current_user(authorization)
+    
+    # Get current market price if not provided
+    if trade_data.entry_price is None:
+        ticker = await exchange.fetch_ticker(trade_data.symbol)
+        trade_data.entry_price = ticker['last']
+    
+    required_balance = trade_data.amount
+    user_balance = user.get("paper_trading_balance", 10000.0)
+    
+    if required_balance > user_balance:
+        raise HTTPException(status_code=400, detail="Insufficient balance")
+    
+    trade = Trade(
+        user_id=user["_id"],
+        symbol=trade_data.symbol,
+        side=trade_data.side,
+        leverage=trade_data.leverage,
+        amount=trade_data.amount,
+        entry_price=trade_data.entry_price,
+        stop_loss=trade_data.stop_loss,
+        take_profit=trade_data.take_profit,
+        opened_at=datetime.now(timezone.utc).isoformat()
+    )
+    
+    await db.trades.insert_one(trade.dict())
+    await db.users.update_one(
+        {"_id": user["_id"]},
+        {"$inc": {"paper_trading_balance": -required_balance}}
+    )
+    
+    return trade
+
+@api_router.post("/trading/close/{trade_id}")
+async def close_trade(trade_id: str, authorization: str = Header(None)):
+    user = await get_current_user(authorization)
+    trade = await db.trades.find_one({"id": trade_id, "user_id": user["_id"]})
+    
+    if not trade:
+        raise HTTPException(status_code=404, detail="Trade not found")
+    if trade["status"] == "closed":
+        raise HTTPException(status_code=400, detail="Trade already closed")
+    
+    ticker = await exchange.fetch_ticker(trade["symbol"])
+    exit_price = ticker['last']
+    
+    price_diff = exit_price - trade["entry_price"]
+    if trade["side"] == "short":
+        price_diff = -price_diff
+    
+    pnl_percentage = (price_diff / trade["entry_price"]) * 100 * trade["leverage"]
+    pnl = (trade["amount"] * pnl_percentage) / 100
+    
+    closed_at = datetime.now(timezone.utc).isoformat()
+    
+    await db.trades.update_one(
+        {"id": trade_id},
+        {"$set": {
+            "exit_price": exit_price,
+            "pnl": pnl,
+            "pnl_percentage": pnl_percentage,
+            "status": "closed",
+            "closed_at": closed_at
+        }}
+    )
+    
+    await db.users.update_one(
+        {"_id": user["_id"]},
+        {"$inc": {"paper_trading_balance": trade["amount"] + pnl}}
+    )
+    
+    return {"success": True, "pnl": pnl, "pnl_percentage": pnl_percentage}
+
+@api_router.get("/trading/portfolio")
+async def get_portfolio(authorization: str = Header(None)):
+    user = await get_current_user(authorization)
+    trades = await db.trades.find({"user_id": user["_id"]}).to_list(None)
+    
+    open_trades = [t for t in trades if t["status"] == "open"]
+    closed_trades = [t for t in trades if t["status"] == "closed"]
+    
+    total_pnl = sum(t.get("pnl", 0) for t in closed_trades)
+    winning_trades = len([t for t in closed_trades if t.get("pnl", 0) > 0])
+    losing_trades = len([t for t in closed_trades if t.get("pnl", 0) < 0])
+    win_rate = (winning_trades / len(closed_trades) * 100) if closed_trades else 0
+    
+    return {
+        "balance": user.get("paper_trading_balance", 10000.0),
+        "open_trades": open_trades,
+        "closed_trades": closed_trades,
+        "total_pnl": total_pnl,
+        "total_trades": len(trades),
+        "winning_trades": winning_trades,
+        "losing_trades": losing_trades,
+        "win_rate": win_rate
+    }
+
+@api_router.get("/coins")
+async def get_available_coins():
+    return {"coins": TOP_COINS}
+
+# ============= EXISTING ROUTES =============
 @api_router.get("/")
 async def root():
     return {"message": "Hydra AI Trading System"}
