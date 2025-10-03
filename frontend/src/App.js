@@ -40,25 +40,27 @@ function App() {
   }, []);
 
   useEffect(() => {
-    initializeSession();
-    fetchPlugins();
-    fetchLivePrice();
-    fetchIndicators();
-    fetchMacroData();
-    fetchMarketOverview();
-    
-    const priceInterval = setInterval(fetchLivePrice, 10000);
-    const indicatorInterval = setInterval(fetchIndicators, 30000);
-    const macroInterval = setInterval(fetchMacroData, 60000);
-    const overviewInterval = setInterval(fetchMarketOverview, 60000);
-    
-    return () => {
-      clearInterval(priceInterval);
-      clearInterval(indicatorInterval);
-      clearInterval(macroInterval);
-      clearInterval(overviewInterval);
-    };
-  }, []);
+    if (isAuthenticated) {
+      initializeSession();
+      fetchPlugins();
+      fetchLivePrice();
+      fetchIndicators();
+      fetchMacroData();
+      fetchMarketOverview();
+      
+      const priceInterval = setInterval(fetchLivePrice, 10000);
+      const indicatorInterval = setInterval(fetchIndicators, 30000);
+      const macroInterval = setInterval(fetchMacroData, 60000);
+      const overviewInterval = setInterval(fetchMarketOverview, 60000);
+      
+      return () => {
+        clearInterval(priceInterval);
+        clearInterval(indicatorInterval);
+        clearInterval(macroInterval);
+        clearInterval(overviewInterval);
+      };
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     scrollToBottom();
