@@ -1,13 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import "@/App.css";
 import axios from "axios";
-import { Send, TrendingUp, Activity, BarChart3, Brain, Zap, Settings, LineChart } from "lucide-react";
+import { Send, TrendingUp, Activity, BarChart3, Brain, Zap, Settings, LineChart, LogOut } from "lucide-react";
 import TradingChart from "./components/TradingChart";
+import Login from "./pages/Login";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 function App() {
+  // Auth state
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,6 +26,18 @@ function App() {
   const [correlations, setCorrelations] = useState(null);
   const [marketOverview, setMarketOverview] = useState(null);
   const messagesEndRef = useRef(null);
+
+  // Check for existing auth on mount
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    
+    if (storedToken && storedUser) {
+      setToken(storedToken);
+      setUser(JSON.parse(storedUser));
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   useEffect(() => {
     initializeSession();
