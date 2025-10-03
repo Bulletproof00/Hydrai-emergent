@@ -50,6 +50,39 @@ body {
   margin-bottom: 32px;
 }
 
+.user-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 10px;
+}
+
+.username {
+  font-size: 14px;
+  color: #e4e4e7;
+  font-weight: 500;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
 .logo {
   display: flex;
   align-items: center;
