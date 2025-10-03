@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import "@/App.css";
 import axios from "axios";
-import { Send, TrendingUp, Activity, BarChart3, Brain, Zap, Settings } from "lucide-react";
+import { Send, TrendingUp, Activity, BarChart3, Brain, Zap, Settings, LineChart } from "lucide-react";
+import TradingChart from "./components/TradingChart";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
