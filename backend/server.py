@@ -924,15 +924,15 @@ async def analyze_patterns_endpoint(request: IndicatorRequest):
         # Get indicators for context
         indicators = {}
         rsi = await plugin_manager.calculate_rsi(data)
-        if rsi:
+        if rsi and not (np.isnan(rsi) or np.isinf(rsi)):
             indicators['rsi'] = float(rsi)
         
         ema50 = await plugin_manager.calculate_ema(data, 50)
-        if ema50:
+        if ema50 and not (np.isnan(ema50) or np.isinf(ema50)):
             indicators['ema50'] = float(ema50)
         
         ema200 = await plugin_manager.calculate_ema(data, 200)
-        if ema200:
+        if ema200 and not (np.isnan(ema200) or np.isinf(ema200)):
             indicators['ema200'] = float(ema200)
         
         # Gemini AI Analysis
