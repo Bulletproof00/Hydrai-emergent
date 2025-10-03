@@ -176,6 +176,25 @@ function App() {
     }
   };
 
+  const handleLogin = (userData, authToken) => {
+    setUser(userData);
+    setToken(authToken);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setToken(null);
+    setIsAuthenticated(false);
+  };
+
+  // If not authenticated, show login page
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   const runBacktest = async () => {
     setLoading(true);
     try {
