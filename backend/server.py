@@ -885,6 +885,8 @@ async def get_market_overview():
 async def get_chart_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit: int = 100):
     """Get OHLCV chart data for candlestick display"""
     try:
+        # Convert symbol format (BTC-USDT to BTC/USDT)
+        symbol = symbol.replace('-', '/')
         data = await get_market_data(symbol, timeframe, limit)
         
         # Convert to chart-friendly format
