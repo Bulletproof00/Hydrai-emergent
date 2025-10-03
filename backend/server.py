@@ -35,7 +35,7 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # Auth settings
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+import hashlib
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "hydra-secret-key-2024")
 ALGORITHM = "HS256"
 
