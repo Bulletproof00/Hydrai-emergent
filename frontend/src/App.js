@@ -532,6 +532,12 @@ function App() {
           </div>
         )}
 
+        {activeView === 'chart' && (
+          <div className="chart-view">
+            <TradingChart symbol="BTC/USDT" timeframe="1h" />
+          </div>
+        )}
+
         {activeView === 'plugins' && (
           <div className="plugins-view">
             <h1>Plugin System</h1>
