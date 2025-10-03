@@ -1,10 +1,7 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Header
 from .models import TradeCreate, TradeClose, Trade, Portfolio
-from ..auth.routes import get_current_user
 from datetime import datetime, timezone
 import ccxt.async_support as ccxt
-
-router = APIRouter(prefix="/trading", tags=["paper-trading"])
 
 exchange_instance = None
 
@@ -13,6 +10,25 @@ def get_exchange():
     if not exchange_instance:
         exchange_instance = ccxt.kraken({'enableRateLimit': True})
     return exchange_instance
+
+def create_trading_router(db):
+    router = APIRouter(prefix="/trading", tags=["paper-trading"])
+    
+    # Import get_current_user function
+    from ..auth.utils import decode_access_token
+    
+    async def get_current_user(authorization: str = Header(None)):
+        if not authorization or not authorization.startswith('Bearer '):
+            raise HTTPException(status_code=401, detail="Not authenticated")
+        token = authorization.split(' ')[1]
+        payload = decode_access_token(token)
+        if not payload:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        user_id = payload.get("sub")
+        user = await db.users.find_one({"_id": user_id})
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        return user
 
 @router.post("/open-trade", response_model=Trade)
 async def open_trade(trade_data: TradeCreate, current_user = Depends(get_current_user), db = None):
