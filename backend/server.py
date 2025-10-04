@@ -2006,6 +2006,14 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Enhanced Smart Money initialization failed: {str(e)}")
     
+    # Initialize Paper Trading Engine
+    try:
+        global paper_trading
+        paper_trading = PaperTradingEngine(db)
+        logger.info("Paper Trading Engine initialized")
+    except Exception as e:
+        logger.warning(f"Paper Trading initialization failed: {str(e)}")
+    
     # Start background data update task
     asyncio.create_task(update_market_data_background())
     logger.info("Background data update task started")
