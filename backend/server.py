@@ -60,6 +60,7 @@ enhanced_streamer = None
 
 # Smart Money Indicators
 smart_money = None
+enhanced_smart_money = None
 
 # Create the main app without a prefix
 app = FastAPI()
