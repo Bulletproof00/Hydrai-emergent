@@ -131,10 +131,50 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
         </div>
       </div>
 
+      {/* Real-time price display */}
+      <div className="realtime-price-display">
+        <div className="price-header">
+          <span className="symbol-name">{selectedSymbol}</span>
+          <div className="connection-status">
+            <div className={`status-indicator ${connectionStatus}`}></div>
+            <span className="status-text">
+              {connectionStatus === 'connected' ? 'Live' : 
+               connectionStatus === 'disconnected' ? 'API' : 'Error'}
+            </span>
+          </div>
+        </div>
+        
+        <div className="price-info">
+          <span className="current-price">
+            ${getCurrentPrice(selectedSymbol).toLocaleString(undefined, { 
+              minimumFractionDigits: 2, 
+              maximumFractionDigits: 2 
+            })}
+          </span>
+          
+          {(() => {
+            const priceChange = getPriceChange(selectedSymbol);
+            return (
+              <span className={`price-change ${priceChange.isPositive ? 'positive' : 'negative'}`}>
+                {priceChange.isPositive ? '+' : ''}{priceChange.changePercent.toFixed(2)}%
+                {isLive(selectedSymbol) && <span className="live-indicator">●</span>}
+              </span>
+            );
+          })()}
+        </div>
+        
+        {Object.keys(realTimeData).length > 0 && (
+          <div className="data-source">
+            Quelle: {realTimeData[selectedSymbol]?.source || 'N/A'}
+          </div>
+        )}
+      </div>
+
       <CandlestickChart 
         symbol={selectedSymbol}
         timeframe={timeframe}
         height={700}
+        realTimePrice={getCurrentPrice(selectedSymbol)}
       />
     </div>
   );
