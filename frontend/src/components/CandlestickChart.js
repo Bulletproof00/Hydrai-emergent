@@ -10,6 +10,8 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
   const [loading, setLoading] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(null);
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 100 });
+  const [gaps, setGaps] = useState([]);
+  const [showGaps, setShowGaps] = useState(false);
   
   useEffect(() => {
     loadData();
