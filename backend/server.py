@@ -1713,12 +1713,9 @@ async def startup_event():
     
     # Initialize real-time WebSocket streamer
     try:
-        if exchange:
-            real_time_streamer = RealTimeWebSocketStreamer(exchange)
-            await real_time_streamer.start()
-            logger.info("Real-time WebSocket streamer initialized")
-        else:
-            logger.warning("Real-time streamer not initialized - exchange unavailable")
+        real_time_streamer = RealTimeWebSocketStreamer(db)
+        await real_time_streamer.start_all_streams()
+        logger.info("Real-time WebSocket streamer initialized")
     except Exception as e:
         logger.warning(f"Real-time streamer initialization failed: {str(e)}")
     
