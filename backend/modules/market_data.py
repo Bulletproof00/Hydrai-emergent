@@ -220,3 +220,12 @@ class MarketDataFetcher:
         except Exception as e:
             logger.error(f"Error fetching dominance data: {str(e)}")
             return {}
+    
+    async def close(self):
+        """Clean up resources"""
+        if hasattr(self, 'real_time_fetcher'):
+            await self.real_time_fetcher.close_session()
+    
+    async def get_real_time_quotes(self, symbols: list):
+        """Get real-time quotes for multiple symbols"""
+        return await self.real_time_fetcher.get_multiple_quotes(symbols)
