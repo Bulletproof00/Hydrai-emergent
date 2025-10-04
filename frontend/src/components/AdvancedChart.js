@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
+import CandlestickChart from './CandlestickChart';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -20,10 +20,9 @@ const TIMEFRAMES = [
 
 const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
   const [timeframe, setTimeframe] = useState('1h');
-  const [availableCoins, setAvailableCoins] = useState([]);
-  const [currentPrice, setCurrentPrice] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [chartData, setChartData] = useState([]);
+  const [markets, setMarkets] = useState({ crypto: [], traditional: {} });
+  const [assetType, setAssetType] = useState('crypto');
+  const [selectedSymbol, setSelectedSymbol] = useState(symbol);
 
   useEffect(() => {
     fetchAvailableCoins();
