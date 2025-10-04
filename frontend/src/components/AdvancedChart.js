@@ -48,34 +48,32 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
   };
 
   const loadChartData = async () => {
-    if (!candlestickSeries.current || !volumeSeries.current) return;
-    
     setLoading(true);
     try {
       const response = await axios.get(
-        `${API}/chart-data/${symbol.replace('/', '-')}?timeframe=${timeframe}&limit=200`
+        `${API}/chart-data/${symbol.replace('/', '-')}?timeframe=${timeframe}&limit=100`
       );
       const data = response.data.data;
 
       if (data && data.length > 0) {
-        // Set candlestick data
-        candlestickSeries.current.setData(data);
-
-        // Set volume data
-        const volumeData = data.map(d => ({
-          time: d.time,
-          value: d.volume,
-          color: d.close >= d.open ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)'
+        // Format data for Recharts
+        const formattedData = data.map(d => ({
+          time: new Date(d.time * 1000).toLocaleTimeString('de-DE', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit'
+          }),
+          open: d.open,
+          high: d.high,
+          low: d.low,
+          close: d.close,
+          volume: d.volume,
+          color: d.close >= d.open ? '#10b981' : '#ef4444'
         }));
-        volumeSeries.current.setData(volumeData);
 
-        // Set current price
+        setChartData(formattedData);
         setCurrentPrice(data[data.length - 1].close);
-
-        // Fit content
-        if (chart.current) {
-          chart.current.timeScale().fitContent();
-        }
       }
     } catch (error) {
       console.error('Error loading chart data:', error);
