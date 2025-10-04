@@ -2006,6 +2006,107 @@ async def get_trading_symbols():
         logging.error(f"Get trading symbols error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# =================================================================================
+# AI TRADING API ENDPOINTS
+# =================================================================================
+
+@api_router.post("/ai-trading/analyze")
+async def analyze_trading_opportunity(
+    symbol: str,
+    context: str = "",
+    authorization: str = Header(None)
+):
+    """Get AI analysis for a trading opportunity"""
+    try:
+        if not ai_trading:
+            return {
+                'status': 'error',
+                'message': 'AI Trading system not initialized'
+            }
+        
+        user = await get_current_user(authorization)
+        
+        recommendation = await ai_trading.analyze_trade_opportunity(user['_id'], symbol, context)
+        
+        return {
+            'status': 'success',
+            'symbol': symbol,
+            'recommendation': {
+                'action': recommendation.action,
+                'confidence': recommendation.confidence,
+                'position_size': recommendation.position_size,
+                'leverage': recommendation.leverage,
+                'entry_price': recommendation.entry_price,
+                'stop_loss': recommendation.stop_loss,
+                'take_profit': recommendation.take_profit,
+                'risk_reward_ratio': recommendation.risk_reward_ratio,
+                'trade_type': recommendation.trade_type,
+                'reasoning': recommendation.reasoning,
+                'market_conditions': recommendation.market_conditions,
+                'risk_assessment': recommendation.risk_assessment,
+                'probability_analysis': recommendation.probability_analysis
+            },
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"AI trading analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/ai-trading/chat-command")
+async def execute_chat_trading_command(
+    command: str,
+    authorization: str = Header(None)
+):
+    """Execute trading command from chat"""
+    try:
+        if not ai_trading:
+            return {
+                'status': 'error',
+                'message': 'AI Trading system not initialized'
+            }
+        
+        user = await get_current_user(authorization)
+        
+        result = await ai_trading.execute_chat_command(user['_id'], command)
+        
+        return {
+            'status': 'success' if result.get('success') else 'error',
+            'result': result,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"AI chat command error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/ai-trading/learn")
+async def ai_learn_from_interaction(
+    interaction_data: dict,
+    authorization: str = Header(None)
+):
+    """Provide feedback to AI for learning"""
+    try:
+        if not ai_trading:
+            return {
+                'status': 'error',
+                'message': 'AI Trading system not initialized'
+            }
+        
+        user = await get_current_user(authorization)
+        
+        await ai_trading.learn_from_interaction(user['_id'], interaction_data)
+        
+        return {
+            'status': 'success',
+            'message': 'Feedback recorded for AI learning',
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"AI learning error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/chat")
 async def chat(message: ChatMessageCreate, authorization: str = Header(None)):
     """Send a chat message and get AI response with full historical context"""
