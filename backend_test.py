@@ -312,7 +312,7 @@ class TradingSystemTester:
                 f"Analysis length: {len(reasoning)}, Rec: {action}"
             )
         else:
-            self.log_test(test_name, "FAIL", f"Invalid AI analysis: analysis={len(analysis)} chars, rec={recommendation}")
+            self.log_test(test_name, "FAIL", f"Invalid AI analysis: reasoning={len(reasoning)} chars, action={action}")
 
     async def test_ai_trading_analyze_eth_with_context(self):
         """Test POST /api/ai-trading/analyze for ETH/USDT with context"""
