@@ -35,6 +35,7 @@ from modules.real_time_enhanced import EnhancedRealTimeStreamer
 from modules.smart_money_indicators import SmartMoneyIndicators
 from modules.enhanced_smart_money import EnhancedSmartMoneyIndicators
 from modules.paper_trading import PaperTradingEngine
+from modules.ai_trading_engine import AITradingEngine
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
