@@ -262,24 +262,50 @@ class EnhancedSmartMoneyIndicators:
 
     def _calculate_price_range(self, current_price: float, symbol_info: Dict) -> Dict:
         """Calculate price range for heatmap (±20% from current price)"""
+        return self._calculate_price_range_for_timeframe(current_price, symbol_info, "1day")
+
+    def _calculate_price_range_for_timeframe(self, current_price: float, symbol_info: Dict, timeframe: str) -> Dict:
+        """Calculate price range for heatmap based on timeframe"""
         try:
-            range_percent = 0.20  # ±20% range
+            # Timeframe-based range percentages (like Coinglass)
+            timeframe_ranges = {
+                '12h': 0.15,    # ±15% for 12 hours
+                '1day': 0.20,   # ±20% for 1 day
+                '3day': 0.25,   # ±25% for 3 days 
+                '1week': 0.30,  # ±30% for 1 week
+                '2week': 0.35,  # ±35% for 2 weeks
+                'monthly': 0.40 # ±40% for monthly
+            }
+            
+            range_percent = timeframe_ranges.get(timeframe, 0.20)
             
             min_price = current_price * (1 - range_percent)
             max_price = current_price * (1 + range_percent)
             
-            # Create 40 price levels
-            price_levels = np.linspace(min_price, max_price, 40)
+            # More price levels for longer timeframes
+            level_counts = {
+                '12h': 30,
+                '1day': 40,
+                '3day': 50,
+                '1week': 60,
+                '2week': 70,
+                'monthly': 80
+            }
+            
+            level_count = level_counts.get(timeframe, 40)
+            price_levels = np.linspace(min_price, max_price, level_count)
             
             return {
                 'min_price': min_price,
                 'max_price': max_price,
                 'current_price': current_price,
                 'price_levels': price_levels.tolist(),
-                'range_percent': range_percent * 100
+                'range_percent': range_percent * 100,
+                'timeframe': timeframe,
+                'level_count': level_count
             }
         except Exception as e:
-            logger.error(f"Error calculating price range: {e}")
+            logger.error(f"Error calculating price range for timeframe: {e}")
             return {}
 
     async def _fetch_binance_liquidation_detailed(self, symbol: str) -> Optional[Dict]:
