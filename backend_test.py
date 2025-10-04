@@ -135,18 +135,15 @@ class SmartMoneyTester:
         else:
             self.log_test(test_name, "FAIL", f"Insufficient smart money data. Found: {found_symbols}")
     
-    async def test_realtime_history_api(self):
-        """Test /api/realtime/history/{symbol} endpoint"""
-        test_symbols = [
-            ('NASDAQ', 'NASDAQ'),
-            ('BTC/USDT', 'BTCUSDT'),  # Convert to format expected by API
-            ('SPX', 'SPX')
-        ]
+    async def test_liquidation_heatmap_api(self):
+        """Test /api/smart-money/liquidation-heatmap/{symbol} endpoint"""
+        test_symbols = ['BTC%2FUSDT', 'ETH%2FUSDT', 'SOL%2FUSDT', 'XRP%2FUSDT']
         
-        for display_symbol, api_symbol in test_symbols:
-            test_name = f"Real-Time History API - {display_symbol}"
+        for encoded_symbol in test_symbols:
+            display_symbol = encoded_symbol.replace('%2F', '/')
+            test_name = f"Liquidation Heatmap API - {display_symbol}"
             
-            response = await self.test_api_endpoint(f"/realtime/history/{api_symbol}?minutes=60")
+            response = await self.test_api_endpoint(f"/smart-money/liquidation-heatmap/{encoded_symbol}")
             
             if not response['success']:
                 self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
@@ -163,26 +160,58 @@ class SmartMoneyTester:
                 self.log_test(test_name, "FAIL", f"API returned error: {data}")
                 continue
             
-            history_data = data['data']
+            heatmap_data = data['data']
             
-            if len(history_data) > 0:
-                # Validate data structure
-                sample_tick = history_data[0]
-                required_fields = ['symbol', 'price', 'timestamp', 'source', 'asset_type']
-                missing_fields = [field for field in required_fields if field not in sample_tick]
+            # Validate liquidation heatmap structure
+            required_fields = ['symbol', 'timestamp', 'liquidation_levels', 'source']
+            missing_fields = [field for field in required_fields if field not in heatmap_data]
+            
+            if missing_fields:
+                self.log_test(test_name, "FAIL", f"Missing fields in heatmap data: {missing_fields}")
+                continue
+            
+            liquidation_levels = heatmap_data.get('liquidation_levels', [])
+            
+            if len(liquidation_levels) > 0:
+                # Check if liquidation levels have realistic price ranges
+                sample_level = liquidation_levels[0]
+                level_fields = ['price', 'long_liquidation', 'short_liquidation', 'total_liquidation']
+                has_level_fields = all(field in sample_level for field in level_fields)
                 
-                if not missing_fields:
-                    self.log_test(
-                        test_name, 
-                        "PASS", 
-                        f"Retrieved {len(history_data)} ticks with valid structure",
-                        "Valid tick data with required fields",
-                        f"{len(history_data)} ticks"
-                    )
+                if has_level_fields and sample_level['price'] > 0:
+                    # Validate price ranges are realistic for the symbol
+                    prices = [level['price'] for level in liquidation_levels]
+                    price_range = max(prices) - min(prices)
+                    
+                    expected_ranges = {
+                        'BTC/USDT': (50000, 70000),
+                        'ETH/USDT': (2000, 3000), 
+                        'SOL/USDT': (100, 200),
+                        'XRP/USDT': (0.3, 0.8)
+                    }
+                    
+                    expected_min, expected_max = expected_ranges.get(display_symbol, (0, 999999))
+                    
+                    if expected_min <= min(prices) and max(prices) <= expected_max * 1.2:  # Allow 20% buffer
+                        self.log_test(
+                            test_name, 
+                            "PASS", 
+                            f"Valid liquidation heatmap: {len(liquidation_levels)} levels, price range ${min(prices):.2f}-${max(prices):.2f}",
+                            "Realistic price levels with liquidation volumes",
+                            f"{len(liquidation_levels)} levels in expected range"
+                        )
+                    else:
+                        self.log_test(
+                            test_name, 
+                            "WARN", 
+                            f"Price range may be unrealistic: ${min(prices):.2f}-${max(prices):.2f}",
+                            f"Price range roughly ${expected_min}-${expected_max}",
+                            f"${min(prices):.2f}-${max(prices):.2f}"
+                        )
                 else:
-                    self.log_test(test_name, "FAIL", f"Missing fields in tick data: {missing_fields}")
+                    self.log_test(test_name, "FAIL", f"Invalid liquidation level structure: {sample_level}")
             else:
-                self.log_test(test_name, "WARN", "No historical tick data found (may be expected for new system)")
+                self.log_test(test_name, "FAIL", "No liquidation levels found in heatmap data")
     
     async def test_websocket_connection(self):
         """Test WebSocket connection to /api/realtime"""
