@@ -1818,10 +1818,10 @@ async def get_trading_account(authorization: str = Header(None)):
         
         user = await get_current_user(authorization)
         
-        account = await paper_trading.get_user_account(user['user_id'])
+        account = await paper_trading.get_user_account(user['_id'])
         if not account:
             # Create new account with $10,000 starting balance
-            account = await paper_trading.create_user_account(user['user_id'], 10000.0)
+            account = await paper_trading.create_user_account(user['_id'], 10000.0)
         
         return {
             'status': 'success',
