@@ -41,49 +41,38 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
     }
   };
 
-  const loadChartData = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `${API}/chart-data/${symbol.replace('/', '-')}?timeframe=${timeframe}&limit=100`
-      );
-      const data = response.data.data;
-
-      if (data && data.length > 0) {
-        // Format data for Recharts
-        const formattedData = data.map(d => ({
-          time: new Date(d.time * 1000).toLocaleTimeString('de-DE', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            day: '2-digit',
-            month: '2-digit'
-          }),
-          open: d.open,
-          high: d.high,
-          low: d.low,
-          close: d.close,
-          volume: d.volume,
-          color: d.close >= d.open ? '#10b981' : '#ef4444'
-        }));
-
-        setChartData(formattedData);
-        setCurrentPrice(data[data.length - 1].close);
-      }
-    } catch (error) {
-      console.error('Error loading chart data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleTimeframeChange = (tf) => {
     setTimeframe(tf);
   };
 
   const handleSymbolChange = (newSymbol) => {
+    setSelectedSymbol(newSymbol);
     if (onSymbolChange) {
       onSymbolChange(newSymbol);
     }
+  };
+
+  const handleAssetTypeChange = (type) => {
+    setAssetType(type);
+    // Set default symbol for asset type
+    if (type === 'crypto' && markets.crypto.length > 0) {
+      handleSymbolChange(markets.crypto[0]);
+    } else if (type === 'traditional' && markets.traditional?.indices?.length > 0) {
+      handleSymbolChange(markets.traditional.indices[0]);
+    }
+  };
+
+  const getAvailableSymbols = () => {
+    if (assetType === 'crypto') {
+      return markets.crypto || [];
+    } else if (assetType === 'traditional') {
+      return [
+        ...(markets.traditional?.indices || []),
+        ...(markets.traditional?.forex || []),
+        ...(markets.traditional?.commodities || [])
+      ];
+    }
+    return [];
   };
 
   return (
