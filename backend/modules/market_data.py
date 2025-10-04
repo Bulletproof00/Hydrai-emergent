@@ -50,8 +50,28 @@ class MarketDataFetcher:
             logger.error(f"Error fetching crypto OHLCV: {str(e)}")
             return []
     
-    def fetch_traditional_ohlcv(self, symbol, timeframe='1h', limit=1000):
-        """Fetch OHLCV data from traditional markets"""
+    async def fetch_traditional_ohlcv(self, symbol, timeframe='1h', limit=1000):
+        """Fetch OHLCV data from traditional markets with real-time enhancement"""
+        try:
+            # Use the enhanced real-time fetcher
+            data = await self.real_time_fetcher.fetch_enhanced_traditional_ohlcv(
+                symbol, timeframe, limit
+            )
+            
+            if data:
+                logger.info(f"Enhanced traditional OHLCV for {symbol}: {len(data)} candles, latest: ${data[-1]['close']:.2f}")
+                return data
+            else:
+                logger.warning(f"No enhanced data for {symbol}, falling back to legacy method")
+                return self.fetch_traditional_ohlcv_legacy(symbol, timeframe, limit)
+        
+        except Exception as e:
+            logger.error(f"Error in enhanced traditional OHLCV for {symbol}: {str(e)}")
+            # Fallback to legacy method
+            return self.fetch_traditional_ohlcv_legacy(symbol, timeframe, limit)
+    
+    def fetch_traditional_ohlcv_legacy(self, symbol, timeframe='1h', limit=1000):
+        """Legacy OHLCV fetch method as fallback"""
         try:
             yahoo_symbol = TRADITIONAL_MARKETS.get(symbol)
             if not yahoo_symbol:
@@ -65,15 +85,14 @@ class MarketDataFetcher:
             }
             interval = interval_map.get(timeframe, '1h')
             
-            # Calculate period based on limit - get MORE data to ensure we have latest
+            # Calculate period based on limit
             if interval in ['1m', '5m', '15m']:
                 period = '7d'
             elif interval in ['1h', '4h']:
                 period = '60d'
             else:
-                period = 'max'  # Get maximum available data
+                period = 'max'
             
-            # Force download of fresh data
             ticker = yf.Ticker(yahoo_symbol)
             hist = ticker.history(period=period, interval=interval, auto_adjust=True, prepost=False)
             
@@ -81,9 +100,8 @@ class MarketDataFetcher:
                 logger.warning(f"No data returned for {symbol}")
                 return []
             
-            # Log latest price for debugging
             latest_close = hist['Close'].iloc[-1]
-            logger.info(f"{symbol} latest close: ${latest_close:.2f}")
+            logger.info(f"{symbol} legacy close: ${latest_close:.2f}")
             
             formatted_data = []
             for index, row in hist.iterrows():
@@ -99,7 +117,7 @@ class MarketDataFetcher:
             return formatted_data[-limit:] if len(formatted_data) > limit else formatted_data
         
         except Exception as e:
-            logger.error(f"Error fetching traditional OHLCV for {symbol}: {str(e)}")
+            logger.error(f"Error fetching legacy traditional OHLCV for {symbol}: {str(e)}")
             return []
     
     async def store_ohlcv_data(self, symbol, timeframe, data, asset_type='crypto'):
