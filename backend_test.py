@@ -25,8 +25,9 @@ class RealTimeTickDataTester:
     async def setup(self):
         """Initialize test session"""
         self.session = aiohttp.ClientSession()
-        print("🚀 Starting MarketData Real-Time Fix Tests")
+        print("🚀 Starting Real-Time Tick Data System Tests")
         print(f"Backend URL: {BACKEND_URL}")
+        print(f"WebSocket URL: {WEBSOCKET_URL}")
         print("=" * 60)
     
     async def cleanup(self):
