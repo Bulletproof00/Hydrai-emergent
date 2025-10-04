@@ -76,11 +76,13 @@ class SmartMoneyTester:
                 'error': str(e)
             }
     
-    async def test_realtime_latest_api(self):
-        """Test /api/realtime/latest endpoint for current prices"""
-        test_name = "Real-Time Latest Prices API"
+    async def test_smart_money_all_api(self):
+        """Test /api/smart-money/all endpoint for all smart money data"""
+        test_name = "Smart Money All Data API"
         
-        response = await self.test_api_endpoint("/realtime/latest")
+        # Test with focus symbols
+        symbols = "BTC/USDT,ETH/USDT,SOL/USDT,XRP/USDT"
+        response = await self.test_api_endpoint(f"/smart-money/all?symbols={symbols}")
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
@@ -97,46 +99,41 @@ class SmartMoneyTester:
             self.log_test(test_name, "FAIL", f"API returned error status: {data}")
             return
         
-        prices_data = data['data']
+        smart_money_data = data['data']
         
-        # Check if we have price data for expected symbols
-        expected_symbols = ['NASDAQ', 'SPX', 'BTC/USDT', 'ETH/USDT']
+        # Check if we have data for all 4 focus symbols
+        expected_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
         found_symbols = []
         
         for symbol in expected_symbols:
-            if symbol in prices_data and prices_data[symbol]:
-                price_info = prices_data[symbol]
-                if 'price' in price_info and price_info['price'] > 0:
+            if symbol in smart_money_data and smart_money_data[symbol]:
+                symbol_data = smart_money_data[symbol]
+                
+                # Check if all three data types are present
+                required_types = ['liquidation_heatmap', 'open_interest', 'funding_rates']
+                has_all_types = all(data_type in symbol_data and symbol_data[data_type] for data_type in required_types)
+                
+                if has_all_types:
                     found_symbols.append(symbol)
-                    
-                    # Validate NASDAQ is showing current price (~$24,800)
-                    if symbol == 'NASDAQ' and price_info['price'] > 24000:
-                        self.log_test(
-                            f"NASDAQ Real-Time Price", 
-                            "PASS", 
-                            f"NASDAQ shows ${price_info['price']:.2f} (current market level)",
-                            "Price > $24,000",
-                            f"${price_info['price']:.2f}"
-                        )
-                    elif symbol == 'NASDAQ':
-                        self.log_test(
-                            f"NASDAQ Real-Time Price", 
-                            "FAIL", 
-                            f"NASDAQ shows ${price_info['price']:.2f} (may be outdated)",
-                            "Price > $24,000",
-                            f"${price_info['price']:.2f}"
-                        )
         
-        if len(found_symbols) >= 2:  # At least 2 symbols working
+        if len(found_symbols) == 4:  # All 4 symbols working
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"Found real-time data for {len(found_symbols)} symbols: {', '.join(found_symbols)}",
-                "Real-time data for multiple assets",
-                f"{len(found_symbols)} symbols with valid prices"
+                f"All 4 focus symbols have complete smart money data: {', '.join(found_symbols)}",
+                "Complete data for BTC, ETH, SOL, XRP",
+                f"4/4 symbols with liquidation, OI, and funding data"
+            )
+        elif len(found_symbols) >= 2:
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Partial smart money data for {len(found_symbols)} symbols: {', '.join(found_symbols)}",
+                "Complete data for all 4 symbols",
+                f"{len(found_symbols)}/4 symbols working"
             )
         else:
-            self.log_test(test_name, "FAIL", f"Insufficient real-time data. Found: {found_symbols}")
+            self.log_test(test_name, "FAIL", f"Insufficient smart money data. Found: {found_symbols}")
     
     async def test_realtime_history_api(self):
         """Test /api/realtime/history/{symbol} endpoint"""
