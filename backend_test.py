@@ -25,9 +25,8 @@ class SmartMoneyTester:
     async def setup(self):
         """Initialize test session"""
         self.session = aiohttp.ClientSession()
-        print("🚀 Starting Real-Time Tick Data System Tests")
+        print("🚀 Starting Smart Money Indicators System Tests")
         print(f"Backend URL: {BACKEND_URL}")
-        print(f"WebSocket URL: {WEBSOCKET_URL}")
         print("=" * 60)
     
     async def cleanup(self):
