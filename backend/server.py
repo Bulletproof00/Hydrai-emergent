@@ -57,6 +57,9 @@ redis_client = None
 # Enhanced Real-time streamer
 enhanced_streamer = None
 
+# Smart Money Indicators
+smart_money = None
+
 # Create the main app without a prefix
 app = FastAPI()
 
