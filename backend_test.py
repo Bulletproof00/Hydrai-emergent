@@ -17,7 +17,7 @@ from typing import Dict, List, Any
 BACKEND_URL = "https://hydra-trade.preview.emergentagent.com/api"
 WEBSOCKET_URL = "wss://hydra-trade.preview.emergentagent.com/api/realtime"
 
-class RealTimeTickDataTester:
+class SmartMoneyTester:
     def __init__(self):
         self.session = None
         self.test_results = []
