@@ -29,6 +29,15 @@ async def test_positions():
         
         headers = {'Authorization': f'Bearer {auth_token}'}
         
+        # First create trading account
+        async with session.get(f"{BACKEND_URL}/trading/account", headers=headers) as response:
+            if response.status == 200:
+                data = await response.json()
+                print(f"✅ Trading account created: {data}")
+            else:
+                print(f"❌ Could not create trading account: {response.status}")
+                return
+        
         # Create a leveraged position
         order_data = {
             "symbol": "BTC/USDT",
