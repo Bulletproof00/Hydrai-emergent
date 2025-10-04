@@ -482,17 +482,18 @@ class RealTimeTickDataTester:
             )
     
     async def run_all_tests(self):
-        """Run all test cases"""
+        """Run all test cases for real-time tick data system"""
         await self.setup()
         
         try:
-            # Core functionality tests
-            await self.test_nasdaq_current_price()
-            await self.test_traditional_markets()
-            await self.test_crypto_data_still_works()
-            await self.test_force_refresh_endpoint()
-            await self.test_data_consistency()
-            await self.test_error_handling()
+            # Core real-time functionality tests
+            await self.test_realtime_latest_api()
+            await self.test_realtime_history_api()
+            await self.test_websocket_connection()
+            await self.test_data_sources_verification()
+            await self.test_database_storage()
+            await self.test_tick_simulation()
+            await self.test_multi_asset_support()
             await self.test_api_performance()
             
         finally:
