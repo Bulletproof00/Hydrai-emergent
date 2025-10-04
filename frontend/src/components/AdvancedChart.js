@@ -25,19 +25,19 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
   const [selectedSymbol, setSelectedSymbol] = useState(symbol);
 
   useEffect(() => {
-    fetchAvailableCoins();
+    fetchMarkets();
   }, []);
 
   useEffect(() => {
-    loadChartData();
-  }, [symbol, timeframe]);
+    setSelectedSymbol(symbol);
+  }, [symbol]);
 
-  const fetchAvailableCoins = async () => {
+  const fetchMarkets = async () => {
     try {
-      const response = await axios.get(`${API}/coins`);
-      setAvailableCoins(response.data.coins);
+      const response = await axios.get(`${API}/markets`);
+      setMarkets(response.data);
     } catch (error) {
-      console.error('Error fetching coins:', error);
+      console.error('Error fetching markets:', error);
     }
   };
 
