@@ -19,14 +19,11 @@ const TIMEFRAMES = [
 ];
 
 const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
-  const chartContainerRef = useRef();
-  const chart = useRef(null);
-  const candlestickSeries = useRef(null);
-  const volumeSeries = useRef(null);
   const [timeframe, setTimeframe] = useState('1h');
   const [availableCoins, setAvailableCoins] = useState([]);
   const [currentPrice, setCurrentPrice] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
     fetchAvailableCoins();
