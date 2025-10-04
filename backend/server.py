@@ -33,6 +33,7 @@ import base64
 import uuid
 from modules.real_time_enhanced import EnhancedRealTimeStreamer
 from modules.smart_money_indicators import SmartMoneyIndicators
+from modules.enhanced_smart_money import EnhancedSmartMoneyIndicators
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
