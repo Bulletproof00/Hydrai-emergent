@@ -1560,6 +1560,116 @@ async def get_realtime_history(symbol: str, minutes: int = 60):
         logging.error(f"Realtime history error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# ============= SMART MONEY ROUTES =============
+@api_router.get("/smart-money/all")
+async def get_all_smart_money_data(symbols: str = None):
+    """Get all smart money indicators for specified symbols"""
+    try:
+        if not smart_money:
+            return {
+                'status': 'error', 
+                'message': 'Smart Money system not initialized'
+            }
+        
+        symbol_list = None
+        if symbols:
+            symbol_list = [s.strip() for s in symbols.split(',')]
+        
+        data = await smart_money.get_all_smart_money_data(symbol_list)
+        
+        return {
+            'status': 'success',
+            'data': data,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Smart money data error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/smart-money/liquidation-heatmap/{symbol}")
+async def get_liquidation_heatmap(symbol: str):
+    """Get liquidation heatmap for a specific symbol"""
+    try:
+        if not smart_money:
+            return {
+                'status': 'error',
+                'message': 'Smart Money system not initialized'
+            }
+        
+        heatmap_data = await smart_money.fetch_liquidation_heatmap(symbol)
+        
+        return {
+            'status': 'success',
+            'symbol': symbol,
+            'data': heatmap_data,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Liquidation heatmap error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/smart-money/open-interest/{symbol}")
+async def get_open_interest(symbol: str):
+    """Get open interest data for a specific symbol"""
+    try:
+        if not smart_money:
+            return {
+                'status': 'error',
+                'message': 'Smart Money system not initialized'
+            }
+        
+        oi_data = await smart_money.fetch_open_interest(symbol)
+        
+        return {
+            'status': 'success',
+            'symbol': symbol,
+            'data': oi_data,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Open interest error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/smart-money/funding-rates/{symbol}")
+async def get_funding_rates(symbol: str):
+    """Get funding rates for a specific symbol"""
+    try:
+        if not smart_money:
+            return {
+                'status': 'error',
+                'message': 'Smart Money system not initialized'
+            }
+        
+        funding_data = await smart_money.fetch_funding_rates(symbol)
+        
+        return {
+            'status': 'success',
+            'symbol': symbol,
+            'data': funding_data,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Funding rates error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/smart-money/focus-symbols")
+async def get_focus_symbols():
+    """Get the list of focus symbols for smart money analysis"""
+    if smart_money:
+        return {
+            'status': 'success',
+            'symbols': smart_money.focus_symbols
+        }
+    else:
+        return {
+            'status': 'error',
+            'message': 'Smart Money system not initialized'
+        }
+
 @api_router.post("/chat")
 async def chat(message: ChatMessageCreate, authorization: str = Header(None)):
     """Send a chat message and get AI response with full historical context"""
