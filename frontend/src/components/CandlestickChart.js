@@ -15,6 +15,7 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
   
   useEffect(() => {
     loadData();
+    loadGaps();
   }, [symbol, timeframe]);
 
   useEffect(() => {
