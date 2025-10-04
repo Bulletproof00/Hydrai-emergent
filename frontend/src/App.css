@@ -1061,6 +1061,94 @@ body {
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
+/* Candlestick Chart */
+.candlestick-chart-container {
+  width: 100%;
+  position: relative;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.chart-price-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 16px;
+  padding: 12px 20px;
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 10px;
+}
+
+.price-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.price-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #e4e4e7;
+}
+
+.bars-count {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-left: auto;
+}
+
+.chart-controls-mini {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.zoom-btn,
+.refresh-btn {
+  padding: 6px 12px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #e4e4e7;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.zoom-btn:hover,
+.refresh-btn:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.candlestick-canvas {
+  width: 100%;
+  border-radius: 12px;
+  cursor: grab;
+}
+
+.candlestick-canvas:active {
+  cursor: grabbing;
+}
+
+.chart-loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 600px;
+  color: #10b981;
+  font-size: 16px;
+  font-weight: 600;
+}
+
 /* Trading Chart */
 .trading-chart-container {
   width: 100%;
