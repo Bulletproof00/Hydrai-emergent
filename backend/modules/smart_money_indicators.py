@@ -115,8 +115,8 @@ class SmartMoneyIndicators:
                 heatmap_data = await self._generate_synthetic_liquidations(normalized_symbol)
             
             # Store in cache and database
-            self.cache['liquidation_heatmap'][symbol] = heatmap_data
-            await self._store_smart_money_data('liquidation_heatmap', symbol, heatmap_data)
+            self.cache['liquidation_heatmap'][normalized_symbol] = heatmap_data
+            await self._store_smart_money_data('liquidation_heatmap', normalized_symbol, heatmap_data)
             
             return heatmap_data
             
