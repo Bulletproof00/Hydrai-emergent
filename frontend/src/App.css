@@ -1900,7 +1900,7 @@ body {
   padding: 24px;
   margin: 16px;
   min-height: 600px;
-  overflow: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
