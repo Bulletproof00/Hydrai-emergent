@@ -645,7 +645,7 @@ class SmartMoneyTester:
 
 async def main():
     """Main test runner"""
-    tester = RealTimeTickDataTester()
+    tester = SmartMoneyTester()
     await tester.run_all_tests()
 
 if __name__ == "__main__":
