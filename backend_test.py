@@ -337,23 +337,60 @@ class RealTimeTickDataTester:
         else:
             self.log_test(test_name, "WARN", "No tick data found in database (may be expected for new system)")
     
-    async def test_error_handling(self):
-        """Test error handling for invalid symbols"""
-        test_name = "Error Handling - Invalid Symbol"
+    async def test_tick_simulation(self):
+        """Test that price simulation is working between API calls"""
+        test_name = "Price Tick Simulation"
         
-        response = await self.test_api_endpoint("/chart-data/INVALID_SYMBOL", expected_status=500)
+        # Get initial prices
+        response1 = await self.test_api_endpoint("/realtime/latest")
+        if not response1['success']:
+            self.log_test(test_name, "FAIL", f"Could not get initial prices: {response1.get('error', 'Unknown error')}")
+            return
         
-        # We expect this to fail gracefully, not crash
-        if response['status'] in [400, 404, 500]:
+        # Wait for simulation to potentially update prices
+        await asyncio.sleep(5)
+        
+        # Get prices again
+        response2 = await self.test_api_endpoint("/realtime/latest")
+        if not response2['success']:
+            self.log_test(test_name, "FAIL", f"Could not get updated prices: {response2.get('error', 'Unknown error')}")
+            return
+        
+        data1 = response1['data'].get('data', {})
+        data2 = response2['data'].get('data', {})
+        
+        # Check if any prices have changed (indicating simulation)
+        price_changes = 0
+        simulated_ticks = 0
+        
+        for symbol in data1:
+            if symbol in data2 and data1[symbol] and data2[symbol]:
+                price1 = data1[symbol].get('price', 0)
+                price2 = data2[symbol].get('price', 0)
+                
+                if abs(price1 - price2) > 0.001:  # Small threshold for floating point comparison
+                    price_changes += 1
+                
+                # Check if tick is marked as simulated
+                if data2[symbol].get('simulated'):
+                    simulated_ticks += 1
+        
+        if price_changes > 0 or simulated_ticks > 0:
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"Invalid symbol handled gracefully with status {response['status']}",
-                "Graceful error handling",
-                f"HTTP {response['status']}"
+                f"Price simulation active: {price_changes} price changes, {simulated_ticks} simulated ticks",
+                "Price movements between API calls",
+                f"{price_changes} changes, {simulated_ticks} simulated"
             )
         else:
-            self.log_test(test_name, "FAIL", f"Unexpected response: {response}")
+            self.log_test(
+                test_name, 
+                "WARN", 
+                "No price changes detected (simulation may be inactive or very small movements)",
+                "Price simulation active",
+                "No changes detected"
+            )
     
     async def test_api_performance(self):
         """Test API response times"""
