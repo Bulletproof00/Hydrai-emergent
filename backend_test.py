@@ -666,7 +666,7 @@ class TradingSystemTester:
         recommendation = recommendation_data.get('action', '') if isinstance(recommendation_data, dict) else ''
         reasoning = recommendation_data.get('reasoning', '') if isinstance(recommendation_data, dict) else ''
         
-        if recommendation in ['long', 'short'] and len(analysis) > 50:
+        if recommendation in ['long', 'short'] and len(reasoning) > 50:
             # Test if we can place order based on AI recommendation
             order_side = "buy" if recommendation == "long" else "sell"
             order_data = {
