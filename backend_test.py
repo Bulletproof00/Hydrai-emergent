@@ -277,50 +277,76 @@ class SmartMoneyTester:
             else:
                 self.log_test(test_name, "FAIL", f"Insufficient OI data: {len(exchanges)} exchanges, total OI: {total_oi}")
     
-    async def test_data_sources_verification(self):
-        """Test multiple data sources are working (CoinGecko, Yahoo Finance, Market-Adjusted)"""
-        test_name = "Multiple Data Sources Verification"
+    async def test_funding_rates_api(self):
+        """Test /api/smart-money/funding-rates/{symbol} endpoint"""
+        test_symbols = ['BTC%2FUSDT', 'ETH%2FUSDT', 'SOL%2FUSDT', 'XRP%2FUSDT']
         
-        response = await self.test_api_endpoint("/realtime/latest")
-        
-        if not response['success']:
-            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
-            return
-        
-        data = response['data']
-        if 'data' not in data:
-            self.log_test(test_name, "FAIL", "No data in response")
-            return
-        
-        prices_data = data['data']
-        sources_found = set()
-        
-        # Check what data sources are being used
-        for symbol, price_info in prices_data.items():
-            if price_info and 'source' in price_info:
-                sources_found.add(price_info['source'])
-        
-        expected_sources = ['coingecko', 'market_adjusted', 'yahoo_fallback', 'marketwatch']
-        found_expected = [source for source in expected_sources if source in sources_found]
-        
-        if len(found_expected) >= 2:
-            self.log_test(
-                test_name, 
-                "PASS", 
-                f"Multiple data sources active: {', '.join(sources_found)}",
-                "At least 2 different data sources",
-                f"{len(sources_found)} sources: {', '.join(sources_found)}"
-            )
-        elif len(sources_found) > 0:
-            self.log_test(
-                test_name, 
-                "WARN", 
-                f"Only one data source found: {', '.join(sources_found)}",
-                "Multiple data sources",
-                f"1 source: {', '.join(sources_found)}"
-            )
-        else:
-            self.log_test(test_name, "FAIL", "No data sources identified in response")
+        for encoded_symbol in test_symbols:
+            display_symbol = encoded_symbol.replace('%2F', '/')
+            test_name = f"Funding Rates API - {display_symbol}"
+            
+            response = await self.test_api_endpoint(f"/smart-money/funding-rates/{encoded_symbol}")
+            
+            if not response['success']:
+                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+                continue
+            
+            data = response['data']
+            
+            # Check response structure
+            if 'status' not in data or 'data' not in data:
+                self.log_test(test_name, "FAIL", "Invalid response structure")
+                continue
+            
+            if data['status'] != 'success':
+                self.log_test(test_name, "FAIL", f"API returned error: {data}")
+                continue
+            
+            funding_data = data['data']
+            
+            # Validate funding rates structure
+            required_fields = ['symbol', 'timestamp', 'current_funding_rate', 'exchanges', 'source']
+            missing_fields = [field for field in required_fields if field not in funding_data]
+            
+            if missing_fields:
+                self.log_test(test_name, "FAIL", f"Missing fields in funding data: {missing_fields}")
+                continue
+            
+            exchanges = funding_data.get('exchanges', {})
+            current_rate = funding_data.get('current_funding_rate', 0)
+            next_funding_time = funding_data.get('next_funding_time')
+            
+            # Validate funding rate is in reasonable range (-5% to +5%)
+            if -5.0 <= current_rate <= 5.0:
+                rate_status = "reasonable"
+            else:
+                rate_status = "extreme"
+            
+            if len(exchanges) >= 3 and rate_status == "reasonable":
+                # Check if exchanges have proper funding rate structure
+                exchange_rates = []
+                for exchange, data in exchanges.items():
+                    if isinstance(data, dict) and 'funding_rate' in data:
+                        rate = data['funding_rate']
+                        exchange_rates.append(f"{exchange}: {rate:.4f}%")
+                
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Multi-exchange funding rates: Avg {current_rate:.4f}%, {len(exchanges)} exchanges",
+                    "Reasonable funding rates (-5% to +5%) from multiple exchanges",
+                    f"Rate: {current_rate:.4f}%, Exchanges: {', '.join(exchange_rates[:3])}"
+                )
+            elif rate_status != "reasonable":
+                self.log_test(
+                    test_name, 
+                    "WARN", 
+                    f"Extreme funding rate: {current_rate:.4f}% (may indicate market stress)",
+                    "Funding rate between -5% and +5%",
+                    f"{current_rate:.4f}%"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"Insufficient funding data: {len(exchanges)} exchanges")
     
     async def test_database_storage(self):
         """Test that real-time ticks are being stored in database"""
