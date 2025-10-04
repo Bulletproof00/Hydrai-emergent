@@ -436,14 +436,14 @@ class SmartMoneyIndicators:
             }
             
             # Fetch from Binance
-            binance_funding = await self._fetch_binance_funding_rate(symbol)
+            binance_funding = await self._fetch_binance_funding_rate(normalized_symbol)
             if binance_funding:
                 funding_data['exchanges']['binance'] = binance_funding
                 funding_data['current_funding_rate'] = binance_funding.get('funding_rate', 0)
                 funding_data['next_funding_time'] = binance_funding.get('next_funding_time')
             
             # Add synthetic funding rates for other exchanges
-            synthetic_funding = await self._generate_synthetic_funding_rates(symbol)
+            synthetic_funding = await self._generate_synthetic_funding_rates(normalized_symbol)
             funding_data['exchanges'].update(synthetic_funding)
             
             # Calculate weighted average funding rate
