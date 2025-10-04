@@ -725,7 +725,10 @@ const EnhancedSmartMoneyPanel = () => {
                     </div>
                 </div>
                 <div className="header-right">
-                    {renderSymbolSelector()}
+                    <div className="controls-container">
+                        {renderTimeframeSelector()}
+                        {renderSymbolSelector()}
+                    </div>
                 </div>
             </div>
 
