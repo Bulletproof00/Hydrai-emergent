@@ -20,7 +20,7 @@ const EnhancedSmartMoneyPanel = () => {
         if (selectedSymbol) {
             fetchEnhancedSmartMoneyData();
         }
-    }, [selectedSymbol]);
+    }, [selectedSymbol, selectedTimeframe]);
 
     const fetchSupportedSymbols = async () => {
         try {
