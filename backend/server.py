@@ -1516,8 +1516,8 @@ async def get_latest_realtime_data(symbols: str = None):
     try:
         symbol_list = symbols.split(',') if symbols else None
         
-        if real_time_streamer:
-            latest_data = await real_time_streamer.get_latest_ticks(symbol_list)
+        if enhanced_streamer:
+            latest_data = await enhanced_streamer.get_latest_prices(symbol_list)
             return {
                 'status': 'success',
                 'data': latest_data,
@@ -1526,7 +1526,7 @@ async def get_latest_realtime_data(symbols: str = None):
         else:
             return {
                 'status': 'error',
-                'message': 'Real-time streamer not initialized'
+                'message': 'Enhanced streamer not initialized'
             }
             
     except Exception as e:
