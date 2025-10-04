@@ -2209,8 +2209,8 @@ async def startup_event():
     # Initialize Paper Trading Engine
     try:
         global paper_trading
-        paper_trading = PaperTradingEngine(db)
-        logger.info("Paper Trading Engine initialized")
+        paper_trading = PaperTradingEngine(db, enhanced_smart_money)
+        logger.info("Paper Trading Engine initialized with Enhanced Smart Money integration")
     except Exception as e:
         logger.warning(f"Paper Trading initialization failed: {str(e)}")
     
