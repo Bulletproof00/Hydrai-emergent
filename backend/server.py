@@ -1846,15 +1846,7 @@ async def get_trading_account(authorization: str = Header(None)):
 
 @api_router.post("/trading/order")
 async def place_trading_order(
-    symbol: str,
-    side: str,
-    order_type: str,
-    quantity: float,
-    price: Optional[float] = None,
-    leverage: int = 1,
-    stop_loss: Optional[float] = None,
-    take_profit: Optional[float] = None,
-    reduce_only: bool = False,
+    order_data: OrderCreate,
     authorization: str = Header(None)
 ):
     """Place a new trading order"""
@@ -1868,8 +1860,9 @@ async def place_trading_order(
         user = await get_current_user(authorization)
         
         result = await paper_trading.place_order(
-            user['_id'], symbol, side, order_type, quantity,
-            price, leverage, stop_loss, take_profit, reduce_only
+            user['_id'], order_data.symbol, order_data.side, order_data.order_type, 
+            order_data.quantity, order_data.price, order_data.leverage, 
+            order_data.stop_loss, order_data.take_profit, order_data.reduce_only
         )
         
         return {
