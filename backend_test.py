@@ -669,21 +669,26 @@ class SmartMoneyTester:
                     self.log_test(test_name, "FAIL", f"API returned error: {data}")
                     continue
                 
-                # Check for required fields
+                # Check for required fields in the nested data structure
+                if 'data' not in data:
+                    self.log_test(test_name, "FAIL", "Missing 'data' field in response")
+                    continue
+                
+                nested_data = data['data']
                 required_fields = ['symbol', 'timeframe', 'liquidation_heatmap_2d']
-                missing_fields = [field for field in required_fields if field not in data]
+                missing_fields = [field for field in required_fields if field not in nested_data]
                 
                 if missing_fields:
                     self.log_test(test_name, "FAIL", f"Missing required fields: {missing_fields}")
                     continue
                 
                 # Validate timeframe matches request
-                if data.get('timeframe') != timeframe:
-                    self.log_test(test_name, "FAIL", f"Timeframe mismatch: expected {timeframe}, got {data.get('timeframe')}")
+                if nested_data.get('timeframe') != timeframe:
+                    self.log_test(test_name, "FAIL", f"Timeframe mismatch: expected {timeframe}, got {nested_data.get('timeframe')}")
                     continue
                 
                 # Check liquidation heatmap 2D data
-                heatmap_2d = data.get('liquidation_heatmap_2d')
+                heatmap_2d = nested_data.get('liquidation_heatmap_2d')
                 if heatmap_2d and isinstance(heatmap_2d, dict):
                     # Check for directional bias
                     if 'directional_bias' in heatmap_2d:
