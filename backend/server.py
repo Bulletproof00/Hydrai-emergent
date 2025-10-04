@@ -1624,11 +1624,15 @@ async def get_open_interest(symbol: str):
                 'message': 'Smart Money system not initialized'
             }
         
-        oi_data = await smart_money.fetch_open_interest(symbol)
+        # URL decode the symbol parameter
+        import urllib.parse
+        decoded_symbol = urllib.parse.unquote(symbol)
+        
+        oi_data = await smart_money.fetch_open_interest(decoded_symbol)
         
         return {
             'status': 'success',
-            'symbol': symbol,
+            'symbol': decoded_symbol,
             'data': oi_data,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
