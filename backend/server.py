@@ -1597,7 +1597,11 @@ async def get_liquidation_heatmap(symbol: str):
                 'message': 'Smart Money system not initialized'
             }
         
-        heatmap_data = await smart_money.fetch_liquidation_heatmap(symbol)
+        # URL decode the symbol parameter
+        import urllib.parse
+        decoded_symbol = urllib.parse.unquote(symbol)
+        
+        heatmap_data = await smart_money.fetch_liquidation_heatmap(decoded_symbol)
         
         return {
             'status': 'success',
