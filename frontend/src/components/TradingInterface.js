@@ -428,6 +428,133 @@ const TradingInterface = () => {
                     </div>
                 </div>
 
+                {/* AI Analysis Panel */}
+                {showAiPanel && aiAnalysis && (
+                    <div className="ai-analysis-panel">
+                        <div className="ai-panel-header">
+                            <h4>🤖 KI Analyse: {selectedSymbol}</h4>
+                            <button onClick={() => setShowAiPanel(false)} className="close-btn">×</button>
+                        </div>
+                        
+                        <div className="ai-recommendation">
+                            <div className="recommendation-main">
+                                <span className={`action-badge ${aiAnalysis.action}`}>
+                                    {aiAnalysis.action.toUpperCase()}
+                                </span>
+                                <span className="confidence-score">
+                                    Konfidenz: {(aiAnalysis.confidence * 100).toFixed(1)}%
+                                </span>
+                            </div>
+                            
+                            <div className="trade-details">
+                                <div className="detail-item">
+                                    <span>Trade Typ:</span>
+                                    <span>{aiAnalysis.trade_type}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <span>Position Size:</span>
+                                    <span>{aiAnalysis.position_size}%</span>
+                                </div>
+                                <div className="detail-item">
+                                    <span>Leverage:</span>
+                                    <span>{aiAnalysis.leverage}x</span>
+                                </div>
+                                {aiAnalysis.entry_price && (
+                                    <div className="detail-item">
+                                        <span>Entry:</span>
+                                        <span>${formatNumber(aiAnalysis.entry_price, 4)}</span>
+                                    </div>
+                                )}
+                                {aiAnalysis.stop_loss && (
+                                    <div className="detail-item">
+                                        <span>Stop Loss:</span>
+                                        <span>${formatNumber(aiAnalysis.stop_loss, 4)}</span>
+                                    </div>
+                                )}
+                                {aiAnalysis.take_profit && (
+                                    <div className="detail-item">
+                                        <span>Take Profit:</span>
+                                        <span>${formatNumber(aiAnalysis.take_profit, 4)}</span>
+                                    </div>
+                                )}
+                                {aiAnalysis.risk_reward_ratio && (
+                                    <div className="detail-item">
+                                        <span>R/R Ratio:</span>
+                                        <span>{aiAnalysis.risk_reward_ratio.toFixed(2)}</span>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div className="ai-reasoning">
+                                <h5>Analyse:</h5>
+                                <p>{aiAnalysis.reasoning}</p>
+                            </div>
+                            
+                            <div className="market-conditions">
+                                <h5>Marktbedingungen:</h5>
+                                <p>{aiAnalysis.market_conditions}</p>
+                            </div>
+                            
+                            <div className="risk-assessment">
+                                <h5>Risikobewertung:</h5>
+                                <p>{aiAnalysis.risk_assessment}</p>
+                            </div>
+                            
+                            {aiAnalysis.probability_analysis && (
+                                <div className="probability-analysis">
+                                    <h5>Wahrscheinlichkeitsanalyse:</h5>
+                                    <div className="prob-details">
+                                        <div className="prob-item">
+                                            <span>Gewinnwahrscheinlichkeit:</span>
+                                            <span>{(aiAnalysis.probability_analysis.win_probability * 100).toFixed(1)}%</span>
+                                        </div>
+                                        <div className="prob-item">
+                                            <span>Erwarteter Return:</span>
+                                            <span>{aiAnalysis.probability_analysis.expected_return?.toFixed(2)}%</span>
+                                        </div>
+                                        <div className="prob-item">
+                                            <span>Max Drawdown:</span>
+                                            <span>{aiAnalysis.probability_analysis.max_drawdown_risk?.toFixed(2)}%</span>
+                                        </div>
+                                        <div className="prob-item">
+                                            <span>Zeithorizont:</span>
+                                            <span>{aiAnalysis.probability_analysis.time_horizon}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            <div className="ai-actions">
+                                <button 
+                                    onClick={() => {
+                                        // Auto-apply AI recommendations to order form
+                                        setOrderForm(prev => ({
+                                            ...prev,
+                                            side: aiAnalysis.action === 'buy' ? 'buy' : 'sell',
+                                            quantity: (aiAnalysis.position_size / 100).toString(),
+                                            leverage: aiAnalysis.leverage,
+                                            stopLoss: aiAnalysis.stop_loss?.toString() || '',
+                                            takeProfit: aiAnalysis.take_profit?.toString() || ''
+                                        }));
+                                        setShowAiPanel(false);
+                                    }}
+                                    className="apply-ai-btn"
+                                >
+                                    KI Empfehlung anwenden
+                                </button>
+                                <button 
+                                    onClick={() => getAiAnalysis(selectedSymbol, "Provide updated analysis")}
+                                    disabled={analysisLoading}
+                                    className="refresh-analysis-btn"
+                                >
+                                    Analyse aktualisieren
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
                 {/* Positions Panel */}
                 <div className="positions-panel">
                     <div className="panel-header">
