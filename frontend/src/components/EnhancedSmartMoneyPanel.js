@@ -54,8 +54,7 @@ const EnhancedSmartMoneyPanel = () => {
             }
             
             // Then fetch Enhanced Smart Money data with timeframe
-            const encodedSymbol = encodeURIComponent(selectedSymbol);
-            const response = await axios.get(`${BACKEND_URL}/api/enhanced-smart-money/data/${encodedSymbol}?timeframe=${selectedTimeframe}`);
+            const response = await axios.get(`${BACKEND_URL}/api/enhanced-smart-money/data?symbol=${encodeURIComponent(selectedSymbol)}&timeframe=${selectedTimeframe}`);
             
             if (response.data.status === 'success') {
                 const enhancedData = response.data.data;
