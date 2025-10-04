@@ -307,9 +307,9 @@ class TradingSystemTester:
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"AI analysis generated: {len(analysis)} chars, recommendation: {recommendation}",
+                f"AI analysis generated: {len(reasoning)} chars, recommendation: {action}",
                 "Detailed AI analysis with trading recommendation",
-                f"Analysis length: {len(analysis)}, Rec: {recommendation}"
+                f"Analysis length: {len(reasoning)}, Rec: {action}"
             )
         else:
             self.log_test(test_name, "FAIL", f"Invalid AI analysis: analysis={len(analysis)} chars, rec={recommendation}")
