@@ -372,22 +372,22 @@ const EnhancedSmartMoneyPanel = () => {
 
     const renderTimeframeSelector = () => {
         const timeframes = [
-            { value: '12h', label: '12 Hours' },
-            { value: '1day', label: '1 Day' },
-            { value: '3day', label: '3 Days' },
-            { value: '1week', label: '1 Week' },
-            { value: '2week', label: '2 Weeks' },
-            { value: 'monthly', label: 'Monthly' }
+            { value: '12h', label: '12 Stunde' },
+            { value: '1day', label: '1 Tag' },
+            { value: '3day', label: '3 Tag' },
+            { value: '1week', label: '1 Woche' },
+            { value: '2week', label: '2 Woche' },
+            { value: 'monthly', label: '1 Monat' }
         ];
 
         return (
             <div className="timeframe-selector-container">
-                <label htmlFor="timeframe-select" className="timeframe-label">Timeframe:</label>
                 <select 
                     id="timeframe-select"
                     value={selectedTimeframe} 
                     onChange={(e) => setSelectedTimeframe(e.target.value)}
                     className="timeframe-select"
+                    title="Zeitrahmen auswählen"
                 >
                     {timeframes.map((tf) => (
                         <option key={tf.value} value={tf.value}>
