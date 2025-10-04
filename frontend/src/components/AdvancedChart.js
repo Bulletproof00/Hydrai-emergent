@@ -42,11 +42,6 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
     }
   };
 
-  const initChart = () => {
-    // Chart will be rendered using Recharts instead
-    return;
-  };
-
   const loadChartData = async () => {
     setLoading(true);
     try {
