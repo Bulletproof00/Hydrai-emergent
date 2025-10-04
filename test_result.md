@@ -105,77 +105,101 @@
 user_problem_statement: "Teste das neue Paper Trading System vollständig: Trading System APIs (Account Management, Order Management, Position Management, Trading Data), Trading Engine Features (Order Execution, Risk Management, Portfolio Tracking), und Top 30 Crypto Assets validation."
 
 backend:
-  - task: "Implement Smart Money Indicators system with liquidation heatmaps"
+  - task: "Paper Trading Account Management - GET /api/trading/account"
     implemented: true
     working: true
-    file: "/app/backend/modules/smart_money_indicators.py, /app/backend/server.py"
+    file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
-          comment: "COMPREHENSIVE TESTING COMPLETED: Smart Money Indicators system fully operational. ✅ All 4 focus symbols (BTC, ETH, SOL, XRP) have complete smart money data ✅ Liquidation heatmaps showing realistic price ranges: BTC $52K-$69K, ETH $1.9K-$2.6K, SOL $120-$160, XRP $0.44-$0.58 ✅ All individual APIs working: /api/smart-money/liquidation-heatmap/{symbol}, /api/smart-money/open-interest/{symbol}, /api/smart-money/funding-rates/{symbol} ✅ Multi-exchange open interest data with proper distribution ✅ Funding rates within normal range (-0.05% to +0.03%) ✅ Database storage in smart_money_data collection working (175 documents) ✅ Multiple data sources: Binance API + synthetic fallbacks ✅ Excellent API performance (0.006s response time) ✅ 15-minute background updates active ✅ Focus symbols API working correctly. Success rate: 94.1% (16/17 tests passed, 1 minor warning about ETH price range). Smart Money system is production-ready."
+          comment: "VERIFIED: Trading account creation working perfectly. ✅ Creates new account with $10,000 initial balance ✅ Account structure includes all required fields: balance, equity, free_margin, unrealized_pnl ✅ Automatic account creation on first access ✅ Proper user authentication and account linking ✅ Database storage in paper_trading_accounts collection working correctly."
 
-  - task: "Implement Smart Money open interest tracking across exchanges"
+  - task: "Paper Trading Order Management - POST /api/trading/order"
     implemented: true
     working: true
-    file: "/app/backend/modules/smart_money_indicators.py"
+    file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
-          comment: "VERIFIED: Open Interest tracking fully functional. ✅ Multi-exchange data for all 4 symbols: BTC $309K, ETH $1.4M, SOL $384K, XRP $670K total OI ✅ Exchange breakdown working: Bybit, OKX, Deribit, FTX, BitMEX with realistic distribution ✅ No single exchange dominance (all under 80% share) ✅ Real-time Binance API integration + synthetic data for other exchanges ✅ Database storage and caching working ✅ API endpoint /api/smart-money/open-interest/{symbol} operational for all symbols."
+          comment: "COMPREHENSIVE TESTING COMPLETED: Order management system fully operational. ✅ MARKET ORDERS: Immediate execution with realistic fill prices and slippage ✅ LIMIT ORDERS: Proper order creation with stop loss and take profit support ✅ LEVERAGE SUPPORT: All tested leverage levels working (1x, 25x, 50x, 100x) ✅ FEE CALCULATION: Accurate taker fees (0.04%) applied to all orders ✅ SLIPPAGE CALCULATION: Realistic slippage based on order size ✅ ORDER VALIDATION: Proper validation of order parameters and balance checks ✅ JSON API: Pydantic models for proper request/response handling."
 
-  - task: "Implement Smart Money funding rates with next funding times"
+  - task: "Paper Trading Position Management - GET /api/trading/positions"
     implemented: true
     working: true
-    file: "/app/backend/modules/smart_money_indicators.py"
+    file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
-          comment: "VERIFIED: Funding rates system fully operational. ✅ Multi-exchange funding rates for all 4 symbols within normal range (-0.05% to +0.03%) ✅ Real-time Binance API integration working ✅ Next funding times calculated correctly ✅ Exchange-specific rates: Bybit, OKX, Deribit, FTX with realistic variations ✅ Weighted average calculation working ✅ API endpoint /api/smart-money/funding-rates/{symbol} functional ✅ Database storage and 15-minute updates active."
+          comment: "VERIFIED: Position tracking system working correctly. ✅ Position creation and tracking for all order types ✅ Complete position data: position_id, symbol, side, size, entry_price, leverage, liquidation_price ✅ Position aggregation: Multiple orders correctly add to existing positions ✅ Real-time position updates with mark prices ✅ Position status management (open/closed) ✅ Database storage and retrieval working properly."
 
-  - task: "Implement Smart Money background updates every 15 minutes"
+  - task: "Paper Trading Margin Management - POST /api/trading/position/margin"
     implemented: true
     working: true
-    file: "/app/backend/modules/smart_money_indicators.py"
+    file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
-          comment: "VERIFIED: Background update system working correctly. ✅ 15-minute update cycle active and running ✅ Database contains 175 smart money documents across all data types ✅ All 3 data types being stored: liquidation_heatmap, open_interest, funding_rates ✅ Cache mechanism working with proper refresh logic ✅ Background task started on server startup ✅ Data cleanup working (keeps last 24 hours) ✅ Update logs showing successful completion."
+          comment: "VERIFIED: Margin management fully functional. ✅ Add margin to positions working correctly ✅ Reduce margin with proper validation ✅ Leverage recalculation after margin changes ✅ Liquidation price updates after margin modifications ✅ Balance and free margin updates ✅ Minimum margin requirements enforced ✅ JSON API with proper request validation."
 
-  - task: "Implement Smart Money aggregated API endpoint"
+  - task: "Paper Trading History - GET /api/trading/history"
     implemented: true
     working: true
-    file: "/app/backend/server.py"
+    file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
-          comment: "VERIFIED: Aggregated Smart Money API fully functional. ✅ /api/smart-money/all endpoint working with symbol filtering ✅ Returns complete data for all 4 focus symbols (BTC, ETH, SOL, XRP) ✅ Includes all 3 data types: liquidation_heatmap, open_interest, funding_rates ✅ Excellent performance (0.006s response time) ✅ Proper data structure and timestamps ✅ Cache integration working ✅ Focus symbols endpoint /api/smart-money/focus-symbols operational."
+          comment: "VERIFIED: Trading history system working correctly. ✅ Complete trade history retrieval ✅ Proper order data: order_id, symbol, side, quantity, status, timestamps ✅ Chronological ordering (newest first) ✅ Limit parameter support for pagination ✅ All order statuses tracked (filled, partially_filled) ✅ Database queries optimized with proper indexing."
 
-  - task: "Implement Enhanced Smart Money with timeframe filters and directional bias"
+  - task: "Paper Trading Symbols - GET /api/trading/symbols (Top 30 Crypto)"
     implemented: true
     working: true
-    file: "/app/backend/modules/enhanced_smart_money.py, /app/backend/server.py"
+    file: "/app/backend/server.py, /app/backend/modules/enhanced_smart_money.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
-          comment: "COMPREHENSIVE TESTING COMPLETED: Enhanced Smart Money system with timeframe filters fully operational. ✅ SUCCESS RATE: 37/38 tests passed (97.4%) ✅ SUPPORTED SYMBOLS: 6 symbols (BTC, ETH, SOL, XRP, BNB, ADA) via /api/enhanced-smart-money/supported-symbols ✅ TIMEFRAME SUPPORT: 1day, 3day, 1week timeframes working correctly ✅ ENHANCED APIs: /api/enhanced-smart-money/data and /api/enhanced-smart-money/liquidation-heatmap-2d operational ✅ LIQUIDATION HEATMAP 2D: Enhanced heatmaps with cluster_strength and timeframe_impact fields ✅ DIRECTIONAL BIAS: Advanced bias calculations working - varies by timeframe (neutral/bullish/bearish with strength values) ✅ TIMEFRAME VALIDATION: Different timeframes return different liquidation data as expected ✅ DATA QUALITY: All enhanced features including above_ratio, below_ratio, recommendation text working ✅ PERFORMANCE: Excellent response times maintained. Enhanced Smart Money system is production-ready with Coinglass-style analytics."
+          comment: "VERIFIED: Trading symbols API working excellently. ✅ 30 total symbols available including all major cryptocurrencies ✅ Top cryptos included: BTC/USDT, ETH/USDT, BNB/USDT, XRP/USDT, ADA/USDT, SOL/USDT ✅ Trading-specific information: leverage_max (100x), min_order_size ($5), maker_fee (0.02%), taker_fee (0.04%) ✅ Proper symbol formatting and metadata ✅ Integration with enhanced smart money system for symbol data."
+
+  - task: "Paper Trading Engine - Order Execution & Risk Management"
+    implemented: true
+    working: true
+    file: "/app/backend/modules/paper_trading.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "COMPREHENSIVE TESTING COMPLETED: Trading engine core features fully operational. ✅ ORDER EXECUTION: Market orders fill immediately with realistic slippage (0.1%-0.5%) ✅ FEE CALCULATION: Accurate maker (0.02%) and taker (0.04%) fees ✅ LEVERAGE FUNCTIONALITY: Full leverage support from 1x to 100x ✅ POSITION MANAGEMENT: Proper position creation, modification, and closing ✅ RISK MANAGEMENT: Balance checks, margin requirements, minimum order sizes ✅ LIQUIDATION PRICES: Calculated correctly based on leverage and maintenance margin ✅ SLIPPAGE: Dynamic slippage based on order size with random variation."
+
+  - task: "Paper Trading Portfolio Tracking - Unrealized PnL & Balance Updates"
+    implemented: true
+    working: true
+    file: "/app/backend/modules/paper_trading.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "VERIFIED: Portfolio tracking system working perfectly. ✅ UNREALIZED PNL: Real-time calculation and updates based on current market prices ✅ BALANCE TRACKING: Proper balance, equity, and free margin calculations ✅ EQUITY CALCULATION: Equity = Balance + Unrealized PnL working correctly ✅ MARGIN TRACKING: Used margin and free margin properly calculated ✅ POSITION UPDATES: Mark prices updated with current market data ✅ ACCOUNT SYNCHRONIZATION: All account metrics synchronized across positions."
 
 frontend:
   - task: "Display Smart Money Indicators in frontend UI"
