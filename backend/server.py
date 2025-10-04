@@ -1712,13 +1712,13 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Redis connection failed: {str(e)}")
     
-    # Initialize real-time WebSocket streamer
+    # Initialize enhanced real-time streamer
     try:
-        real_time_streamer = RealTimeWebSocketStreamer(db)
-        await real_time_streamer.start_all_streams()
-        logger.info("Real-time WebSocket streamer initialized")
+        enhanced_streamer = EnhancedRealTimeStreamer(db)
+        await enhanced_streamer.start_polling_streams()
+        logger.info("Enhanced real-time streamer initialized")
     except Exception as e:
-        logger.warning(f"Real-time streamer initialization failed: {str(e)}")
+        logger.warning(f"Enhanced streamer initialization failed: {str(e)}")
     
     # Start background data update task
     asyncio.create_task(update_market_data_background())
