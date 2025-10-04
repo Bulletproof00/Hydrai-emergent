@@ -12,10 +12,12 @@ BACKEND_URL = "https://liquidation-oracle.preview.emergentagent.com/api"
 async def test_positions():
     async with aiohttp.ClientSession() as session:
         # Register a test user
+        import datetime
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         user_data = {
-            "email": "quick_test@example.com",
+            "email": f"quick_test_{timestamp}@example.com",
             "password": "testpass123",
-            "username": "quick_test"
+            "username": f"quick_test_{timestamp}"
         }
         
         async with session.post(f"{BACKEND_URL}/auth/register", json=user_data) as response:
