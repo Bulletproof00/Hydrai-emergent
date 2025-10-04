@@ -2818,6 +2818,215 @@ body {
   transform: none;
 }
 
+/* AI Analysis Button */
+.ai-analysis-btn {
+  width: 100%;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #8b5cf6, #a855f7);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.ai-analysis-btn:hover {
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  transform: translateY(-1px);
+}
+
+.ai-analysis-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* AI Analysis Panel */
+.ai-analysis-panel {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+}
+
+.ai-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ai-panel-header h4 {
+  margin: 0;
+  color: #a855f7;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.ai-panel-header .close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recommendation-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 8px;
+}
+
+.action-badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.action-badge.buy {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.action-badge.sell {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.action-badge.hold {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.confidence-score {
+  font-size: 14px;
+  font-weight: 600;
+  color: #a855f7;
+}
+
+.trade-details {
+  margin-bottom: 16px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.detail-item span:first-child {
+  color: #94a3b8;
+}
+
+.detail-item span:last-child {
+  color: #f8fafc;
+  font-weight: 500;
+}
+
+.ai-reasoning, .market-conditions, .risk-assessment, .probability-analysis {
+  margin-bottom: 16px;
+}
+
+.ai-reasoning h5, .market-conditions h5, .risk-assessment h5, .probability-analysis h5 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.ai-reasoning p, .market-conditions p, .risk-assessment p {
+  margin: 0;
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.prob-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.prob-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 6px 8px;
+  background: rgba(15, 23, 42, 0.4);
+  border-radius: 4px;
+}
+
+.prob-item span:first-child {
+  color: #94a3b8;
+}
+
+.prob-item span:last-child {
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.ai-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.apply-ai-btn, .refresh-analysis-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apply-ai-btn {
+  background: #10b981;
+  color: white;
+}
+
+.refresh-analysis-btn {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.apply-ai-btn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.refresh-analysis-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
 /* Positions Panel */
 .positions-panel {
   padding: 0;
