@@ -284,6 +284,14 @@ function App() {
             <TrendingUp size={20} />
             <span>Smart Money</span>
           </button>
+          <button 
+            className={`nav-item ${activeView === 'trading' ? 'active' : ''}`}
+            onClick={() => setActiveView('trading')}
+            data-testid="nav-trading"
+          >
+            <DollarSign size={20} />
+            <span>Paper Trading</span>
+          </button>
         </nav>
 
         {/* Live Price Widget */}
