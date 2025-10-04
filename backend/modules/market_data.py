@@ -63,19 +63,25 @@ class MarketDataFetcher:
             }
             interval = interval_map.get(timeframe, '1h')
             
-            # Calculate period based on limit
+            # Calculate period based on limit - get MORE data to ensure we have latest
             if interval in ['1m', '5m', '15m']:
-                period = '7d'  # yfinance limit for minute data
+                period = '7d'
             elif interval in ['1h', '4h']:
                 period = '60d'
             else:
-                period = '2y'
+                period = 'max'  # Get maximum available data
             
+            # Force download of fresh data
             ticker = yf.Ticker(yahoo_symbol)
-            hist = ticker.history(period=period, interval=interval)
+            hist = ticker.history(period=period, interval=interval, auto_adjust=True, prepost=False)
             
             if hist.empty:
+                logger.warning(f"No data returned for {symbol}")
                 return []
+            
+            # Log latest price for debugging
+            latest_close = hist['Close'].iloc[-1]
+            logger.info(f"{symbol} latest close: ${latest_close:.2f}")
             
             formatted_data = []
             for index, row in hist.iterrows():
@@ -85,13 +91,13 @@ class MarketDataFetcher:
                     'high': float(row['High']),
                     'low': float(row['Low']),
                     'close': float(row['Close']),
-                    'volume': float(row['Volume'])
+                    'volume': float(row['Volume']) if 'Volume' in row else 0
                 })
             
             return formatted_data[-limit:] if len(formatted_data) > limit else formatted_data
         
         except Exception as e:
-            logger.error(f"Error fetching traditional OHLCV: {str(e)}")
+            logger.error(f"Error fetching traditional OHLCV for {symbol}: {str(e)}")
             return []
     
     async def store_ohlcv_data(self, symbol, timeframe, data, asset_type='crypto'):
