@@ -358,8 +358,8 @@ class SmartMoneyIndicators:
                     oi_data['total_oi'] += data.get('open_interest', 0)
             
             # Store in cache and database
-            self.cache['open_interest'][symbol] = oi_data
-            await self._store_smart_money_data('open_interest', symbol, oi_data)
+            self.cache['open_interest'][normalized_symbol] = oi_data
+            await self._store_smart_money_data('open_interest', normalized_symbol, oi_data)
             
             return oi_data
             
