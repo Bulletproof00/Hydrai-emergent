@@ -10,6 +10,7 @@ const EnhancedSmartMoneyPanel = () => {
     const [activeTab, setActiveTab] = useState('liquidation_heatmap');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedTimeframe, setSelectedTimeframe] = useState('1day');
 
     useEffect(() => {
         fetchSupportedSymbols();
