@@ -213,66 +213,69 @@ class SmartMoneyTester:
             else:
                 self.log_test(test_name, "FAIL", "No liquidation levels found in heatmap data")
     
-    async def test_websocket_connection(self):
-        """Test WebSocket connection to /api/realtime"""
-        test_name = "WebSocket Real-Time Connection"
+    async def test_open_interest_api(self):
+        """Test /api/smart-money/open-interest/{symbol} endpoint"""
+        test_symbols = ['BTC%2FUSDT', 'ETH%2FUSDT', 'SOL%2FUSDT', 'XRP%2FUSDT']
         
-        try:
-            # Test WebSocket connection
-            async with websockets.connect(WEBSOCKET_URL) as websocket:
-                self.log_test(
-                    f"{test_name} - Connection", 
-                    "PASS", 
-                    "Successfully connected to WebSocket endpoint",
-                    "WebSocket connection established",
-                    "Connected"
-                )
+        for encoded_symbol in test_symbols:
+            display_symbol = encoded_symbol.replace('%2F', '/')
+            test_name = f"Open Interest API - {display_symbol}"
+            
+            response = await self.test_api_endpoint(f"/smart-money/open-interest/{encoded_symbol}")
+            
+            if not response['success']:
+                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+                continue
+            
+            data = response['data']
+            
+            # Check response structure
+            if 'status' not in data or 'data' not in data:
+                self.log_test(test_name, "FAIL", "Invalid response structure")
+                continue
+            
+            if data['status'] != 'success':
+                self.log_test(test_name, "FAIL", f"API returned error: {data}")
+                continue
+            
+            oi_data = data['data']
+            
+            # Validate open interest structure
+            required_fields = ['symbol', 'timestamp', 'total_oi', 'exchanges', 'source']
+            missing_fields = [field for field in required_fields if field not in oi_data]
+            
+            if missing_fields:
+                self.log_test(test_name, "FAIL", f"Missing fields in OI data: {missing_fields}")
+                continue
+            
+            exchanges = oi_data.get('exchanges', {})
+            total_oi = oi_data.get('total_oi', 0)
+            
+            if len(exchanges) >= 3 and total_oi > 0:  # Should have multiple exchanges
+                # Check if exchanges have proper structure
+                exchange_names = list(exchanges.keys())
+                sample_exchange = exchanges[exchange_names[0]]
                 
-                # Send ping message
-                ping_msg = json.dumps({"type": "ping"})
-                await websocket.send(ping_msg)
-                
-                # Wait for response with timeout
-                try:
-                    response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                    data = json.loads(response)
+                if isinstance(sample_exchange, dict) and 'open_interest' in sample_exchange:
+                    # Calculate percentage breakdown
+                    exchange_breakdown = []
+                    for exchange, data in exchanges.items():
+                        if isinstance(data, dict) and 'open_interest' in data:
+                            oi_value = data['open_interest']
+                            percentage = (oi_value / total_oi) * 100 if total_oi > 0 else 0
+                            exchange_breakdown.append(f"{exchange}: {percentage:.1f}%")
                     
-                    if data.get('type') == 'pong':
-                        self.log_test(
-                            f"{test_name} - Ping/Pong", 
-                            "PASS", 
-                            "WebSocket ping/pong working",
-                            "Pong response received",
-                            "Pong received"
-                        )
-                    elif data.get('type') == 'initial_data':
-                        self.log_test(
-                            f"{test_name} - Initial Data", 
-                            "PASS", 
-                            "Received initial price data on connection",
-                            "Initial data broadcast",
-                            "Initial data received"
-                        )
-                    else:
-                        self.log_test(
-                            f"{test_name} - Response", 
-                            "PASS", 
-                            f"Received WebSocket message: {data.get('type', 'unknown')}",
-                            "Any WebSocket response",
-                            f"Type: {data.get('type', 'unknown')}"
-                        )
-                        
-                except asyncio.TimeoutError:
                     self.log_test(
-                        f"{test_name} - Response", 
-                        "WARN", 
-                        "No response received within 5 seconds (may be normal for new system)",
-                        "WebSocket response",
-                        "Timeout"
+                        test_name, 
+                        "PASS", 
+                        f"Multi-exchange OI data: Total ${total_oi:,.0f}, {len(exchanges)} exchanges",
+                        "Multiple exchanges with OI breakdown",
+                        f"Exchanges: {', '.join(exchange_breakdown[:3])}"
                     )
-                
-        except Exception as e:
-            self.log_test(test_name, "FAIL", f"WebSocket connection failed: {str(e)}")
+                else:
+                    self.log_test(test_name, "FAIL", f"Invalid exchange data structure: {sample_exchange}")
+            else:
+                self.log_test(test_name, "FAIL", f"Insufficient OI data: {len(exchanges)} exchanges, total OI: {total_oi}")
     
     async def test_data_sources_verification(self):
         """Test multiple data sources are working (CoinGecko, Yahoo Finance, Market-Adjusted)"""
