@@ -18,6 +18,7 @@ class EnhancedSmartMoneyIndicators:
     def __init__(self, db):
         self.db = db
         self.session = None
+        self.live_fetcher = LiveSmartMoneyDataFetcher(db)
         
         # All supported symbols (expanded from focus symbols)
         self.supported_symbols = {
