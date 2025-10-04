@@ -282,13 +282,8 @@ class TradingSystemTester:
         """Test POST /api/ai-trading/analyze for BTC/USDT"""
         test_name = "AI Trading Analysis - BTC/USDT"
         
-        analyze_data = {
-            "symbol": "BTC/USDT",
-            "timeframe": "1h",
-            "analysis_type": "technical"
-        }
-        
-        response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=analyze_data, auth=True)
+        # Use query parameters instead of JSON body
+        response = await self.test_api_endpoint("/ai-trading/analyze?symbol=BTC/USDT&context=technical_analysis", method="POST", auth=True)
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
