@@ -460,8 +460,8 @@ class SmartMoneyIndicators:
                 funding_data['current_funding_rate'] = weighted_funding / total_weight
             
             # Store in cache and database
-            self.cache['funding_rates'][symbol] = funding_data
-            await self._store_smart_money_data('funding_rates', symbol, funding_data)
+            self.cache['funding_rates'][normalized_symbol] = funding_data
+            await self._store_smart_money_data('funding_rates', normalized_symbol, funding_data)
             
             return funding_data
             
