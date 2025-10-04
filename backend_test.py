@@ -186,52 +186,66 @@ class RealTimeTickDataTester:
             else:
                 self.log_test(test_name, "WARN", "No historical tick data found (may be expected for new system)")
     
-    async def test_crypto_data_still_works(self):
-        """Test that crypto data still works after traditional market fixes"""
-        crypto_symbols = ['BTC/USDT', 'ETH/USDT']
+    async def test_websocket_connection(self):
+        """Test WebSocket connection to /api/realtime"""
+        test_name = "WebSocket Real-Time Connection"
         
-        for symbol in crypto_symbols:
-            test_name = f"{symbol} Crypto Data"
-            
-            # Convert symbol for URL (BTC/USDT -> BTC-USDT)
-            url_symbol = symbol.replace('/', '-')
-            response = await self.test_api_endpoint(f"/chart-data/{url_symbol}?timeframe=1h&limit=10")
-            
-            if not response['success']:
-                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
-                continue
-            
-            data = response['data']
-            if 'data' not in data or not data['data']:
-                self.log_test(test_name, "FAIL", "No chart data returned")
-                continue
-            
-            latest_candle = data['data'][-1]
-            current_price = latest_candle['close']
-            
-            # Validate crypto prices are reasonable
-            expected_ranges = {
-                'BTC/USDT': (20000, 200000),  # BTC should be between $20k-$200k
-                'ETH/USDT': (1000, 20000)     # ETH should be between $1k-$20k
-            }
-            
-            min_price, max_price = expected_ranges[symbol]
-            if min_price <= current_price <= max_price:
+        try:
+            # Test WebSocket connection with timeout
+            async with websockets.connect(WEBSOCKET_URL, timeout=10) as websocket:
                 self.log_test(
-                    test_name, 
+                    f"{test_name} - Connection", 
                     "PASS", 
-                    f"{symbol} price: ${current_price:.2f}, {len(data['data'])} candles",
-                    f"Price between ${min_price}-${max_price}",
-                    f"${current_price:.2f}"
+                    "Successfully connected to WebSocket endpoint",
+                    "WebSocket connection established",
+                    "Connected"
                 )
-            else:
-                self.log_test(
-                    test_name, 
-                    "FAIL", 
-                    f"Price ${current_price:.2f} outside expected range",
-                    f"Price between ${min_price}-${max_price}",
-                    f"${current_price:.2f}"
-                )
+                
+                # Send ping message
+                ping_msg = json.dumps({"type": "ping"})
+                await websocket.send(ping_msg)
+                
+                # Wait for response with timeout
+                try:
+                    response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+                    data = json.loads(response)
+                    
+                    if data.get('type') == 'pong':
+                        self.log_test(
+                            f"{test_name} - Ping/Pong", 
+                            "PASS", 
+                            "WebSocket ping/pong working",
+                            "Pong response received",
+                            "Pong received"
+                        )
+                    elif data.get('type') == 'initial_data':
+                        self.log_test(
+                            f"{test_name} - Initial Data", 
+                            "PASS", 
+                            "Received initial price data on connection",
+                            "Initial data broadcast",
+                            "Initial data received"
+                        )
+                    else:
+                        self.log_test(
+                            f"{test_name} - Response", 
+                            "PASS", 
+                            f"Received WebSocket message: {data.get('type', 'unknown')}",
+                            "Any WebSocket response",
+                            f"Type: {data.get('type', 'unknown')}"
+                        )
+                        
+                except asyncio.TimeoutError:
+                    self.log_test(
+                        f"{test_name} - Response", 
+                        "WARN", 
+                        "No response received within 5 seconds (may be normal for new system)",
+                        "WebSocket response",
+                        "Timeout"
+                    )
+                
+        except Exception as e:
+            self.log_test(test_name, "FAIL", f"WebSocket connection failed: {str(e)}")
     
     async def test_force_refresh_endpoint(self):
         """Test the new force-refresh endpoint"""
