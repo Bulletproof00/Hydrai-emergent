@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Dict, List, Any
 
 # Test configuration
-BACKEND_URL = "https://hydra-trade.preview.emergentagent.com/api"
+BACKEND_URL = "https://liquidation-oracle.preview.emergentagent.com/api"
 WEBSOCKET_URL = "wss://hydra-trade.preview.emergentagent.com/api/realtime"
 
 class SmartMoneyTester:
