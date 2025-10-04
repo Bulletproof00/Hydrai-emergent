@@ -154,6 +154,11 @@ class OrderCreate(BaseModel):
     take_profit: Optional[float] = None
     reduce_only: bool = False
 
+class MarginModify(BaseModel):
+    position_id: str
+    action: Literal["add", "reduce"]
+    amount: float = Field(gt=0)
+
 class Trade(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
