@@ -108,29 +108,29 @@ const EnhancedSmartMoneyPanel = () => {
             source: 'aggregated'
         };
         
-        // Process liquidation levels and calculate summary
-        if (liquidationData?.liquidation_levels) {
-            const currentPrice = enhancedLiquidation.current_price;
-            const levels = liquidationData.liquidation_levels.map(level => ({
-                ...level,
-                above_current: level.price > currentPrice
-            }));
-            
-            enhancedLiquidation.liquidation_levels = levels;
-            
+        // Process liquidation levels and calculate enhanced summary
+        const currentPrice = enhancedLiquidation.current_price;
+        const levels = enhancedLiquidation.liquidation_levels;
+        
+        if (levels && levels.length > 0) {
             const aboveLevels = levels.filter(l => l.above_current);
             const belowLevels = levels.filter(l => !l.above_current);
             
+            // Calculate directional bias
+            const directionalBias = calculateDirectionalBias(levels, currentPrice);
+            
             enhancedLiquidation.summary = {
-                total_liquidations_above: aboveLevels.reduce((sum, l) => sum + (l.short_liquidation || 0), 0),
-                total_liquidations_below: belowLevels.reduce((sum, l) => sum + (l.long_liquidation || 0), 0),
+                total_liquidations_above: aboveLevels.reduce((sum, l) => sum + (l.total_liquidation || 0), 0),
+                total_liquidations_below: belowLevels.reduce((sum, l) => sum + (l.total_liquidation || 0), 0),
                 strongest_level_above: aboveLevels.length > 0 ? aboveLevels.reduce((max, l) => 
                     (l.total_liquidation || 0) > (max.total_liquidation || 0) ? l : max) : null,
                 strongest_level_below: belowLevels.length > 0 ? belowLevels.reduce((max, l) => 
                     (l.total_liquidation || 0) > (max.total_liquidation || 0) ? l : max) : null,
                 risk_score: Math.floor(Math.random() * 100),
                 levels_count_above: aboveLevels.length,
-                levels_count_below: belowLevels.length
+                levels_count_below: belowLevels.length,
+                directional_bias: directionalBias,
+                timeframe: selectedTimeframe
             };
         }
         
