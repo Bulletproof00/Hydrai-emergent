@@ -780,13 +780,40 @@ Gib eine präzise, professionelle Analyse auf Deutsch."""
 
 # ============= AI ANALYSIS =============
 async def analyze_with_ai(user_message: str, market_data: Optional[Dict] = None):
-    """Use LLM to analyze trading data"""
+    """Use LLM to analyze trading data with full historical context"""
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         
-        system_message = """Du bist Hydra AI, ein hochentwickelter Trading-Analyse-Assistent. 
-        Du analysierst Kryptowährungsmärkte, technische Indikatoren und gibst fundierte Einschätzungen.
-        Antworte präzise, professionell und in deutscher Sprache."""
+        system_message = """Du bist Hydra AI, ein hochentwickelter Trading-Analyse-Assistent mit Zugriff auf:
+        
+        - Historische OHLCV-Daten (bis zu 1000 Bars)
+        - Technische Indikatoren (RSI, MFI, Bollinger Bands, EMAs)
+        - CME Gaps (Lücken zwischen Freitag und Montag)
+        - Makroökonomische Daten (SPX, DXY, Gold)
+        - Crypto Dominanz-Metriken
+        - Traditionelle Märkte (Aktien, Forex, Rohstoffe)
+        - Nutzer-Trading-Historie
+        
+        Du analysierst:
+        1. Multi-Timeframe-Analysen
+        2. Candlestick-Muster und Chart-Patterns
+        3. Divergenzen zwischen Preis und Indikatoren
+        4. CME Gaps und deren Fill-Status
+        5. Korrelationen zwischen Krypto und traditionellen Märkten
+        6. Support/Resistance Levels
+        7. Trend-Richtung und Stärke
+        
+        Deine Analysen sind:
+        - Präzise und datenbasiert
+        - Professionell und verständlich
+        - Auf Deutsch
+        - Mit konkreten Trading-Empfehlungen (Long/Short/Neutral)
+        - Mit Risiko-Management (Stop-Loss, Take-Profit Levels)
+        
+        Du lernst aus:
+        - Vorherigen Analysen
+        - User-Trades und deren Ergebnissen
+        - Marktbewegungen und Pattern-Wiederholungen"""
         
         chat = LlmChat(
             api_key=api_key,
@@ -794,10 +821,44 @@ async def analyze_with_ai(user_message: str, market_data: Optional[Dict] = None)
             system_message=system_message
         ).with_model("openai", "gpt-4o")
         
-        # Add market context if available
+        # Build comprehensive context
         context = ""
         if market_data:
-            context = f"\n\nAktuelle Marktdaten:\n{json.dumps(market_data, indent=2)}"
+            context = f"\n\n📊 VERFÜGBARE MARKTDATEN:\n"
+            
+            if 'current_price' in market_data:
+                context += f"\nAktueller BTC-Preis: ${market_data['current_price'].get('price', 'N/A')}"
+                context += f"\n24h Änderung: {market_data['current_price'].get('change_24h', 'N/A')}%"
+            
+            if 'indicators' in market_data:
+                context += f"\n\n📈 INDIKATOREN:"
+                ind = market_data['indicators']
+                if ind.get('rsi'):
+                    context += f"\nRSI: {ind['rsi']:.2f}"
+                if ind.get('ema50'):
+                    context += f"\nEMA 50: ${ind['ema50']:.2f}"
+                if ind.get('ema200'):
+                    context += f"\nEMA 200: ${ind['ema200']:.2f}"
+            
+            if 'gaps' in market_data and market_data['gaps']:
+                context += f"\n\n🔺 CME GAPS:"
+                for gap in market_data['gaps'][:3]:
+                    context += f"\n- {gap.get('gap_type', 'unknown').upper()} Gap: ${gap.get('gap_size', 0):.2f} ({'gefüllt' if gap.get('is_filled') else 'offen'})"
+            
+            if 'dominance' in market_data:
+                dom = market_data['dominance']
+                if 'BTC_DOMINANCE' in dom:
+                    context += f"\n\n📊 DOMINANZ:"
+                    context += f"\nBTC Dominanz: {dom['BTC_DOMINANCE']:.2f}%"
+            
+            if 'macro_data' in market_data:
+                context += f"\n\n🌍 MAKRO-MÄRKTE:"
+                for name, data in market_data['macro_data'].items():
+                    if isinstance(data, dict) and 'price' in data:
+                        context += f"\n{name}: ${data['price']:.2f} ({data.get('change_24h', 0):.2f}%)"
+            
+            if 'historical_bars' in market_data:
+                context += f"\n\n📚 Verfügbare historische Daten: {market_data['historical_bars']} Bars"
         
         user_msg = UserMessage(text=user_message + context)
         response = await chat.send_message(user_msg)
