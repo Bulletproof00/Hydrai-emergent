@@ -389,59 +389,111 @@ class SmartMoneyTester:
                 f"{', '.join(symbols)}"
             )
     
-    async def test_tick_simulation(self):
-        """Test that price simulation is working between API calls"""
-        test_name = "Price Tick Simulation"
+    async def test_data_quality_validation(self):
+        """Test data quality across all smart money indicators"""
+        test_name = "Smart Money Data Quality"
         
-        # Get initial prices
-        response1 = await self.test_api_endpoint("/realtime/latest")
-        if not response1['success']:
-            self.log_test(test_name, "FAIL", f"Could not get initial prices: {response1.get('error', 'Unknown error')}")
+        # Get all smart money data
+        response = await self.test_api_endpoint("/smart-money/all?symbols=BTC/USDT,ETH/USDT")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
             return
         
-        # Wait for simulation to potentially update prices
-        await asyncio.sleep(5)
-        
-        # Get prices again
-        response2 = await self.test_api_endpoint("/realtime/latest")
-        if not response2['success']:
-            self.log_test(test_name, "FAIL", f"Could not get updated prices: {response2.get('error', 'Unknown error')}")
+        data = response['data']
+        if 'data' not in data:
+            self.log_test(test_name, "FAIL", "No data in response")
             return
         
-        data1 = response1['data'].get('data', {})
-        data2 = response2['data'].get('data', {})
+        smart_money_data = data['data']
+        quality_issues = []
+        quality_passes = []
         
-        # Check if any prices have changed (indicating simulation)
-        price_changes = 0
-        simulated_ticks = 0
-        
-        for symbol in data1:
-            if symbol in data2 and data1[symbol] and data2[symbol]:
-                price1 = data1[symbol].get('price', 0)
-                price2 = data2[symbol].get('price', 0)
+        for symbol, symbol_data in smart_money_data.items():
+            if not symbol_data:
+                continue
                 
-                if abs(price1 - price2) > 0.001:  # Small threshold for floating point comparison
-                    price_changes += 1
+            # Check liquidation heatmap quality
+            if 'liquidation_heatmap' in symbol_data and symbol_data['liquidation_heatmap']:
+                heatmap = symbol_data['liquidation_heatmap']
+                levels = heatmap.get('liquidation_levels', [])
                 
-                # Check if tick is marked as simulated
-                if data2[symbol].get('simulated'):
-                    simulated_ticks += 1
+                if len(levels) >= 10:  # Should have reasonable number of levels
+                    prices = [level.get('price', 0) for level in levels if level.get('price', 0) > 0]
+                    if len(prices) >= 10:
+                        price_range = max(prices) - min(prices)
+                        avg_price = sum(prices) / len(prices)
+                        
+                        # Price range should be reasonable (not too narrow or too wide)
+                        range_ratio = price_range / avg_price
+                        if 0.05 <= range_ratio <= 0.5:  # 5% to 50% range
+                            quality_passes.append(f"{symbol} liquidation levels have realistic price spread")
+                        else:
+                            quality_issues.append(f"{symbol} liquidation price range may be unrealistic: {range_ratio:.2%}")
+                    else:
+                        quality_issues.append(f"{symbol} liquidation levels missing valid prices")
+                else:
+                    quality_issues.append(f"{symbol} insufficient liquidation levels: {len(levels)}")
+            
+            # Check open interest quality
+            if 'open_interest' in symbol_data and symbol_data['open_interest']:
+                oi = symbol_data['open_interest']
+                exchanges = oi.get('exchanges', {})
+                total_oi = oi.get('total_oi', 0)
+                
+                if len(exchanges) >= 3 and total_oi > 0:
+                    # Check if exchange distribution is reasonable (no single exchange > 80%)
+                    max_exchange_share = 0
+                    for exchange, exchange_data in exchanges.items():
+                        if isinstance(exchange_data, dict) and 'open_interest' in exchange_data:
+                            share = exchange_data['open_interest'] / total_oi
+                            max_exchange_share = max(max_exchange_share, share)
+                    
+                    if max_exchange_share <= 0.8:
+                        quality_passes.append(f"{symbol} OI well distributed across exchanges")
+                    else:
+                        quality_issues.append(f"{symbol} OI too concentrated in one exchange: {max_exchange_share:.1%}")
+                else:
+                    quality_issues.append(f"{symbol} insufficient OI data: {len(exchanges)} exchanges")
+            
+            # Check funding rates quality
+            if 'funding_rates' in symbol_data and symbol_data['funding_rates']:
+                funding = symbol_data['funding_rates']
+                current_rate = funding.get('current_funding_rate', 0)
+                exchanges = funding.get('exchanges', {})
+                
+                if -2.0 <= current_rate <= 2.0:  # Reasonable funding rate range
+                    quality_passes.append(f"{symbol} funding rate within normal range: {current_rate:.4f}%")
+                else:
+                    quality_issues.append(f"{symbol} extreme funding rate: {current_rate:.4f}%")
         
-        if price_changes > 0 or simulated_ticks > 0:
+        # Evaluate overall quality
+        total_checks = len(quality_passes) + len(quality_issues)
+        if total_checks == 0:
+            self.log_test(test_name, "FAIL", "No data quality checks could be performed")
+        elif len(quality_issues) == 0:
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"Price simulation active: {price_changes} price changes, {simulated_ticks} simulated ticks",
-                "Price movements between API calls",
-                f"{price_changes} changes, {simulated_ticks} simulated"
+                f"All {len(quality_passes)} data quality checks passed",
+                "High quality smart money data",
+                f"{len(quality_passes)} quality checks passed"
+            )
+        elif len(quality_passes) > len(quality_issues):
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Most quality checks passed: {len(quality_passes)} passed, {len(quality_issues)} issues",
+                "All quality checks passing",
+                f"Issues: {'; '.join(quality_issues[:2])}"
             )
         else:
             self.log_test(
                 test_name, 
-                "WARN", 
-                "No price changes detected (simulation may be inactive or very small movements)",
-                "Price simulation active",
-                "No changes detected"
+                "FAIL", 
+                f"Multiple quality issues: {len(quality_issues)} issues, {len(quality_passes)} passed",
+                "High quality data",
+                f"Issues: {'; '.join(quality_issues[:3])}"
             )
     
     async def test_multi_asset_support(self):
