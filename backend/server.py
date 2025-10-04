@@ -1802,6 +1802,199 @@ async def get_enhanced_open_interest(symbol: str):
         logging.error(f"Enhanced open interest error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# =================================================================================
+# PAPER TRADING API ENDPOINTS
+# =================================================================================
+
+@api_router.get("/trading/account")
+async def get_trading_account(authorization: str = Header(None)):
+    """Get user's paper trading account"""
+    try:
+        if not paper_trading:
+            return {
+                'status': 'error',
+                'message': 'Paper Trading system not initialized'
+            }
+        
+        user = await get_current_user(authorization)
+        
+        account = await paper_trading.get_user_account(user['user_id'])
+        if not account:
+            # Create new account with $10,000 starting balance
+            account = await paper_trading.create_user_account(user['user_id'], 10000.0)
+        
+        return {
+            'status': 'success',
+            'account': account,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Trading account error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/trading/order")
+async def place_trading_order(
+    symbol: str,
+    side: str,
+    order_type: str,
+    quantity: float,
+    price: Optional[float] = None,
+    leverage: int = 1,
+    stop_loss: Optional[float] = None,
+    take_profit: Optional[float] = None,
+    reduce_only: bool = False,
+    authorization: str = Header(None)
+):
+    """Place a new trading order"""
+    try:
+        if not paper_trading:
+            return {
+                'status': 'error',
+                'message': 'Paper Trading system not initialized'
+            }
+        
+        user = await get_current_user(authorization)
+        
+        result = await paper_trading.place_order(
+            user['user_id'], symbol, side, order_type, quantity,
+            price, leverage, stop_loss, take_profit, reduce_only
+        )
+        
+        return {
+            'status': 'success' if result['success'] else 'error',
+            'result': result,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Place order error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/trading/positions")
+async def get_trading_positions(authorization: str = Header(None)):
+    """Get user's open positions"""
+    try:
+        if not paper_trading:
+            return {
+                'status': 'error',
+                'message': 'Paper Trading system not initialized'
+            }
+        
+        user = await get_current_user(authorization)
+        
+        positions = await paper_trading.get_positions(user['user_id'])
+        
+        return {
+            'status': 'success',
+            'positions': positions,
+            'count': len(positions),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Get positions error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/trading/position/margin")
+async def modify_position_margin(
+    position_id: str,
+    action: str,  # 'add' or 'reduce'
+    amount: float,
+    authorization: str = Header(None)
+):
+    """Add or reduce margin for a position"""
+    try:
+        if not paper_trading:
+            return {
+                'status': 'error',
+                'message': 'Paper Trading system not initialized'
+            }
+        
+        user = await get_current_user(authorization)
+        
+        if action == 'add':
+            result = await paper_trading.add_margin_to_position(user['user_id'], position_id, amount)
+        elif action == 'reduce':
+            result = await paper_trading.reduce_margin_from_position(user['user_id'], position_id, amount)
+        else:
+            return {
+                'status': 'error',
+                'message': 'Invalid action. Use "add" or "reduce"'
+            }
+        
+        return {
+            'status': 'success' if result['success'] else 'error',
+            'result': result,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Modify position margin error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/trading/history")
+async def get_trading_history(
+    limit: int = 50,
+    authorization: str = Header(None)
+):
+    """Get user's trade history"""
+    try:
+        if not paper_trading:
+            return {
+                'status': 'error',
+                'message': 'Paper Trading system not initialized'
+            }
+        
+        user = await get_current_user(authorization)
+        
+        history = await paper_trading.get_trade_history(user['user_id'], limit)
+        
+        return {
+            'status': 'success',
+            'history': history,
+            'count': len(history),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Get trading history error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/trading/symbols")
+async def get_trading_symbols():
+    """Get all available trading symbols (Top 30 Crypto)"""
+    try:
+        if not enhanced_smart_money:
+            return {
+                'status': 'error',
+                'message': 'Enhanced Smart Money system not initialized'
+            }
+        
+        symbols = await enhanced_smart_money.get_supported_symbols()
+        
+        # Add trading-specific information
+        trading_symbols = []
+        for symbol in symbols:
+            trading_symbols.append({
+                **symbol,
+                'leverage_max': 100,
+                'min_order_size': 5.0,
+                'maker_fee': 0.0002,
+                'taker_fee': 0.0004
+            })
+        
+        return {
+            'status': 'success',
+            'symbols': trading_symbols,
+            'count': len(trading_symbols),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Get trading symbols error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/chat")
 async def chat(message: ChatMessageCreate, authorization: str = Header(None)):
     """Send a chat message and get AI response with full historical context"""
