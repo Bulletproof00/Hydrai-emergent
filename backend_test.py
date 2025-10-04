@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend Test Suite for MarketData Real-Time Fix
-Tests the enhanced MarketData functionality with real-time traditional market data
+Backend Test Suite for Real-Time Tick Data System
+Tests the new EnhancedRealTimeStreamer with WebSocket and REST APIs
 """
 
 import asyncio
@@ -9,13 +9,15 @@ import aiohttp
 import json
 import sys
 import os
+import websockets
 from datetime import datetime
 from typing import Dict, List, Any
 
 # Test configuration
 BACKEND_URL = "https://hydra-trade.preview.emergentagent.com/api"
+WEBSOCKET_URL = "wss://hydra-trade.preview.emergentagent.com/api/realtime"
 
-class MarketDataTester:
+class RealTimeTickDataTester:
     def __init__(self):
         self.session = None
         self.test_results = []
