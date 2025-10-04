@@ -141,14 +141,16 @@ class RealTimeTickDataTester:
     
     async def test_realtime_history_api(self):
         """Test /api/realtime/history/{symbol} endpoint"""
-        test_symbols = ['NASDAQ', 'BTC/USDT', 'SPX']
+        test_symbols = [
+            ('NASDAQ', 'NASDAQ'),
+            ('BTC/USDT', 'BTCUSDT'),  # Convert to format expected by API
+            ('SPX', 'SPX')
+        ]
         
-        for symbol in test_symbols:
-            test_name = f"Real-Time History API - {symbol}"
+        for display_symbol, api_symbol in test_symbols:
+            test_name = f"Real-Time History API - {display_symbol}"
             
-            # URL encode the symbol (BTC/USDT -> BTC%2FUSDT)
-            encoded_symbol = symbol.replace('/', '%2F')
-            response = await self.test_api_endpoint(f"/realtime/history/{encoded_symbol}?minutes=60")
+            response = await self.test_api_endpoint(f"/realtime/history/{api_symbol}?minutes=60")
             
             if not response['success']:
                 self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
