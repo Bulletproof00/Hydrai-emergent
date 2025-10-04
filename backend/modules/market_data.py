@@ -184,14 +184,8 @@ class MarketDataFetcher:
         return data
     
     async def fetch_and_store_traditional(self, symbol, timeframe='1h', limit=1000):
-        """Fetch traditional market data and store in DB"""
-        data = await asyncio.get_event_loop().run_in_executor(
-            None, 
-            self.fetch_traditional_ohlcv, 
-            symbol, 
-            timeframe, 
-            limit
-        )
+        """Fetch traditional market data and store in DB with real-time enhancement"""
+        data = await self.fetch_traditional_ohlcv(symbol, timeframe, limit)
         if data:
             await self.store_ohlcv_data(symbol, timeframe, data, 'traditional')
         return data
