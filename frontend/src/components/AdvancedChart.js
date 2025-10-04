@@ -130,17 +130,76 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
         )}
       </div>
 
-      <div 
-        ref={chartContainerRef} 
-        className="chart-canvas"
-        data-testid="chart-canvas"
-      />
+      <div className="chart-canvas" data-testid="chart-canvas">
+        {loading ? (
+          <div className="chart-loading">Lade Chart-Daten...</div>
+        ) : (
+          <>
+            <ResponsiveContainer width="100%" height={450}>
+              <ComposedChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis 
+                  dataKey="time" 
+                  stroke="#94a3b8"
+                  tick={{ fill: '#94a3b8', fontSize: 11 }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis 
+                  stroke="#94a3b8"
+                  tick={{ fill: '#94a3b8', fontSize: 12 }}
+                  domain={['dataMin - 100', 'dataMax + 100']}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)', 
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px',
+                    color: '#e4e4e7'
+                  }}
+                  formatter={(value, name) => {
+                    if (name === 'close' || name === 'open' || name === 'high' || name === 'low') {
+                      return [`$${value.toFixed(2)}`, name.toUpperCase()];
+                    }
+                    return [value, name];
+                  }}
+                />
+                <Line type="monotone" dataKey="high" stroke="#3b82f6" strokeWidth={1} dot={false} opacity={0.3} />
+                <Line type="monotone" dataKey="low" stroke="#ef4444" strokeWidth={1} dot={false} opacity={0.3} />
+                <Line type="monotone" dataKey="close" stroke="#10b981" strokeWidth={2} dot={false} />
+              </ComposedChart>
+            </ResponsiveContainer>
 
-      {loading && (
-        <div className="chart-loading">
-          Lade Chart-Daten...
-        </div>
-      )}
+            <ResponsiveContainer width="100%" height={120}>
+              <ComposedChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis 
+                  dataKey="time" 
+                  stroke="#94a3b8"
+                  tick={{ fill: '#94a3b8', fontSize: 11 }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis 
+                  stroke="#94a3b8"
+                  tick={{ fill: '#94a3b8', fontSize: 11 }}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)', 
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px',
+                    color: '#e4e4e7'
+                  }}
+                />
+                <Bar dataKey="volume">
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} opacity={0.6} />
+                  ))}
+                </Bar>
+              </ComposedChart>
+            </ResponsiveContainer>
+          </>
+        )}
+      </div>
     </div>
   );
 };
