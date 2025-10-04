@@ -339,7 +339,7 @@ class TradingSystemTester:
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"Context-aware AI analysis: {context_mentions} context mentions in {len(analysis)} chars",
+                f"Context-aware AI analysis: {context_mentions} context mentions in {len(reasoning)} chars",
                 "AI analysis incorporating provided context",
                 f"Context awareness: {context_mentions} mentions"
             )
