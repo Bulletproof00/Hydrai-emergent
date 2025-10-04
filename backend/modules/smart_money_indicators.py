@@ -343,13 +343,13 @@ class SmartMoneyIndicators:
             }
             
             # Fetch from Binance
-            binance_oi = await self._fetch_binance_open_interest(symbol)
+            binance_oi = await self._fetch_binance_open_interest(normalized_symbol)
             if binance_oi:
                 oi_data['exchanges']['binance'] = binance_oi
                 oi_data['total_oi'] += binance_oi.get('open_interest', 0)
             
             # Add synthetic OI data for other exchanges
-            synthetic_oi = await self._generate_synthetic_open_interest(symbol)
+            synthetic_oi = await self._generate_synthetic_open_interest(normalized_symbol)
             oi_data['exchanges'].update(synthetic_oi)
             
             # Calculate total
