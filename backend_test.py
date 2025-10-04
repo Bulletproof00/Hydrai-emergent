@@ -317,18 +317,8 @@ class TradingSystemTester:
         """Test POST /api/ai-trading/analyze for ETH/USDT with context"""
         test_name = "AI Trading Analysis - ETH/USDT with Context"
         
-        analyze_data = {
-            "symbol": "ETH/USDT",
-            "timeframe": "4h",
-            "analysis_type": "comprehensive",
-            "context": {
-                "market_sentiment": "bullish",
-                "previous_trades": ["long_btc_profitable"],
-                "risk_tolerance": "medium"
-            }
-        }
-        
-        response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=analyze_data, auth=True)
+        context = "comprehensive_analysis_with_bullish_sentiment_medium_risk_tolerance"
+        response = await self.test_api_endpoint(f"/ai-trading/analyze?symbol=ETH/USDT&context={context}", method="POST", auth=True)
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
