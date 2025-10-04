@@ -1712,6 +1712,17 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Redis connection failed: {str(e)}")
     
+    # Initialize real-time WebSocket streamer
+    try:
+        if exchange:
+            real_time_streamer = RealTimeWebSocketStreamer(exchange)
+            await real_time_streamer.start()
+            logger.info("Real-time WebSocket streamer initialized")
+        else:
+            logger.warning("Real-time streamer not initialized - exchange unavailable")
+    except Exception as e:
+        logger.warning(f"Real-time streamer initialization failed: {str(e)}")
+    
     # Start background data update task
     asyncio.create_task(update_market_data_background())
     logger.info("Background data update task started")
