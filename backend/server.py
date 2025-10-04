@@ -1684,6 +1684,110 @@ async def get_focus_symbols():
             'message': 'Smart Money system not initialized'
         }
 
+# ============= ENHANCED SMART MONEY ROUTES (Coinglass-style) =============
+@api_router.get("/enhanced-smart-money/supported-symbols")
+async def get_enhanced_supported_symbols():
+    """Get supported symbols for enhanced smart money analysis"""
+    try:
+        if not enhanced_smart_money:
+            return {
+                'status': 'error',
+                'message': 'Enhanced Smart Money system not initialized'
+            }
+        
+        symbols = await enhanced_smart_money.get_supported_symbols()
+        
+        return {
+            'status': 'success',
+            'symbols': symbols,
+            'count': len(symbols)
+        }
+        
+    except Exception as e:
+        logging.error(f"Enhanced supported symbols error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/enhanced-smart-money/data/{symbol}")
+async def get_enhanced_smart_money_data(symbol: str):
+    """Get comprehensive enhanced smart money data for a symbol (Coinglass-style)"""
+    try:
+        if not enhanced_smart_money:
+            return {
+                'status': 'error',
+                'message': 'Enhanced Smart Money system not initialized'
+            }
+        
+        # URL decode the symbol parameter
+        import urllib.parse
+        decoded_symbol = urllib.parse.unquote(symbol)
+        
+        data = await enhanced_smart_money.get_enhanced_smart_money_data(decoded_symbol)
+        
+        return {
+            'status': 'success',
+            'symbol': decoded_symbol,
+            'data': data,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Enhanced smart money data error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/enhanced-smart-money/liquidation-heatmap-2d/{symbol}")
+async def get_enhanced_liquidation_heatmap(symbol: str):
+    """Get 2D liquidation heatmap like Coinglass"""
+    try:
+        if not enhanced_smart_money:
+            return {
+                'status': 'error',
+                'message': 'Enhanced Smart Money system not initialized'
+            }
+        
+        # URL decode the symbol parameter
+        import urllib.parse
+        decoded_symbol = urllib.parse.unquote(symbol)
+        
+        heatmap_data = await enhanced_smart_money.fetch_enhanced_liquidation_heatmap(decoded_symbol)
+        
+        return {
+            'status': 'success',
+            'symbol': decoded_symbol,
+            'data': heatmap_data,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Enhanced liquidation heatmap error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/enhanced-smart-money/open-interest-detailed/{symbol}")
+async def get_enhanced_open_interest(symbol: str):
+    """Get detailed open interest breakdown like Coinglass table"""
+    try:
+        if not enhanced_smart_money:
+            return {
+                'status': 'error',
+                'message': 'Enhanced Smart Money system not initialized'
+            }
+        
+        # URL decode the symbol parameter
+        import urllib.parse
+        decoded_symbol = urllib.parse.unquote(symbol)
+        
+        oi_data = await enhanced_smart_money.fetch_enhanced_open_interest(decoded_symbol)
+        
+        return {
+            'status': 'success',
+            'symbol': decoded_symbol,
+            'data': oi_data,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Enhanced open interest error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/chat")
 async def chat(message: ChatMessageCreate, authorization: str = Header(None)):
     """Send a chat message and get AI response with full historical context"""
