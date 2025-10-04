@@ -2399,6 +2399,130 @@ body {
   transition: all 0.2s ease;
 }
 
+.levels-table-row.near-price {
+  background: rgba(16, 185, 129, 0.08);
+  border-left-color: #10b981;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2);
+}
+
+.levels-table-row.cluster-very_high {
+  background: rgba(239, 68, 68, 0.1);
+  border-width: 3px;
+}
+
+.levels-table-row.cluster-high {
+  border-width: 2px;
+}
+
+.near-indicator {
+  font-size: 9px;
+  color: #10b981;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.2);
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-top: 2px;
+}
+
+.distance-label {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.volume-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+}
+
+.leverage-info {
+  font-size: 10px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-top: 2px;
+}
+
+.strength-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.strength-bar {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background: #374151;
+}
+
+.strength-bar.strength-very_high {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.strength-bar.strength-high {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.strength-bar.strength-medium {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.strength-bar.strength-low {
+  background: #6b7280;
+}
+
+.strength-text {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.direction-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.direction-indicator.resistance {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.direction-indicator.support {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.legend-color.resistance {
+  background: #ef4444;
+}
+
+.legend-color.support {
+  background: #10b981;
+}
+
+.cluster-summary {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.summary-text {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
 .levels-table-header {
   display: grid;
   grid-template-columns: 140px 100px 120px 100px 100px;
