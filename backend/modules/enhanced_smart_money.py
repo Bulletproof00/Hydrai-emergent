@@ -20,49 +20,132 @@ class EnhancedSmartMoneyIndicators:
         self.session = None
         self.live_fetcher = LiveSmartMoneyDataFetcher(db)
         
-        # All supported symbols (expanded from focus symbols)
+        # Top 30 Crypto Assets for Paper Trading
         self.supported_symbols = {
+            # Top 10
             'BTC/USDT': {
-                'binance': 'BTCUSDT',
-                'coinglass': 'BTC', 
-                'display_name': 'Bitcoin',
-                'price_precision': 2,
-                'base_price': 62000
+                'binance': 'BTCUSDT', 'coinglass': 'BTC', 'display_name': 'Bitcoin',
+                'price_precision': 2, 'base_price': 62000, 'rank': 1
             },
             'ETH/USDT': {
-                'binance': 'ETHUSDT',
-                'coinglass': 'ETH',
-                'display_name': 'Ethereum', 
-                'price_precision': 2,
-                'base_price': 2400
-            },
-            'SOL/USDT': {
-                'binance': 'SOLUSDT',
-                'coinglass': 'SOL',
-                'display_name': 'Solana',
-                'price_precision': 2,
-                'base_price': 140
-            },
-            'XRP/USDT': {
-                'binance': 'XRPUSDT',
-                'coinglass': 'XRP',
-                'display_name': 'Ripple',
-                'price_precision': 4,
-                'base_price': 0.52
+                'binance': 'ETHUSDT', 'coinglass': 'ETH', 'display_name': 'Ethereum', 
+                'price_precision': 2, 'base_price': 2400, 'rank': 2
             },
             'BNB/USDT': {
-                'binance': 'BNBUSDT',
-                'coinglass': 'BNB',
-                'display_name': 'BNB',
-                'price_precision': 2,
-                'base_price': 580
+                'binance': 'BNBUSDT', 'coinglass': 'BNB', 'display_name': 'BNB',
+                'price_precision': 2, 'base_price': 580, 'rank': 3
+            },
+            'SOL/USDT': {
+                'binance': 'SOLUSDT', 'coinglass': 'SOL', 'display_name': 'Solana',
+                'price_precision': 2, 'base_price': 140, 'rank': 4
+            },
+            'XRP/USDT': {
+                'binance': 'XRPUSDT', 'coinglass': 'XRP', 'display_name': 'Ripple',
+                'price_precision': 4, 'base_price': 0.52, 'rank': 5
+            },
+            'DOGE/USDT': {
+                'binance': 'DOGEUSDT', 'coinglass': 'DOGE', 'display_name': 'Dogecoin',
+                'price_precision': 5, 'base_price': 0.08, 'rank': 6
             },
             'ADA/USDT': {
-                'binance': 'ADAUSDT',
-                'coinglass': 'ADA',
-                'display_name': 'Cardano',
-                'price_precision': 4,
-                'base_price': 0.35
+                'binance': 'ADAUSDT', 'coinglass': 'ADA', 'display_name': 'Cardano',
+                'price_precision': 4, 'base_price': 0.35, 'rank': 7
+            },
+            'MATIC/USDT': {
+                'binance': 'MATICUSDT', 'coinglass': 'MATIC', 'display_name': 'Polygon',
+                'price_precision': 4, 'base_price': 0.42, 'rank': 8
+            },
+            'AVAX/USDT': {
+                'binance': 'AVAXUSDT', 'coinglass': 'AVAX', 'display_name': 'Avalanche',
+                'price_precision': 3, 'base_price': 28.5, 'rank': 9
+            },
+            'LINK/USDT': {
+                'binance': 'LINKUSDT', 'coinglass': 'LINK', 'display_name': 'Chainlink',
+                'price_precision': 3, 'base_price': 11.2, 'rank': 10
+            },
+            
+            # Top 11-20
+            'DOT/USDT': {
+                'binance': 'DOTUSDT', 'coinglass': 'DOT', 'display_name': 'Polkadot',
+                'price_precision': 3, 'base_price': 4.8, 'rank': 11
+            },
+            'UNI/USDT': {
+                'binance': 'UNIUSDT', 'coinglass': 'UNI', 'display_name': 'Uniswap',
+                'price_precision': 3, 'base_price': 6.7, 'rank': 12
+            },
+            'LTC/USDT': {
+                'binance': 'LTCUSDT', 'coinglass': 'LTC', 'display_name': 'Litecoin',
+                'price_precision': 2, 'base_price': 68.5, 'rank': 13
+            },
+            'ATOM/USDT': {
+                'binance': 'ATOMUSDT', 'coinglass': 'ATOM', 'display_name': 'Cosmos',
+                'price_precision': 3, 'base_price': 4.2, 'rank': 14
+            },
+            'FIL/USDT': {
+                'binance': 'FILUSDT', 'coinglass': 'FIL', 'display_name': 'Filecoin',
+                'price_precision': 3, 'base_price': 3.8, 'rank': 15
+            },
+            'ICP/USDT': {
+                'binance': 'ICPUSDT', 'coinglass': 'ICP', 'display_name': 'Internet Computer',
+                'price_precision': 3, 'base_price': 8.9, 'rank': 16
+            },
+            'NEAR/USDT': {
+                'binance': 'NEARUSDT', 'coinglass': 'NEAR', 'display_name': 'NEAR Protocol',
+                'price_precision': 3, 'base_price': 3.6, 'rank': 17
+            },
+            'ALGO/USDT': {
+                'binance': 'ALGOUSDT', 'coinglass': 'ALGO', 'display_name': 'Algorand',
+                'price_precision': 4, 'base_price': 0.14, 'rank': 18
+            },
+            'VET/USDT': {
+                'binance': 'VETUSDT', 'coinglass': 'VET', 'display_name': 'VeChain',
+                'price_precision': 5, 'base_price': 0.025, 'rank': 19
+            },
+            'MANA/USDT': {
+                'binance': 'MANAUSDT', 'coinglass': 'MANA', 'display_name': 'Decentraland',
+                'price_precision': 4, 'base_price': 0.32, 'rank': 20
+            },
+            
+            # Top 21-30
+            'SAND/USDT': {
+                'binance': 'SANDUSDT', 'coinglass': 'SAND', 'display_name': 'The Sandbox',
+                'price_precision': 4, 'base_price': 0.28, 'rank': 21
+            },
+            'APE/USDT': {
+                'binance': 'APEUSDT', 'coinglass': 'APE', 'display_name': 'ApeCoin',
+                'price_precision': 3, 'base_price': 1.12, 'rank': 22
+            },
+            'THETA/USDT': {
+                'binance': 'THETAUSDT', 'coinglass': 'THETA', 'display_name': 'Theta Network',
+                'price_precision': 3, 'base_price': 1.48, 'rank': 23
+            },
+            'AAVE/USDT': {
+                'binance': 'AAVEUSDT', 'coinglass': 'AAVE', 'display_name': 'Aave',
+                'price_precision': 2, 'base_price': 95.2, 'rank': 24
+            },
+            'AXS/USDT': {
+                'binance': 'AXSUSDT', 'coinglass': 'AXS', 'display_name': 'Axie Infinity',
+                'price_precision': 3, 'base_price': 4.85, 'rank': 25
+            },
+            'FTM/USDT': {
+                'binance': 'FTMUSDT', 'coinglass': 'FTM', 'display_name': 'Fantom',
+                'price_precision': 4, 'base_price': 0.42, 'rank': 26
+            },
+            'GRT/USDT': {
+                'binance': 'GRTUSDT', 'coinglass': 'GRT', 'display_name': 'The Graph',
+                'price_precision': 4, 'base_price': 0.095, 'rank': 27
+            },
+            'ENJ/USDT': {
+                'binance': 'ENJUSDT', 'coinglass': 'ENJ', 'display_name': 'Enjin Coin',
+                'price_precision': 4, 'base_price': 0.18, 'rank': 28
+            },
+            'CRV/USDT': {
+                'binance': 'CRVUSDT', 'coinglass': 'CRV', 'display_name': 'Curve DAO',
+                'price_precision': 4, 'base_price': 0.28, 'rank': 29
+            },
+            'SUSHI/USDT': {
+                'binance': 'SUSHIUSDT', 'coinglass': 'SUSHI', 'display_name': 'SushiSwap',
+                'price_precision': 3, 'base_price': 0.72, 'rank': 30
             }
         }
         
