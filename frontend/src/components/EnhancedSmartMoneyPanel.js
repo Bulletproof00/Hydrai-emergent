@@ -74,10 +74,13 @@ const EnhancedSmartMoneyPanel = () => {
         }
     };
 
-    const transformToEnhancedFormat = (originalData, symbol) => {
+    const transformToEnhancedFormat = (originalData, symbol, currentPrice) => {
         // Get symbol info
         const symbolInfo = supportedSymbols.find(s => s.symbol === symbol);
         const displayName = symbolInfo ? symbolInfo.display_name : symbol;
+        
+        // Use real-time price if available
+        const realCurrentPrice = currentPrice || originalData.liquidation_heatmap?.current_price || getCurrentPriceForSymbol(symbol);
         
         // Transform liquidation heatmap
         const liquidationData = originalData.liquidation_heatmap;
