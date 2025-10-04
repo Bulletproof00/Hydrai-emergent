@@ -538,65 +538,93 @@ const EnhancedSmartMoneyPanel = () => {
 
                 <div className="liquidation-levels-enhanced">
                     <div className="levels-header">
-                        <h4>Liquidation Levels Distribution</h4>
+                        <h4>Near-Price Liquidation Clusters ({selectedTimeframe})</h4>
                         <div className="levels-legend">
                             <div className="legend-item">
-                                <div className="legend-color above-price"></div>
-                                <span>Above Current (Short Liq.)</span>
+                                <div className="legend-color resistance"></div>
+                                <span>Resistance (Above Price)</span>
                             </div>
                             <div className="legend-item">
-                                <div className="legend-color below-price"></div>
-                                <span>Below Current (Long Liq.)</span>
+                                <div className="legend-color support"></div>
+                                <span>Support (Below Price)</span>
+                            </div>
+                            <div className="legend-item cluster-strength">
+                                <span>🔥 High Impact Clusters</span>
                             </div>
                         </div>
                     </div>
 
                     <div className="levels-table">
                         <div className="levels-table-header">
-                            <div className="col-price">Price</div>
+                            <div className="col-price">Price Level</div>
                             <div className="col-distance">Distance</div>
                             <div className="col-volume">Volume</div>
-                            <div className="col-density">Density</div>
-                            <div className="col-type">Type</div>
+                            <div className="col-strength">Impact</div>
+                            <div className="col-direction">Direction</div>
                         </div>
 
-                        {levels.map((level, index) => {
+                        {levels.slice(0, 15).map((level, index) => {
                             const isAboveCurrent = level.above_current;
-                            const distancePercent = ((Math.abs(level.price - currentPrice) / currentPrice) * 100);
-                            const volumeInMillions = level.total_volume / 1000000;
+                            const distancePercent = level.distance_percent || ((Math.abs(level.price - currentPrice) / currentPrice) * 100);
+                            const volumeInMillions = level.total_liquidation / 1000000;
+                            const clusterStrength = level.cluster_strength || 'medium';
+                            const isNearPrice = distancePercent <= 5; // Within 5%
                             
                             return (
                                 <div 
                                     key={index} 
-                                    className={`levels-table-row ${isAboveCurrent ? 'above-current' : 'below-current'}`}
+                                    className={`levels-table-row ${isAboveCurrent ? 'above-current' : 'below-current'} ${isNearPrice ? 'near-price' : ''} cluster-${clusterStrength}`}
                                 >
                                     <div className="col-price">
-                                        ${level.price?.toFixed(2)}
+                                        <div className="price-value">
+                                            ${level.price?.toFixed(2)}
+                                        </div>
+                                        {isNearPrice && <div className="near-indicator">🎯 NEAR</div>}
                                     </div>
                                     <div className="col-distance">
-                                        {distancePercent.toFixed(2)}%
-                                    </div>
-                                    <div className="col-volume">
-                                        ${volumeInMillions.toFixed(1)}M
-                                    </div>
-                                    <div className="col-density">
-                                        <div className="density-bar-container">
-                                            <div 
-                                                className={`density-bar ${isAboveCurrent ? 'short' : 'long'}`}
-                                                style={{ 
-                                                    width: `${Math.min(100, (volumeInMillions / 50) * 100)}%` 
-                                                }}
-                                            />
+                                        <div className="distance-value">
+                                            {distancePercent.toFixed(1)}%
+                                        </div>
+                                        <div className="distance-label">
+                                            {isAboveCurrent ? 'Above' : 'Below'}
                                         </div>
                                     </div>
-                                    <div className="col-type">
-                                        <span className={`type-badge ${isAboveCurrent ? 'short-badge' : 'long-badge'}`}>
-                                            {isAboveCurrent ? 'SHORT' : 'LONG'}
-                                        </span>
+                                    <div className="col-volume">
+                                        <div className="volume-value">
+                                            ${volumeInMillions.toFixed(1)}M
+                                        </div>
+                                        {level.leverage && (
+                                            <div className="leverage-info">
+                                                {level.leverage}x
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="col-strength">
+                                        <div className="strength-indicator">
+                                            <div className={`strength-bar strength-${clusterStrength}`}></div>
+                                            <span className="strength-text">
+                                                {clusterStrength === 'very_high' ? 'VERY HIGH' : 
+                                                 clusterStrength === 'high' ? 'HIGH' : 
+                                                 clusterStrength === 'medium' ? 'MED' : 'LOW'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="col-direction">
+                                        <div className={`direction-indicator ${isAboveCurrent ? 'resistance' : 'support'}`}>
+                                            <span className="direction-text">
+                                                {isAboveCurrent ? '🔴 RESIST' : '🟢 SUPPORT'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             );
                         })}
+                    </div>
+                    
+                    <div className="cluster-summary">
+                        <div className="summary-text">
+                            Showing closest {Math.min(15, levels.length)} liquidation clusters to current price
+                        </div>
                     </div>
                 </div>
 
