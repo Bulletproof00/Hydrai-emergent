@@ -426,14 +426,30 @@ const EnhancedSmartMoneyPanel = () => {
             <div className="liquidation-heatmap-2d">
                 <div className="heatmap-header-enhanced">
                     <div className="header-left">
-                        <h3>Liquidation Heatmap - {heatmapData.display_name}</h3>
+                        <h3>Liquidation Clusters - {heatmapData.display_name}</h3>
                         <div className="current-price-large">
                             Current Price: ${currentPrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
+                        <div className="timeframe-display">
+                            Timeframe: {summary.timeframe || selectedTimeframe}
+                        </div>
                     </div>
                     <div className="header-right">
+                        {summary.directional_bias && (
+                            <div className="directional-bias">
+                                <div className={`bias-indicator ${summary.directional_bias.bias}`}>
+                                    <span className="bias-label">Market Bias:</span>
+                                    <span className="bias-value">
+                                        {summary.directional_bias.bias.toUpperCase()}
+                                    </span>
+                                    <div className="bias-strength">
+                                        Strength: {(summary.directional_bias.strength * 100).toFixed(0)}%
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         <div className="risk-score">
-                            <span className="risk-label">Risk Score:</span>
+                            <span className="risk-label">Risk:</span>
                             <span className={`risk-value ${summary.risk_score > 70 ? 'high' : summary.risk_score > 40 ? 'medium' : 'low'}`}>
                                 {summary.risk_score?.toFixed(0)}/100
                             </span>
