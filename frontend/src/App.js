@@ -615,6 +615,12 @@ function App() {
             </div>
           </div>
         )}
+
+        {activeView === 'smartmoney' && (
+          <div className="smartmoney-view">
+            <SmartMoneyPanel selectedSymbol={selectedSymbol} />
+          </div>
+        )}
       </div>
     </div>
   );
