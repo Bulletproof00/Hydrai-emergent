@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "NASDAQ price showing 22,775 USD but actual price is over 24,000 USD. All asset values need verification and correction for real-time data."
+user_problem_statement: "Please comprehensively test the new Smart Money Indicators system that was just implemented with liquidation heatmaps, open interest tracking, funding rates, and 15-minute update frequency for BTC, ETH, SOL, XRP."
 
 backend:
   - task: "Fix MarketData module for real-time traditional market data"
