@@ -100,19 +100,19 @@ class SmartMoneyIndicators:
             }
             
             # Try CoinGlass API first
-            coinglass_data = await self._fetch_coinglass_liquidations(symbol)
+            coinglass_data = await self._fetch_coinglass_liquidations(normalized_symbol)
             if coinglass_data:
                 heatmap_data['liquidation_levels'].extend(coinglass_data.get('levels', []))
             
             # Try alternative sources
-            binance_data = await self._fetch_binance_liquidations(symbol)
+            binance_data = await self._fetch_binance_liquidations(normalized_symbol)
             if binance_data:
                 heatmap_data['long_liquidations'].extend(binance_data.get('longs', []))
                 heatmap_data['short_liquidations'].extend(binance_data.get('shorts', []))
             
             # Generate synthetic heatmap if no real data available
             if not heatmap_data['liquidation_levels']:
-                heatmap_data = await self._generate_synthetic_liquidations(symbol)
+                heatmap_data = await self._generate_synthetic_liquidations(normalized_symbol)
             
             # Store in cache and database
             self.cache['liquidation_heatmap'][symbol] = heatmap_data
