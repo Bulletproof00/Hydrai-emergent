@@ -423,8 +423,11 @@ class SmartMoneyIndicators:
     async def fetch_funding_rates(self, symbol: str) -> Optional[Dict]:
         """Fetch funding rates from multiple exchanges"""
         try:
+            # Convert symbol format if needed (BTCUSDT -> BTC/USDT)
+            normalized_symbol = self._normalize_symbol(symbol)
+            
             funding_data = {
-                'symbol': symbol,
+                'symbol': normalized_symbol,
                 'timestamp': datetime.now(timezone.utc).isoformat(),
                 'current_funding_rate': 0,
                 'next_funding_time': None,
