@@ -348,50 +348,46 @@ class SmartMoneyTester:
             else:
                 self.log_test(test_name, "FAIL", f"Insufficient funding data: {len(exchanges)} exchanges")
     
-    async def test_database_storage(self):
-        """Test that real-time ticks are being stored in database"""
-        test_name = "Database Storage - Real-Time Ticks"
+    async def test_focus_symbols_api(self):
+        """Test /api/smart-money/focus-symbols endpoint"""
+        test_name = "Focus Symbols API"
         
-        # First get some real-time data to ensure there's something to store
-        response = await self.test_api_endpoint("/realtime/latest")
+        response = await self.test_api_endpoint("/smart-money/focus-symbols")
         
         if not response['success']:
-            self.log_test(test_name, "FAIL", f"Could not get real-time data: {response.get('error', 'Unknown error')}")
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
             return
         
-        # Wait a moment for data to be stored
-        await asyncio.sleep(2)
+        data = response['data']
         
-        # Now check if we can retrieve historical data (which comes from database)
-        history_response = await self.test_api_endpoint("/realtime/history/NASDAQ?minutes=10")
-        
-        if not history_response['success']:
-            self.log_test(test_name, "FAIL", f"Could not retrieve historical data: {history_response.get('error', 'Unknown error')}")
+        # Check response structure
+        if 'status' not in data or 'symbols' not in data:
+            self.log_test(test_name, "FAIL", "Invalid response structure")
             return
         
-        history_data = history_response['data']
+        if data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error status: {data}")
+            return
         
-        if 'data' in history_data and len(history_data['data']) > 0:
-            ticks = history_data['data']
-            
-            # Validate tick structure
-            sample_tick = ticks[0]
-            required_fields = ['symbol', 'price', 'timestamp', 'source', 'asset_type']
-            has_all_fields = all(field in sample_tick for field in required_fields)
-            
-            if has_all_fields:
-                self.log_test(
-                    test_name, 
-                    "PASS", 
-                    f"Database contains {len(ticks)} real-time ticks with proper structure",
-                    "Real-time ticks stored in database",
-                    f"{len(ticks)} ticks with valid structure"
-                )
-            else:
-                missing = [field for field in required_fields if field not in sample_tick]
-                self.log_test(test_name, "FAIL", f"Tick data missing fields: {missing}")
+        symbols = data['symbols']
+        expected_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
+        
+        if symbols == expected_symbols:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"Focus symbols correctly configured: {', '.join(symbols)}",
+                "BTC/USDT, ETH/USDT, SOL/USDT, XRP/USDT",
+                f"{', '.join(symbols)}"
+            )
         else:
-            self.log_test(test_name, "WARN", "No tick data found in database (may be expected for new system)")
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Focus symbols differ from expected: {', '.join(symbols)}",
+                "BTC/USDT, ETH/USDT, SOL/USDT, XRP/USDT",
+                f"{', '.join(symbols)}"
+            )
     
     async def test_tick_simulation(self):
         """Test that price simulation is working between API calls"""
