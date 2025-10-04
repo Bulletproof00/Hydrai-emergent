@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend Test Suite for Real-Time Tick Data System
-Tests the new EnhancedRealTimeStreamer with WebSocket and REST APIs
+Backend Test Suite for Smart Money Indicators System
+Tests the new Smart Money APIs: liquidation heatmaps, open interest, funding rates
 """
 
 import asyncio
