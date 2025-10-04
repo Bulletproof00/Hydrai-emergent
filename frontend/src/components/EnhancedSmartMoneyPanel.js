@@ -200,69 +200,162 @@ const EnhancedSmartMoneyPanel = () => {
         return currentPrices[symbol] || 100;
     };
 
-    const generateRealisticLiquidationLevels = (currentPrice, symbol) => {
-        // Generate realistic liquidation levels based on current market conditions
+    const generateRealisticLiquidationLevels = (currentPrice, symbol, timeframe = '1day') => {
+        // Generate realistic liquidation levels based on timeframe and focus on near-price clusters
         const levels = [];
         const leverageLevels = [5, 10, 20, 50, 100];
         
-        // Base liquidation volume (scales with price)
-        const baseVolume = currentPrice * 50000; // $50k base per level
+        // Timeframe multipliers for volume and range
+        const timeframeConfig = {
+            '12h': { multiplier: 0.5, maxDistance: 0.15, clusterCount: 15 },
+            '1day': { multiplier: 1, maxDistance: 0.20, clusterCount: 20 },
+            '3day': { multiplier: 1.8, maxDistance: 0.25, clusterCount: 25 },
+            '1week': { multiplier: 3, maxDistance: 0.30, clusterCount: 30 },
+            '2week': { multiplier: 5, maxDistance: 0.35, clusterCount: 35 },
+            'monthly': { multiplier: 8, maxDistance: 0.40, clusterCount: 40 }
+        };
         
+        const config = timeframeConfig[timeframe] || timeframeConfig['1day'];
+        const baseVolume = currentPrice * 50000 * config.multiplier;
+        
+        // Generate focused liquidation clusters near current price
         for (let leverage of leverageLevels) {
-            // Calculate liquidation distances
-            const liquidationThreshold = (1 / leverage) * 0.9; // 90% margin used
+            const liquidationThreshold = (1 / leverage) * 0.9;
             
-            // Long liquidations (below current price)
+            // Long liquidations (below current price) - more likely in bull markets
             const longLiqPrice = currentPrice * (1 - liquidationThreshold);
-            const longVolume = baseVolume * (Math.random() * 2 + 0.5); // 0.5x to 2.5x base
+            const longVolume = baseVolume * (Math.random() * 2 + 0.8); // Higher volume for long liquidations
             
-            // Short liquidations (above current price)
+            // Short liquidations (above current price) - resistance levels
             const shortLiqPrice = currentPrice * (1 + liquidationThreshold);
-            const shortVolume = baseVolume * (Math.random() * 2 + 0.5);
+            const shortVolume = baseVolume * (Math.random() * 1.5 + 0.4); // Moderate short volume
             
-            levels.push({
-                price: longLiqPrice,
-                long_liquidation: longVolume,
-                short_liquidation: longVolume * 0.3,
-                total_liquidation: longVolume + longVolume * 0.3,
-                above_current: false,
-                leverage: leverage,
-                distance_percent: ((currentPrice - longLiqPrice) / currentPrice) * 100
-            });
+            if ((currentPrice - longLiqPrice) / currentPrice <= config.maxDistance) {
+                levels.push({
+                    price: longLiqPrice,
+                    long_liquidation: longVolume,
+                    short_liquidation: longVolume * 0.2,
+                    total_liquidation: longVolume * 1.2,
+                    above_current: false,
+                    leverage: leverage,
+                    distance_percent: ((currentPrice - longLiqPrice) / currentPrice) * 100,
+                    cluster_strength: 'high',
+                    timeframe_impact: timeframe
+                });
+            }
             
-            levels.push({
-                price: shortLiqPrice,
-                long_liquidation: shortVolume * 0.3,
-                short_liquidation: shortVolume,
-                total_liquidation: shortVolume * 0.3 + shortVolume,
-                above_current: true,
-                leverage: leverage,
-                distance_percent: ((shortLiqPrice - currentPrice) / currentPrice) * 100
-            });
+            if ((shortLiqPrice - currentPrice) / currentPrice <= config.maxDistance) {
+                levels.push({
+                    price: shortLiqPrice,
+                    long_liquidation: shortVolume * 0.3,
+                    short_liquidation: shortVolume,
+                    total_liquidation: shortVolume * 1.3,
+                    above_current: true,
+                    leverage: leverage,
+                    distance_percent: ((shortLiqPrice - currentPrice) / currentPrice) * 100,
+                    cluster_strength: 'high',
+                    timeframe_impact: timeframe
+                });
+            }
         }
         
-        // Add some random levels for more realism
-        for (let i = 0; i < 10; i++) {
-            const distancePercent = (Math.random() * 0.3 + 0.01); // 1% to 30% away
-            const isAbove = Math.random() > 0.5;
+        // Add focused cluster levels near current price (±1% to maxDistance)
+        for (let i = 0; i < config.clusterCount; i++) {
+            const distancePercent = Math.random() * config.maxDistance + 0.01; // 1% to maxDistance
+            const isAbove = Math.random() > 0.45; // Slight bias toward above (resistance)
+            
             const price = isAbove ? 
                 currentPrice * (1 + distancePercent) : 
                 currentPrice * (1 - distancePercent);
             
-            const volume = baseVolume * (Math.random() * 3 + 0.2);
+            // Cluster strength based on distance (closer = stronger)
+            const proximityFactor = 1 - (distancePercent / config.maxDistance);
+            const clusterStrength = proximityFactor > 0.7 ? 'very_high' : proximityFactor > 0.4 ? 'high' : 'medium';
+            
+            const volume = baseVolume * proximityFactor * (Math.random() * 2 + 0.5);
             
             levels.push({
                 price: price,
-                long_liquidation: isAbove ? volume * 0.2 : volume,
-                short_liquidation: isAbove ? volume : volume * 0.2,
-                total_liquidation: volume + volume * 0.2,
+                long_liquidation: isAbove ? volume * 0.25 : volume,
+                short_liquidation: isAbove ? volume : volume * 0.25,
+                total_liquidation: volume * 1.25,
                 above_current: isAbove,
-                leverage: 'mixed',
-                distance_percent: distancePercent * 100
+                leverage: 'cluster',
+                distance_percent: distancePercent * 100,
+                cluster_strength: clusterStrength,
+                timeframe_impact: timeframe
             });
         }
         
-        return levels.sort((a, b) => a.price - b.price);
+        // Sort by price and filter to most relevant levels
+        const sortedLevels = levels.sort((a, b) => a.price - b.price);
+        
+        // Focus on levels within reasonable distance of current price
+        const filteredLevels = sortedLevels.filter(level => {
+            const distance = Math.abs(level.price - currentPrice) / currentPrice;
+            return distance <= config.maxDistance;
+        });
+        
+        return filteredLevels.slice(0, config.clusterCount);
+    };
+
+    const calculateDirectionalBias = (levels, currentPrice) => {
+        // Calculate bias based on liquidation clusters above vs below current price
+        const aboveLevels = levels.filter(l => l.above_current);
+        const belowLevels = levels.filter(l => !l.above_current);
+        
+        const totalAboveVolume = aboveLevels.reduce((sum, l) => sum + (l.total_liquidation || 0), 0);
+        const totalBelowVolume = belowLevels.reduce((sum, l) => sum + (l.total_liquidation || 0), 0);
+        
+        const totalVolume = totalAboveVolume + totalBelowVolume;
+        const aboveRatio = totalVolume > 0 ? totalAboveVolume / totalVolume : 0.5;
+        
+        // Calculate strongest clusters near current price
+        const nearLevels = levels.filter(l => 
+            Math.abs(l.price - currentPrice) / currentPrice <= 0.05 // Within 5%
+        );
+        
+        const nearAbove = nearLevels.filter(l => l.above_current);
+        const nearBelow = nearLevels.filter(l => !l.above_current);
+        
+        // Determine bias
+        let bias = 'neutral';
+        let biasStrength = 0;
+        
+        if (aboveRatio > 0.65) {
+            bias = 'bearish'; // More liquidations above = resistance = bearish
+            biasStrength = (aboveRatio - 0.5) * 2; // 0.3 to 1.0
+        } else if (aboveRatio < 0.35) {
+            bias = 'bullish'; // More liquidations below = support = bullish
+            biasStrength = (0.5 - aboveRatio) * 2; // 0.3 to 1.0
+        } else {
+            bias = 'neutral';
+            biasStrength = 1 - Math.abs(aboveRatio - 0.5) * 2; // 0 to 1.0
+        }
+        
+        return {
+            bias: bias,
+            strength: Math.min(1, Math.max(0, biasStrength)),
+            above_ratio: aboveRatio,
+            below_ratio: 1 - aboveRatio,
+            total_above_volume: totalAboveVolume,
+            total_below_volume: totalBelowVolume,
+            near_clusters_above: nearAbove.length,
+            near_clusters_below: nearBelow.length,
+            recommendation: getBiasRecommendation(bias, biasStrength, nearAbove.length, nearBelow.length)
+        };
+    };
+
+    const getBiasRecommendation = (bias, strength, nearAbove, nearBelow) => {
+        const strengthText = strength > 0.7 ? 'Strong' : strength > 0.4 ? 'Moderate' : 'Weak';
+        
+        if (bias === 'bullish') {
+            return `${strengthText} Bullish Bias - More liquidations below current price. Expect upward pressure.`;
+        } else if (bias === 'bearish') {
+            return `${strengthText} Bearish Bias - Heavy resistance above. Expect downward pressure.`;
+        } else {
+            return `Neutral - Balanced liquidations. Watch for breakout direction.`;
+        }
     };
 
     const handleSymbolChange = (event) => {
