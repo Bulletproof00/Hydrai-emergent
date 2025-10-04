@@ -30,9 +30,6 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
   }, []);
 
   useEffect(() => {
-    if (chartContainerRef.current && !chart.current) {
-      initChart();
-    }
     loadChartData();
   }, [symbol, timeframe]);
 
