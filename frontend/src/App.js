@@ -275,6 +275,14 @@ function App() {
             <Zap size={20} />
             <span>Plugins</span>
           </button>
+          <button 
+            className={`nav-item ${activeView === 'smartmoney' ? 'active' : ''}`}
+            onClick={() => setActiveView('smartmoney')}
+            data-testid="nav-smartmoney"
+          >
+            <TrendingUp size={20} />
+            <span>Smart Money</span>
+          </button>
         </nav>
 
         {/* Live Price Widget */}
