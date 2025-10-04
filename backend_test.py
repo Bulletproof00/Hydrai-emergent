@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend Test Suite for Smart Money Indicators System
-Tests the new Smart Money APIs: liquidation heatmaps, open interest, funding rates
+Backend Test Suite for Trading System with Real-time Data and AI Integration
+Tests: Real-time Integration, AI Trading Engine, Enhanced Smart Money, Paper Trading Integration
 """
 
 import asyncio
@@ -15,7 +15,7 @@ from typing import Dict, List, Any
 
 # Test configuration
 BACKEND_URL = "https://liquidation-oracle.preview.emergentagent.com/api"
-WEBSOCKET_URL = "wss://hydra-trade.preview.emergentagent.com/api/realtime"
+WEBSOCKET_URL = "wss://liquidation-oracle.preview.emergentagent.com/api/realtime"
 
 class SmartMoneyTester:
     def __init__(self):
