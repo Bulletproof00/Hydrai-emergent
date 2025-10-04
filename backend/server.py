@@ -1857,6 +1857,15 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Enhanced streamer initialization failed: {str(e)}")
     
+    # Initialize Smart Money Indicators
+    try:
+        smart_money = SmartMoneyIndicators(db)
+        # Start background updates for smart money data
+        asyncio.create_task(smart_money.start_background_updates())
+        logger.info("Smart Money Indicators initialized")
+    except Exception as e:
+        logger.warning(f"Smart Money initialization failed: {str(e)}")
+    
     # Start background data update task
     asyncio.create_task(update_market_data_background())
     logger.info("Background data update task started")
