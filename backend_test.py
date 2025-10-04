@@ -778,7 +778,9 @@ class SmartMoneyTester:
             
             if response['success'] and response['data'].get('status') == 'success':
                 data = response['data']
-                heatmap_2d = data.get('liquidation_heatmap_2d', {})
+                # Handle nested data structure
+                nested_data = data.get('data', {})
+                heatmap_2d = nested_data.get('liquidation_heatmap_2d', {})
                 
                 if 'directional_bias' in heatmap_2d:
                     bias = heatmap_2d['directional_bias']
