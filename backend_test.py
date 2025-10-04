@@ -833,13 +833,7 @@ class TradingSystemTester:
         start_time = datetime.now()
         
         # Test AI analysis performance
-        analyze_data = {
-            "symbol": "BTC/USDT",
-            "timeframe": "1h",
-            "analysis_type": "comprehensive"
-        }
-        
-        response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=analyze_data, auth=True)
+        response = await self.test_api_endpoint("/ai-trading/analyze?symbol=BTC/USDT&context=comprehensive_performance_test", method="POST", auth=True)
         
         end_time = datetime.now()
         response_time = (end_time - start_time).total_seconds()
