@@ -573,9 +573,11 @@ class TradingSystemTester:
         
         if order_response['success']:
             order_data = order_response['data']
-            if 'fill_price' in order_data and order_data['fill_price'] > 0:
+            result = order_data.get('result', {})
+            order_info = result.get('order', {})
+            fill_price = order_info.get('filled_price', 0)
+            if fill_price > 0:
                 # Check if fill price is realistic (between 30k-100k for BTC)
-                fill_price = order_data['fill_price']
                 if 30000 <= fill_price <= 100000:
                     self.log_test(
                         test_name, 
