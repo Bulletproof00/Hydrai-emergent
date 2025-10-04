@@ -154,77 +154,20 @@ function App() {
     };
 
     setMessages(prev => [...prev, userMessage]);
-    const originalInput = input;
     setInput("");
     setLoading(true);
 
     try {
-      // Check if this is a trading command
-      const tradingKeywords = [
-        'long', 'short', 'buy', 'sell', 'trade', 'position', 'leverage', 
-        'stop loss', 'take profit', 'close', 'analyze', 'analysis',
-        'bollinger', 'rsi', 'strategy', 'entry', 'exit', 'btc', 'eth', 'sol'
-      ];
-      
-      const isTrading = tradingKeywords.some(keyword => 
-        originalInput.toLowerCase().includes(keyword.toLowerCase())
-      );
-      
-      // Send regular chat message (which now includes AI trading integration)
       const response = await axios.post(`${API}/chat`, {
         session_id: sessionId,
-        content: originalInput
+        content: input
       });
 
-      let assistantResponse = {
+      setMessages(prev => [...prev, {
         role: "assistant",
         content: response.data.content,
         timestamp: response.data.timestamp
-      };
-
-      // If this was a trading command, try to execute it via AI Trading
-      if (isTrading) {
-        try {
-          const token = localStorage.getItem('token');
-          if (token) {
-            const tradingResponse = await axios.post(`${API}/ai-trading/chat-command`, {
-              command: originalInput
-            }, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (tradingResponse.data.status === 'success' && tradingResponse.data.result.success) {
-              // Append trading result to assistant response
-              const tradingResult = tradingResponse.data.result;
-              assistantResponse.content += "\n\n🤖 **Trading Command Executed:**\n";
-              
-              if (tradingResult.order) {
-                assistantResponse.content += `✅ Order placed: ${tradingResult.order.side} ${tradingResult.order.quantity} ${tradingResult.order.symbol}\n`;
-              }
-              
-              if (tradingResult.ai_analysis) {
-                assistantResponse.content += `📊 AI Confidence: ${(tradingResult.ai_analysis.confidence * 100).toFixed(1)}%\n`;
-                assistantResponse.content += `💡 Analysis: ${tradingResult.ai_analysis.reasoning.substring(0, 200)}...\n`;
-              }
-              
-              if (tradingResult.analysis) {
-                assistantResponse.content += `📈 Market Analysis:\n`;
-                assistantResponse.content += `Recommendation: ${tradingResult.analysis.recommendation.toUpperCase()}\n`;
-                assistantResponse.content += `Confidence: ${(tradingResult.analysis.confidence * 100).toFixed(1)}%\n`;
-                assistantResponse.content += `Trade Type: ${tradingResult.analysis.trade_type}\n`;
-              }
-            } else if (tradingResponse.data.result && !tradingResponse.data.result.success) {
-              assistantResponse.content += `\n\n❌ Trading Command Error: ${tradingResponse.data.result.message}`;
-            }
-          }
-        } catch (tradingError) {
-          console.warn('Trading command execution failed:', tradingError);
-          // Don't show error to user, just log it
-        }
-      }
-
-      setMessages(prev => [...prev, assistantResponse]);
-      
+      }]);
     } catch (error) {
       console.error("Error sending message:", error);
       setMessages(prev => [...prev, {
