@@ -44,14 +44,21 @@ const EnhancedSmartMoneyPanel = () => {
             setLoading(true);
             setError(null);
             
-            // Use the working Smart Money API for now and simulate enhanced features
+            // Fetch real-time price first to ensure current data
+            const priceResponse = await axios.get(`${BACKEND_URL}/api/realtime/latest?symbols=${selectedSymbol}`);
+            let currentPrice = null;
+            
+            if (priceResponse.data.status === 'success' && priceResponse.data.data[selectedSymbol]) {
+                currentPrice = priceResponse.data.data[selectedSymbol].price;
+            }
+            
+            // Then fetch Smart Money data
             const response = await axios.get(`${BACKEND_URL}/api/smart-money/all?symbols=${selectedSymbol}`);
             
             if (response.data.status === 'success') {
-                // Transform the data to enhanced format
                 const symbolData = response.data.data[selectedSymbol];
                 if (symbolData) {
-                    const enhancedData = transformToEnhancedFormat(symbolData, selectedSymbol);
+                    const enhancedData = transformToEnhancedFormat(symbolData, selectedSymbol, currentPrice);
                     setSmartMoneyData(enhancedData);
                 } else {
                     setError('No data available for selected symbol');
