@@ -63,6 +63,9 @@ enhanced_streamer = None
 smart_money = None
 enhanced_smart_money = None
 
+# Paper Trading Engine
+paper_trading = None
+
 # Create the main app without a prefix
 app = FastAPI()
 
