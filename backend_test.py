@@ -496,54 +496,54 @@ class SmartMoneyTester:
                 f"Issues: {'; '.join(quality_issues[:3])}"
             )
     
-    async def test_multi_asset_support(self):
-        """Test support for crypto and traditional markets"""
-        test_name = "Multi-Asset Support"
+    async def test_data_sources_verification(self):
+        """Test multiple data sources are working (Binance, synthetic, aggregated)"""
+        test_name = "Smart Money Data Sources"
         
-        response = await self.test_api_endpoint("/realtime/latest")
+        response = await self.test_api_endpoint("/smart-money/all?symbols=BTC/USDT,ETH/USDT")
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
             return
         
-        data = response['data'].get('data', {})
+        data = response['data']
+        if 'data' not in data:
+            self.log_test(test_name, "FAIL", "No data in response")
+            return
         
-        crypto_assets = []
-        traditional_assets = []
+        smart_money_data = data['data']
+        sources_found = set()
         
-        for symbol, price_info in data.items():
-            if price_info and 'asset_type' in price_info:
-                if price_info['asset_type'] == 'crypto':
-                    crypto_assets.append(symbol)
-                elif price_info['asset_type'] == 'traditional':
-                    traditional_assets.append(symbol)
+        # Check what data sources are being used
+        for symbol, symbol_data in smart_money_data.items():
+            if not symbol_data:
+                continue
+                
+            for data_type, type_data in symbol_data.items():
+                if type_data and 'source' in type_data:
+                    sources_found.add(type_data['source'])
         
-        if len(crypto_assets) > 0 and len(traditional_assets) > 0:
+        expected_sources = ['binance', 'synthetic', 'aggregated', 'coinglass']
+        found_expected = [source for source in expected_sources if source in sources_found]
+        
+        if len(found_expected) >= 2:
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"Both asset types supported: {len(crypto_assets)} crypto, {len(traditional_assets)} traditional",
-                "Both crypto and traditional assets",
-                f"Crypto: {crypto_assets[:3]}, Traditional: {traditional_assets[:3]}"
+                f"Multiple data sources active: {', '.join(sources_found)}",
+                "At least 2 different data sources",
+                f"{len(sources_found)} sources: {', '.join(sources_found)}"
             )
-        elif len(crypto_assets) > 0:
+        elif len(sources_found) > 0:
             self.log_test(
                 test_name, 
                 "WARN", 
-                f"Only crypto assets found: {crypto_assets}",
-                "Both asset types",
-                f"Only crypto: {crypto_assets}"
-            )
-        elif len(traditional_assets) > 0:
-            self.log_test(
-                test_name, 
-                "WARN", 
-                f"Only traditional assets found: {traditional_assets}",
-                "Both asset types",
-                f"Only traditional: {traditional_assets}"
+                f"Limited data sources: {', '.join(sources_found)}",
+                "Multiple data sources",
+                f"1 source: {', '.join(sources_found)}"
             )
         else:
-            self.log_test(test_name, "FAIL", "No assets with asset_type found")
+            self.log_test(test_name, "FAIL", "No data sources identified in response")
 
     async def test_api_performance(self):
         """Test real-time API response times"""
