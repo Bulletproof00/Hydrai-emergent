@@ -605,3 +605,116 @@ class PaperTradingEngine:
             
         except Exception as e:
             logger.error(f"Error updating account margin: {e}")
+
+    async def _add_to_position(self, position: Dict, order: Dict, execution_price: float, fee: float):
+        """Add to existing position (increase position size)"""
+        try:
+            current_size = abs(position['size'])
+            order_size = order['quantity']
+            
+            # Calculate new weighted average entry price
+            current_value = current_size * position['entry_price']
+            order_value = order_size * execution_price
+            total_size = current_size + order_size
+            new_entry_price = (current_value + order_value) / total_size
+            
+            # Update position size (maintain direction)
+            new_size = position['size'] + (order_size if position['size'] > 0 else -order_size)
+            
+            # Calculate new margin requirement
+            new_margin = (total_size * new_entry_price) / order['leverage']
+            
+            # Recalculate liquidation price
+            new_liquidation_price = self._calculate_liquidation_price(
+                new_entry_price, order['leverage'], position['side']
+            )
+            
+            await self.db.paper_trading_positions.update_one(
+                {'_id': position['_id']},
+                {
+                    '$set': {
+                        'size': new_size,
+                        'entry_price': new_entry_price,
+                        'margin': new_margin,
+                        'leverage': order['leverage'],
+                        'liquidation_price': new_liquidation_price,
+                        'total_fees': position['total_fees'] + fee,
+                        'updated_at': datetime.now(timezone.utc)
+                    }
+                }
+            )
+            
+            logger.info(f"Added to position: new size {new_size}, new entry ${new_entry_price:.2f}")
+            
+        except Exception as e:
+            logger.error(f"Error adding to position: {e}")
+
+    async def _close_position_fully(self, position: Dict, close_price: float, fee: float, close_size: float):
+        """Fully close a position"""
+        try:
+            entry_price = position['entry_price']
+            position_size = abs(position['size'])
+            
+            # Calculate PnL for full position
+            if position['side'] == 'long':
+                pnl = (close_price - entry_price) * position_size
+            else:
+                pnl = (entry_price - close_price) * position_size
+            
+            # Update position to closed
+            await self.db.paper_trading_positions.update_one(
+                {'_id': position['_id']},
+                {
+                    '$set': {
+                        'size': 0,
+                        'status': 'closed',
+                        'realized_pnl': position['realized_pnl'] + pnl - fee,
+                        'total_fees': position['total_fees'] + fee,
+                        'updated_at': datetime.now(timezone.utc)
+                    }
+                }
+            )
+            
+            # Update account with realized PnL and free up margin
+            await self._update_account_pnl(position['user_id'], pnl - fee)
+            await self._update_account_margin(position['user_id'], position['margin'])
+            
+            logger.info(f"Closed position fully: PnL ${pnl - fee:.2f}")
+            
+        except Exception as e:
+            logger.error(f"Error closing position fully: {e}")
+
+    async def _create_new_position_after_close(self, order: Dict, execution_price: float, remaining_size: float, fee: float):
+        """Create new position after closing existing one"""
+        try:
+            position_side = 'long' if order['side'] == 'buy' else 'short'
+            
+            position = {
+                'position_id': str(uuid.uuid4()),
+                'user_id': order['user_id'],
+                'symbol': order['symbol'],
+                'side': position_side,
+                'size': remaining_size if order['side'] == 'buy' else -remaining_size,
+                'entry_price': execution_price,
+                'mark_price': execution_price,
+                'leverage': order['leverage'],
+                'margin': (remaining_size * execution_price) / order['leverage'],
+                'unrealized_pnl': 0.0,
+                'realized_pnl': 0.0,
+                'total_fees': fee,
+                'liquidation_price': self._calculate_liquidation_price(
+                    execution_price, order['leverage'], position_side
+                ),
+                'stop_loss': order.get('stop_loss'),
+                'take_profit': order.get('take_profit'),
+                'status': 'open',
+                'created_at': datetime.now(timezone.utc),
+                'updated_at': datetime.now(timezone.utc)
+            }
+            
+            await self.db.paper_trading_positions.insert_one(position)
+            
+            logger.info(f"Created new position after close: {remaining_size} {order['symbol']}")
+            
+        except Exception as e:
+            logger.error(f"Error creating new position after close: {e}")
