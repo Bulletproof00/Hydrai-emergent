@@ -17,17 +17,55 @@ from typing import Dict, List, Any
 BACKEND_URL = "https://liquidation-oracle.preview.emergentagent.com/api"
 WEBSOCKET_URL = "wss://liquidation-oracle.preview.emergentagent.com/api/realtime"
 
-class SmartMoneyTester:
+class TradingSystemTester:
     def __init__(self):
         self.session = None
         self.test_results = []
+        self.auth_token = None
         
     async def setup(self):
         """Initialize test session"""
         self.session = aiohttp.ClientSession()
-        print("🚀 Starting Smart Money Indicators System Tests")
+        print("🚀 Starting Trading System with Real-time Data and AI Integration Tests")
         print(f"Backend URL: {BACKEND_URL}")
-        print("=" * 60)
+        print("=" * 80)
+        
+        # Setup test user for authenticated endpoints
+        await self.setup_test_user()
+    
+    async def setup_test_user(self):
+        """Setup test user for authenticated endpoints"""
+        try:
+            # Try to login with existing test user
+            login_data = {
+                "email": "trader@example.com",
+                "password": "password123"
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/auth/login", json=login_data) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    self.auth_token = data.get('access_token')
+                    print("✅ Logged in with existing test user")
+                    return
+                    
+            # If login fails, register new user
+            register_data = {
+                "email": "trader@example.com",
+                "username": "testtrader",
+                "password": "password123"
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/auth/register", json=register_data) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    self.auth_token = data.get('access_token')
+                    print("✅ Registered new test user")
+                else:
+                    print("⚠️ Could not setup test user - some tests may fail")
+                    
+        except Exception as e:
+            print(f"⚠️ Error setting up test user: {e}")
     
     async def cleanup(self):
         """Clean up test session"""
@@ -55,19 +93,29 @@ class SmartMoneyTester:
             print(f"   Actual: {actual}")
         print()
     
-    async def test_api_endpoint(self, endpoint: str, expected_status: int = 200) -> Dict[str, Any]:
+    async def test_api_endpoint(self, endpoint: str, expected_status: int = 200, method: str = "GET", data: dict = None, auth: bool = False) -> Dict[str, Any]:
         """Test API endpoint and return response"""
         try:
             url = f"{BACKEND_URL}{endpoint}"
-            async with self.session.get(url) as response:
-                status = response.status
-                data = await response.json() if response.content_type == 'application/json' else await response.text()
-                
-                return {
-                    'status': status,
-                    'data': data,
-                    'success': status == expected_status
-                }
+            headers = {}
+            
+            if auth and self.auth_token:
+                headers['Authorization'] = f'Bearer {self.auth_token}'
+            
+            if method == "GET":
+                async with self.session.get(url, headers=headers) as response:
+                    status = response.status
+                    response_data = await response.json() if response.content_type == 'application/json' else await response.text()
+            elif method == "POST":
+                async with self.session.post(url, json=data, headers=headers) as response:
+                    status = response.status
+                    response_data = await response.json() if response.content_type == 'application/json' else await response.text()
+            
+            return {
+                'status': status,
+                'data': response_data,
+                'success': status == expected_status
+            }
         except Exception as e:
             return {
                 'status': 0,
@@ -75,14 +123,14 @@ class SmartMoneyTester:
                 'success': False,
                 'error': str(e)
             }
+
+    # ============= REAL-TIME INTEGRATION TESTS =============
     
-    async def test_smart_money_all_api(self):
-        """Test /api/smart-money/all endpoint for all smart money data"""
-        test_name = "Smart Money All Data API"
+    async def test_realtime_latest_all_assets(self):
+        """Test GET /api/realtime/latest for all Top 30 Assets"""
+        test_name = "Real-time Latest Data - All Top 30 Assets"
         
-        # Test with focus symbols
-        symbols = "BTC/USDT,ETH/USDT,SOL/USDT,XRP/USDT"
-        response = await self.test_api_endpoint(f"/smart-money/all?symbols={symbols}")
+        response = await self.test_api_endpoint("/realtime/latest")
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
@@ -90,517 +138,379 @@ class SmartMoneyTester:
         
         data = response['data']
         
-        # Check response structure
-        if 'status' not in data or 'data' not in data:
-            self.log_test(test_name, "FAIL", "Invalid response structure")
-            return
-        
-        if data['status'] != 'success':
+        if 'status' not in data or data['status'] != 'success':
             self.log_test(test_name, "FAIL", f"API returned error status: {data}")
             return
         
-        smart_money_data = data['data']
+        realtime_data = data.get('data', {})
         
-        # Check if we have data for all 4 focus symbols
-        expected_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
-        found_symbols = []
+        # Check for key crypto assets
+        key_assets = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'MATIC/USDT', 'AVAX/USDT', 
+                     'LINK/USDT', 'DOT/USDT', 'UNI/USDT', 'ATOM/USDT', 'AAVE/USDT']
         
-        for symbol in expected_symbols:
-            if symbol in smart_money_data and smart_money_data[symbol]:
-                symbol_data = smart_money_data[symbol]
-                
-                # Check if all three data types are present
-                required_types = ['liquidation_heatmap', 'open_interest', 'funding_rates']
-                has_all_types = all(data_type in symbol_data and symbol_data[data_type] for data_type in required_types)
-                
-                if has_all_types:
-                    found_symbols.append(symbol)
+        found_assets = []
+        for asset in key_assets:
+            if asset in realtime_data and realtime_data[asset]:
+                asset_data = realtime_data[asset]
+                if 'price' in asset_data and asset_data['price'] > 0:
+                    found_assets.append(asset)
         
-        if len(found_symbols) == 4:  # All 4 symbols working
+        if len(found_assets) >= 8:  # At least 8 out of 10 key assets
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"All 4 focus symbols have complete smart money data: {', '.join(found_symbols)}",
-                "Complete data for BTC, ETH, SOL, XRP",
-                f"4/4 symbols with liquidation, OI, and funding data"
+                f"Real-time data available for {len(found_assets)}/10 key assets: {', '.join(found_assets)}",
+                "Live prices for BTC, ETH, SOL, MATIC, AVAX, LINK, DOT, UNI, ATOM, AAVE",
+                f"{len(found_assets)} assets with live prices"
             )
-        elif len(found_symbols) >= 2:
+        elif len(found_assets) >= 5:
             self.log_test(
                 test_name, 
                 "WARN", 
-                f"Partial smart money data for {len(found_symbols)} symbols: {', '.join(found_symbols)}",
-                "Complete data for all 4 symbols",
-                f"{len(found_symbols)}/4 symbols working"
+                f"Partial real-time data for {len(found_assets)}/10 key assets: {', '.join(found_assets)}",
+                "Live prices for all 10 key assets",
+                f"Only {len(found_assets)} assets available"
             )
         else:
-            self.log_test(test_name, "FAIL", f"Insufficient smart money data. Found: {found_symbols}")
-    
-    async def test_liquidation_heatmap_api(self):
-        """Test /api/smart-money/liquidation-heatmap/{symbol} endpoint"""
-        test_symbols = [
-            ('BTC/USDT', 'BTCUSDT'),
-            ('ETH/USDT', 'ETHUSDT'), 
-            ('SOL/USDT', 'SOLUSDT'),
-            ('XRP/USDT', 'XRPUSDT')
-        ]
+            self.log_test(test_name, "FAIL", f"Insufficient real-time data. Found: {found_assets}")
+
+    async def test_realtime_live_prices_verification(self):
+        """Verify live prices for specific assets are realistic"""
+        test_name = "Real-time Price Verification"
         
-        for display_symbol, api_symbol in test_symbols:
-            test_name = f"Liquidation Heatmap API - {display_symbol}"
-            
-            response = await self.test_api_endpoint(f"/smart-money/liquidation-heatmap/{api_symbol}")
-            
-            if not response['success']:
-                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
-                continue
-            
-            data = response['data']
-            
-            # Check response structure
-            if 'status' not in data or 'data' not in data:
-                self.log_test(test_name, "FAIL", "Invalid response structure")
-                continue
-            
-            if data['status'] != 'success':
-                self.log_test(test_name, "FAIL", f"API returned error: {data}")
-                continue
-            
-            heatmap_data = data['data']
-            
-            # Validate liquidation heatmap structure
-            required_fields = ['symbol', 'timestamp', 'liquidation_levels', 'source']
-            missing_fields = [field for field in required_fields if field not in heatmap_data]
-            
-            if missing_fields:
-                self.log_test(test_name, "FAIL", f"Missing fields in heatmap data: {missing_fields}")
-                continue
-            
-            liquidation_levels = heatmap_data.get('liquidation_levels', [])
-            
-            if len(liquidation_levels) > 0:
-                # Check if liquidation levels have realistic price ranges
-                sample_level = liquidation_levels[0]
-                level_fields = ['price', 'long_liquidation', 'short_liquidation', 'total_liquidation']
-                has_level_fields = all(field in sample_level for field in level_fields)
-                
-                if has_level_fields and sample_level['price'] > 0:
-                    # Validate price ranges are realistic for the symbol
-                    prices = [level['price'] for level in liquidation_levels]
-                    price_range = max(prices) - min(prices)
-                    
-                    expected_ranges = {
-                        'BTC/USDT': (50000, 70000),
-                        'ETH/USDT': (2000, 3000), 
-                        'SOL/USDT': (100, 200),
-                        'XRP/USDT': (0.3, 0.8)
-                    }
-                    
-                    expected_min, expected_max = expected_ranges.get(display_symbol, (0, 999999))
-                    
-                    if expected_min <= min(prices) and max(prices) <= expected_max * 1.2:  # Allow 20% buffer
-                        self.log_test(
-                            test_name, 
-                            "PASS", 
-                            f"Valid liquidation heatmap: {len(liquidation_levels)} levels, price range ${min(prices):.2f}-${max(prices):.2f}",
-                            "Realistic price levels with liquidation volumes",
-                            f"{len(liquidation_levels)} levels in expected range"
-                        )
-                    else:
-                        self.log_test(
-                            test_name, 
-                            "WARN", 
-                            f"Price range may be unrealistic: ${min(prices):.2f}-${max(prices):.2f}",
-                            f"Price range roughly ${expected_min}-${expected_max}",
-                            f"${min(prices):.2f}-${max(prices):.2f}"
-                        )
+        response = await self.test_api_endpoint("/realtime/latest")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        realtime_data = data.get('data', {})
+        
+        # Expected price ranges (rough estimates for validation)
+        price_ranges = {
+            'BTC/USDT': (30000, 100000),
+            'ETH/USDT': (1500, 5000),
+            'SOL/USDT': (50, 300),
+            'MATIC/USDT': (0.5, 3.0),
+            'AVAX/USDT': (20, 100)
+        }
+        
+        valid_prices = []
+        invalid_prices = []
+        
+        for symbol, (min_price, max_price) in price_ranges.items():
+            if symbol in realtime_data and realtime_data[symbol]:
+                price = realtime_data[symbol].get('price', 0)
+                if min_price <= price <= max_price:
+                    valid_prices.append(f"{symbol}: ${price:.2f}")
                 else:
-                    self.log_test(test_name, "FAIL", f"Invalid liquidation level structure: {sample_level}")
-            else:
-                self.log_test(test_name, "FAIL", "No liquidation levels found in heatmap data")
+                    invalid_prices.append(f"{symbol}: ${price:.2f} (expected ${min_price}-${max_price})")
+        
+        if len(valid_prices) >= 4 and len(invalid_prices) == 0:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"All {len(valid_prices)} checked prices are realistic: {', '.join(valid_prices)}",
+                "Realistic price ranges for major crypto assets",
+                f"{len(valid_prices)} valid prices"
+            )
+        elif len(valid_prices) >= 3:
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Most prices realistic: {len(valid_prices)} valid, {len(invalid_prices)} questionable",
+                "All prices in realistic ranges",
+                f"Valid: {', '.join(valid_prices[:3])}"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"Price validation failed. Invalid: {invalid_prices}")
+
+    async def test_smart_money_extended_assets(self):
+        """Test Smart Money for extended assets (not just BTC/ETH)"""
+        test_name = "Smart Money Extended Assets"
+        
+        extended_symbols = "SOL/USDT,AVAX/USDT,LINK/USDT,DOT/USDT,UNI/USDT"
+        response = await self.test_api_endpoint(f"/smart-money/all?symbols={extended_symbols}")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error status: {data}")
+            return
+        
+        smart_money_data = data.get('data', {})
+        extended_assets = ['SOL/USDT', 'AVAX/USDT', 'LINK/USDT', 'DOT/USDT', 'UNI/USDT']
+        
+        working_assets = []
+        for asset in extended_assets:
+            if asset in smart_money_data and smart_money_data[asset]:
+                asset_data = smart_money_data[asset]
+                # Check if has liquidation, OI, and funding data
+                has_data = ('liquidation_heatmap' in asset_data and 
+                           'open_interest' in asset_data and 
+                           'funding_rates' in asset_data)
+                if has_data:
+                    working_assets.append(asset)
+        
+        if len(working_assets) >= 4:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"Smart Money data available for {len(working_assets)}/5 extended assets: {', '.join(working_assets)}",
+                "Smart Money support for extended crypto assets beyond BTC/ETH",
+                f"{len(working_assets)} extended assets supported"
+            )
+        elif len(working_assets) >= 2:
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Partial Smart Money support: {len(working_assets)}/5 extended assets working",
+                "Full Smart Money support for extended assets",
+                f"Only {len(working_assets)} assets: {', '.join(working_assets)}"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"Limited Smart Money support for extended assets: {working_assets}")
+
+    # ============= AI TRADING ENGINE TESTS =============
     
-    async def test_open_interest_api(self):
-        """Test /api/smart-money/open-interest/{symbol} endpoint"""
-        test_symbols = [
-            ('BTC/USDT', 'BTCUSDT'),
-            ('ETH/USDT', 'ETHUSDT'), 
-            ('SOL/USDT', 'SOLUSDT'),
-            ('XRP/USDT', 'XRPUSDT')
+    async def test_ai_trading_analyze_btc(self):
+        """Test POST /api/ai-trading/analyze for BTC/USDT"""
+        test_name = "AI Trading Analysis - BTC/USDT"
+        
+        analyze_data = {
+            "symbol": "BTC/USDT",
+            "timeframe": "1h",
+            "analysis_type": "technical"
+        }
+        
+        response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=analyze_data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check for AI analysis response structure
+        required_fields = ['symbol', 'analysis', 'recommendation']
+        missing_fields = [field for field in required_fields if field not in data]
+        
+        if missing_fields:
+            self.log_test(test_name, "FAIL", f"Missing fields in AI analysis: {missing_fields}")
+            return
+        
+        analysis = data.get('analysis', '')
+        recommendation = data.get('recommendation', '')
+        
+        if len(analysis) > 50 and recommendation in ['long', 'short', 'neutral', 'hold']:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"AI analysis generated: {len(analysis)} chars, recommendation: {recommendation}",
+                "Detailed AI analysis with trading recommendation",
+                f"Analysis length: {len(analysis)}, Rec: {recommendation}"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"Invalid AI analysis: analysis={len(analysis)} chars, rec={recommendation}")
+
+    async def test_ai_trading_analyze_eth_with_context(self):
+        """Test POST /api/ai-trading/analyze for ETH/USDT with context"""
+        test_name = "AI Trading Analysis - ETH/USDT with Context"
+        
+        analyze_data = {
+            "symbol": "ETH/USDT",
+            "timeframe": "4h",
+            "analysis_type": "comprehensive",
+            "context": {
+                "market_sentiment": "bullish",
+                "previous_trades": ["long_btc_profitable"],
+                "risk_tolerance": "medium"
+            }
+        }
+        
+        response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=analyze_data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check if context was considered in analysis
+        analysis = data.get('analysis', '')
+        
+        # Look for context-aware analysis (mentions of market sentiment, risk, etc.)
+        context_indicators = ['sentiment', 'risk', 'market', 'bullish', 'bearish']
+        context_mentions = sum(1 for indicator in context_indicators if indicator.lower() in analysis.lower())
+        
+        if context_mentions >= 2 and len(analysis) > 100:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"Context-aware AI analysis: {context_mentions} context mentions in {len(analysis)} chars",
+                "AI analysis incorporating provided context",
+                f"Context awareness: {context_mentions} mentions"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"Limited context awareness in AI analysis: {context_mentions} mentions")
+
+    async def test_ai_trading_chat_commands(self):
+        """Test POST /api/ai-trading/chat-command with various trading commands"""
+        test_name = "AI Trading Chat Commands"
+        
+        commands = [
+            "Long BTC 0.1 at market",
+            "Analyze ETH trading opportunity", 
+            "What's your analysis on SOL?"
         ]
         
-        for display_symbol, api_symbol in test_symbols:
-            test_name = f"Open Interest API - {display_symbol}"
-            
-            response = await self.test_api_endpoint(f"/smart-money/open-interest/{api_symbol}")
-            
-            if not response['success']:
-                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
-                continue
-            
-            data = response['data']
-            
-            # Check response structure
-            if 'status' not in data or 'data' not in data:
-                self.log_test(test_name, "FAIL", "Invalid response structure")
-                continue
-            
-            if data['status'] != 'success':
-                self.log_test(test_name, "FAIL", f"API returned error: {data}")
-                continue
-            
-            oi_data = data['data']
-            
-            # Validate open interest structure
-            required_fields = ['symbol', 'timestamp', 'total_oi', 'exchanges', 'source']
-            missing_fields = [field for field in required_fields if field not in oi_data]
-            
-            if missing_fields:
-                self.log_test(test_name, "FAIL", f"Missing fields in OI data: {missing_fields}")
-                continue
-            
-            exchanges = oi_data.get('exchanges', {})
-            total_oi = oi_data.get('total_oi', 0)
-            
-            if len(exchanges) >= 3 and total_oi > 0:  # Should have multiple exchanges
-                # Check if exchanges have proper structure
-                exchange_names = list(exchanges.keys())
-                sample_exchange = exchanges[exchange_names[0]]
-                
-                if isinstance(sample_exchange, dict) and 'open_interest' in sample_exchange:
-                    # Calculate percentage breakdown
-                    exchange_breakdown = []
-                    for exchange, data in exchanges.items():
-                        if isinstance(data, dict) and 'open_interest' in data:
-                            oi_value = data['open_interest']
-                            percentage = (oi_value / total_oi) * 100 if total_oi > 0 else 0
-                            exchange_breakdown.append(f"{exchange}: {percentage:.1f}%")
-                    
-                    self.log_test(
-                        test_name, 
-                        "PASS", 
-                        f"Multi-exchange OI data: Total ${total_oi:,.0f}, {len(exchanges)} exchanges",
-                        "Multiple exchanges with OI breakdown",
-                        f"Exchanges: {', '.join(exchange_breakdown[:3])}"
-                    )
-                else:
-                    self.log_test(test_name, "FAIL", f"Invalid exchange data structure: {sample_exchange}")
-            else:
-                self.log_test(test_name, "FAIL", f"Insufficient OI data: {len(exchanges)} exchanges, total OI: {total_oi}")
-    
-    async def test_funding_rates_api(self):
-        """Test /api/smart-money/funding-rates/{symbol} endpoint"""
-        test_symbols = [
-            ('BTC/USDT', 'BTCUSDT'),
-            ('ETH/USDT', 'ETHUSDT'), 
-            ('SOL/USDT', 'SOLUSDT'),
-            ('XRP/USDT', 'XRPUSDT')
-        ]
+        successful_commands = 0
         
-        for display_symbol, api_symbol in test_symbols:
-            test_name = f"Funding Rates API - {display_symbol}"
+        for command in commands:
+            command_data = {
+                "command": command,
+                "user_context": {
+                    "balance": 10000,
+                    "risk_level": "medium"
+                }
+            }
             
-            response = await self.test_api_endpoint(f"/smart-money/funding-rates/{api_symbol}")
+            response = await self.test_api_endpoint("/ai-trading/chat-command", method="POST", data=command_data, auth=True)
             
-            if not response['success']:
-                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
-                continue
-            
-            data = response['data']
-            
-            # Check response structure
-            if 'status' not in data or 'data' not in data:
-                self.log_test(test_name, "FAIL", "Invalid response structure")
-                continue
-            
-            if data['status'] != 'success':
-                self.log_test(test_name, "FAIL", f"API returned error: {data}")
-                continue
-            
-            funding_data = data['data']
-            
-            # Validate funding rates structure
-            required_fields = ['symbol', 'timestamp', 'current_funding_rate', 'exchanges', 'source']
-            missing_fields = [field for field in required_fields if field not in funding_data]
-            
-            if missing_fields:
-                self.log_test(test_name, "FAIL", f"Missing fields in funding data: {missing_fields}")
-                continue
-            
-            exchanges = funding_data.get('exchanges', {})
-            current_rate = funding_data.get('current_funding_rate', 0)
-            next_funding_time = funding_data.get('next_funding_time')
-            
-            # Validate funding rate is in reasonable range (-5% to +5%)
-            if -5.0 <= current_rate <= 5.0:
-                rate_status = "reasonable"
-            else:
-                rate_status = "extreme"
-            
-            if len(exchanges) >= 3 and rate_status == "reasonable":
-                # Check if exchanges have proper funding rate structure
-                exchange_rates = []
-                for exchange, data in exchanges.items():
-                    if isinstance(data, dict) and 'funding_rate' in data:
-                        rate = data['funding_rate']
-                        exchange_rates.append(f"{exchange}: {rate:.4f}%")
-                
+            if response['success']:
+                data = response['data']
+                if 'response' in data and len(data['response']) > 20:
+                    successful_commands += 1
+        
+        if successful_commands == len(commands):
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"All {len(commands)} chat commands processed successfully",
+                "AI processing of various trading commands",
+                f"{successful_commands}/{len(commands)} commands successful"
+            )
+        elif successful_commands >= 2:
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Most chat commands working: {successful_commands}/{len(commands)}",
+                "All chat commands should work",
+                f"{successful_commands} out of {len(commands)} working"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"Chat command processing failed: {successful_commands}/{len(commands)} working")
+
+    # ============= ENHANCED SMART MONEY TESTS =============
+    
+    async def test_enhanced_smart_money_avax_1day(self):
+        """Test GET /api/enhanced-smart-money/data?symbol=AVAX/USDT&timeframe=1day"""
+        test_name = "Enhanced Smart Money - AVAX/USDT (1day)"
+        
+        response = await self.test_api_endpoint("/enhanced-smart-money/data?symbol=AVAX/USDT&timeframe=1day")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error: {data}")
+            return
+        
+        enhanced_data = data.get('data', {})
+        
+        # Check for enhanced smart money fields
+        required_fields = ['symbol', 'timeframe', 'liquidation_heatmap_2d']
+        missing_fields = [field for field in required_fields if field not in enhanced_data]
+        
+        if not missing_fields and enhanced_data.get('timeframe') == '1day':
+            heatmap_2d = enhanced_data.get('liquidation_heatmap_2d', {})
+            if 'summary' in heatmap_2d and 'directional_bias' in heatmap_2d['summary']:
                 self.log_test(
                     test_name, 
                     "PASS", 
-                    f"Multi-exchange funding rates: Avg {current_rate:.4f}%, {len(exchanges)} exchanges",
-                    "Reasonable funding rates (-5% to +5%) from multiple exchanges",
-                    f"Rate: {current_rate:.4f}%, Exchanges: {', '.join(exchange_rates[:3])}"
-                )
-            elif rate_status != "reasonable":
-                self.log_test(
-                    test_name, 
-                    "WARN", 
-                    f"Extreme funding rate: {current_rate:.4f}% (may indicate market stress)",
-                    "Funding rate between -5% and +5%",
-                    f"{current_rate:.4f}%"
+                    f"Enhanced Smart Money data for AVAX (1day): directional bias available",
+                    "Enhanced data with 1day timeframe for AVAX",
+                    "Complete enhanced data structure"
                 )
             else:
-                self.log_test(test_name, "FAIL", f"Insufficient funding data: {len(exchanges)} exchanges")
-    
-    async def test_focus_symbols_api(self):
-        """Test /api/smart-money/focus-symbols endpoint"""
-        test_name = "Focus Symbols API"
-        
-        response = await self.test_api_endpoint("/smart-money/focus-symbols")
-        
-        if not response['success']:
-            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
-            return
-        
-        data = response['data']
-        
-        # Check response structure
-        if 'status' not in data or 'symbols' not in data:
-            self.log_test(test_name, "FAIL", "Invalid response structure")
-            return
-        
-        if data['status'] != 'success':
-            self.log_test(test_name, "FAIL", f"API returned error status: {data}")
-            return
-        
-        symbols = data['symbols']
-        expected_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
-        
-        if symbols == expected_symbols:
-            self.log_test(
-                test_name, 
-                "PASS", 
-                f"Focus symbols correctly configured: {', '.join(symbols)}",
-                "BTC/USDT, ETH/USDT, SOL/USDT, XRP/USDT",
-                f"{', '.join(symbols)}"
-            )
+                self.log_test(test_name, "WARN", "Enhanced data structure incomplete - missing directional bias")
         else:
-            self.log_test(
-                test_name, 
-                "WARN", 
-                f"Focus symbols differ from expected: {', '.join(symbols)}",
-                "BTC/USDT, ETH/USDT, SOL/USDT, XRP/USDT",
-                f"{', '.join(symbols)}"
-            )
-    
-    async def test_data_quality_validation(self):
-        """Test data quality across all smart money indicators"""
-        test_name = "Smart Money Data Quality"
-        
-        # Get all smart money data
-        response = await self.test_api_endpoint("/smart-money/all?symbols=BTC/USDT,ETH/USDT")
-        
-        if not response['success']:
-            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
-            return
-        
-        data = response['data']
-        if 'data' not in data:
-            self.log_test(test_name, "FAIL", "No data in response")
-            return
-        
-        smart_money_data = data['data']
-        quality_issues = []
-        quality_passes = []
-        
-        for symbol, symbol_data in smart_money_data.items():
-            if not symbol_data:
-                continue
-                
-            # Check liquidation heatmap quality
-            if 'liquidation_heatmap' in symbol_data and symbol_data['liquidation_heatmap']:
-                heatmap = symbol_data['liquidation_heatmap']
-                levels = heatmap.get('liquidation_levels', [])
-                
-                if len(levels) >= 10:  # Should have reasonable number of levels
-                    prices = [level.get('price', 0) for level in levels if level.get('price', 0) > 0]
-                    if len(prices) >= 10:
-                        price_range = max(prices) - min(prices)
-                        avg_price = sum(prices) / len(prices)
-                        
-                        # Price range should be reasonable (not too narrow or too wide)
-                        range_ratio = price_range / avg_price
-                        if 0.05 <= range_ratio <= 0.5:  # 5% to 50% range
-                            quality_passes.append(f"{symbol} liquidation levels have realistic price spread")
-                        else:
-                            quality_issues.append(f"{symbol} liquidation price range may be unrealistic: {range_ratio:.2%}")
-                    else:
-                        quality_issues.append(f"{symbol} liquidation levels missing valid prices")
-                else:
-                    quality_issues.append(f"{symbol} insufficient liquidation levels: {len(levels)}")
-            
-            # Check open interest quality
-            if 'open_interest' in symbol_data and symbol_data['open_interest']:
-                oi = symbol_data['open_interest']
-                exchanges = oi.get('exchanges', {})
-                total_oi = oi.get('total_oi', 0)
-                
-                if len(exchanges) >= 3 and total_oi > 0:
-                    # Check if exchange distribution is reasonable (no single exchange > 80%)
-                    max_exchange_share = 0
-                    for exchange, exchange_data in exchanges.items():
-                        if isinstance(exchange_data, dict) and 'open_interest' in exchange_data:
-                            share = exchange_data['open_interest'] / total_oi
-                            max_exchange_share = max(max_exchange_share, share)
-                    
-                    if max_exchange_share <= 0.8:
-                        quality_passes.append(f"{symbol} OI well distributed across exchanges")
-                    else:
-                        quality_issues.append(f"{symbol} OI too concentrated in one exchange: {max_exchange_share:.1%}")
-                else:
-                    quality_issues.append(f"{symbol} insufficient OI data: {len(exchanges)} exchanges")
-            
-            # Check funding rates quality
-            if 'funding_rates' in symbol_data and symbol_data['funding_rates']:
-                funding = symbol_data['funding_rates']
-                current_rate = funding.get('current_funding_rate', 0)
-                exchanges = funding.get('exchanges', {})
-                
-                if -2.0 <= current_rate <= 2.0:  # Reasonable funding rate range
-                    quality_passes.append(f"{symbol} funding rate within normal range: {current_rate:.4f}%")
-                else:
-                    quality_issues.append(f"{symbol} extreme funding rate: {current_rate:.4f}%")
-        
-        # Evaluate overall quality
-        total_checks = len(quality_passes) + len(quality_issues)
-        if total_checks == 0:
-            self.log_test(test_name, "FAIL", "No data quality checks could be performed")
-        elif len(quality_issues) == 0:
-            self.log_test(
-                test_name, 
-                "PASS", 
-                f"All {len(quality_passes)} data quality checks passed",
-                "High quality smart money data",
-                f"{len(quality_passes)} quality checks passed"
-            )
-        elif len(quality_passes) > len(quality_issues):
-            self.log_test(
-                test_name, 
-                "WARN", 
-                f"Most quality checks passed: {len(quality_passes)} passed, {len(quality_issues)} issues",
-                "All quality checks passing",
-                f"Issues: {'; '.join(quality_issues[:2])}"
-            )
-        else:
-            self.log_test(
-                test_name, 
-                "FAIL", 
-                f"Multiple quality issues: {len(quality_issues)} issues, {len(quality_passes)} passed",
-                "High quality data",
-                f"Issues: {'; '.join(quality_issues[:3])}"
-            )
-    
-    async def test_data_sources_verification(self):
-        """Test multiple data sources are working (Binance, synthetic, aggregated)"""
-        test_name = "Smart Money Data Sources"
-        
-        response = await self.test_api_endpoint("/smart-money/all?symbols=BTC/USDT,ETH/USDT")
-        
-        if not response['success']:
-            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
-            return
-        
-        data = response['data']
-        if 'data' not in data:
-            self.log_test(test_name, "FAIL", "No data in response")
-            return
-        
-        smart_money_data = data['data']
-        sources_found = set()
-        
-        # Check what data sources are being used
-        for symbol, symbol_data in smart_money_data.items():
-            if not symbol_data:
-                continue
-                
-            for data_type, type_data in symbol_data.items():
-                if type_data and 'source' in type_data:
-                    sources_found.add(type_data['source'])
-        
-        expected_sources = ['binance', 'synthetic', 'aggregated', 'coinglass']
-        found_expected = [source for source in expected_sources if source in sources_found]
-        
-        if len(found_expected) >= 2:
-            self.log_test(
-                test_name, 
-                "PASS", 
-                f"Multiple data sources active: {', '.join(sources_found)}",
-                "At least 2 different data sources",
-                f"{len(sources_found)} sources: {', '.join(sources_found)}"
-            )
-        elif len(sources_found) > 0:
-            self.log_test(
-                test_name, 
-                "WARN", 
-                f"Limited data sources: {', '.join(sources_found)}",
-                "Multiple data sources",
-                f"1 source: {', '.join(sources_found)}"
-            )
-        else:
-            self.log_test(test_name, "FAIL", "No data sources identified in response")
+            self.log_test(test_name, "FAIL", f"Missing enhanced data fields: {missing_fields}")
 
-    async def test_api_performance(self):
-        """Test Smart Money API response times"""
-        test_name = "Smart Money API Performance"
+    async def test_enhanced_smart_money_link_3day(self):
+        """Test GET /api/enhanced-smart-money/data?symbol=LINK/USDT&timeframe=3day"""
+        test_name = "Enhanced Smart Money - LINK/USDT (3day)"
         
-        # Test performance of the main endpoint
-        start_time = datetime.now()
-        response = await self.test_api_endpoint("/smart-money/all?symbols=BTC/USDT,ETH/USDT")
-        end_time = datetime.now()
-        
-        response_time = (end_time - start_time).total_seconds()
+        response = await self.test_api_endpoint("/enhanced-smart-money/data?symbol=LINK/USDT&timeframe=3day")
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
             return
         
-        # Smart Money API should respond within 2 seconds
-        if response_time < 2.0:
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error: {data}")
+            return
+        
+        enhanced_data = data.get('data', {})
+        
+        if enhanced_data.get('timeframe') == '3day' and enhanced_data.get('symbol') == 'LINK/USDT':
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"Excellent response time: {response_time:.3f}s",
-                "Response time < 2s",
-                f"{response_time:.3f}s"
-            )
-        elif response_time < 5.0:
-            self.log_test(
-                test_name, 
-                "WARN", 
-                f"Acceptable response time: {response_time:.3f}s",
-                "Response time < 2s",
-                f"{response_time:.3f}s"
+                f"Enhanced Smart Money data for LINK (3day): timeframe correctly set",
+                "Enhanced data with 3day timeframe for LINK",
+                "Correct symbol and timeframe"
             )
         else:
-            self.log_test(
-                test_name, 
-                "FAIL", 
-                f"Slow response time: {response_time:.3f}s",
-                "Response time < 2s",
-                f"{response_time:.3f}s"
-            )
-    
-    async def test_enhanced_smart_money_supported_symbols(self):
-        """Test /api/enhanced-smart-money/supported-symbols endpoint"""
-        test_name = "Enhanced Smart Money Supported Symbols API"
+            self.log_test(test_name, "FAIL", f"Timeframe/symbol mismatch: got {enhanced_data.get('timeframe')}/{enhanced_data.get('symbol')}")
+
+    async def test_enhanced_smart_money_dot_1week(self):
+        """Test GET /api/enhanced-smart-money/data?symbol=DOT/USDT&timeframe=1week"""
+        test_name = "Enhanced Smart Money - DOT/USDT (1week)"
+        
+        response = await self.test_api_endpoint("/enhanced-smart-money/data?symbol=DOT/USDT&timeframe=1week")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error: {data}")
+            return
+        
+        enhanced_data = data.get('data', {})
+        
+        if enhanced_data.get('timeframe') == '1week' and enhanced_data.get('symbol') == 'DOT/USDT':
+            # Check for weekly-specific analysis
+            heatmap_2d = enhanced_data.get('liquidation_heatmap_2d', {})
+            if heatmap_2d and 'summary' in heatmap_2d:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Enhanced Smart Money data for DOT (1week): weekly analysis available",
+                    "Enhanced data with 1week timeframe for DOT",
+                    "Weekly timeframe analysis complete"
+                )
+            else:
+                self.log_test(test_name, "WARN", "Weekly analysis data incomplete")
+        else:
+            self.log_test(test_name, "FAIL", f"Timeframe/symbol mismatch for DOT weekly data")
+
+    async def test_enhanced_smart_money_top30_support(self):
+        """Validate that all Top 30 Assets are supported"""
+        test_name = "Enhanced Smart Money - Top 30 Assets Support"
         
         response = await self.test_api_endpoint("/enhanced-smart-money/supported-symbols")
         
@@ -610,289 +520,410 @@ class SmartMoneyTester:
         
         data = response['data']
         
-        # Check response structure
-        if 'status' not in data or 'symbols' not in data:
-            self.log_test(test_name, "FAIL", "Invalid response structure")
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error: {data}")
             return
         
-        if data['status'] != 'success':
-            self.log_test(test_name, "FAIL", f"API returned error status: {data}")
-            return
+        symbols = data.get('symbols', [])
         
-        symbols = data['symbols']
-        expected_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
+        # Extract symbol names from the response
+        if isinstance(symbols, list) and len(symbols) > 0:
+            if isinstance(symbols[0], dict):
+                symbol_names = [s.get('symbol', '') for s in symbols]
+            else:
+                symbol_names = symbols
+        else:
+            symbol_names = []
         
-        # Check if all expected symbols are present
-        found_symbols = [s['symbol'] for s in symbols if isinstance(s, dict) and 'symbol' in s]
-        missing_symbols = [s for s in expected_symbols if s not in found_symbols]
+        # Check for key Top 30 assets
+        top_assets = ['BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'XRP/USDT', 'ADA/USDT', 
+                     'SOL/USDT', 'DOGE/USDT', 'DOT/USDT', 'MATIC/USDT', 'AVAX/USDT',
+                     'LINK/USDT', 'UNI/USDT', 'ATOM/USDT', 'AAVE/USDT']
         
-        if not missing_symbols:
+        supported_assets = [asset for asset in top_assets if asset in symbol_names]
+        
+        if len(supported_assets) >= 25:  # At least 25 out of top assets
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"All expected symbols supported: {', '.join(found_symbols)}",
-                "BTC, ETH, SOL, XRP supported",
-                f"{len(found_symbols)} symbols: {', '.join(found_symbols)}"
+                f"Excellent Top 30 support: {len(supported_assets)} major assets supported",
+                "Support for all major Top 30 crypto assets",
+                f"{len(supported_assets)} top assets supported"
             )
-        else:
+        elif len(supported_assets) >= 15:
             self.log_test(
                 test_name, 
                 "WARN", 
-                f"Missing symbols: {', '.join(missing_symbols)}. Found: {', '.join(found_symbols)}",
-                "All expected symbols present",
-                f"Missing: {', '.join(missing_symbols)}"
+                f"Good Top 30 support: {len(supported_assets)} major assets supported",
+                "Support for all Top 30 assets",
+                f"{len(supported_assets)} assets supported"
             )
+        else:
+            self.log_test(test_name, "FAIL", f"Limited Top 30 support: only {len(supported_assets)} assets")
 
-    async def test_enhanced_smart_money_data_with_timeframes(self):
-        """Test /api/enhanced-smart-money/data endpoint with different timeframes"""
-        test_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
-        test_timeframes = ['1day', '3day', '1week']
+    # ============= INTEGRATION TESTS =============
+    
+    async def test_paper_trading_with_live_prices(self):
+        """Test Paper Trading integration with live prices"""
+        test_name = "Paper Trading with Live Prices Integration"
         
-        for symbol in test_symbols:
-            for timeframe in test_timeframes:
-                test_name = f"Enhanced Smart Money Data - {symbol} ({timeframe})"
-                
-                response = await self.test_api_endpoint(f"/enhanced-smart-money/data?symbol={symbol}&timeframe={timeframe}")
-                
-                if not response['success']:
-                    self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
-                    continue
-                
-                data = response['data']
-                
-                # Check response structure
-                if 'status' not in data:
-                    self.log_test(test_name, "FAIL", "Invalid response structure - missing status")
-                    continue
-                
-                if data['status'] != 'success':
-                    self.log_test(test_name, "FAIL", f"API returned error: {data}")
-                    continue
-                
-                # Check for required fields in the nested data structure
-                if 'data' not in data:
-                    self.log_test(test_name, "FAIL", "Missing 'data' field in response")
-                    continue
-                
-                nested_data = data['data']
-                required_fields = ['symbol', 'timeframe', 'liquidation_heatmap_2d']
-                missing_fields = [field for field in required_fields if field not in nested_data]
-                
-                if missing_fields:
-                    self.log_test(test_name, "FAIL", f"Missing required fields: {missing_fields}")
-                    continue
-                
-                # Validate timeframe matches request
-                if nested_data.get('timeframe') != timeframe:
-                    self.log_test(test_name, "FAIL", f"Timeframe mismatch: expected {timeframe}, got {nested_data.get('timeframe')}")
-                    continue
-                
-                # Check liquidation heatmap 2D data
-                heatmap_2d = nested_data.get('liquidation_heatmap_2d')
-                if heatmap_2d and isinstance(heatmap_2d, dict):
-                    # Check for directional bias in summary
-                    summary = heatmap_2d.get('summary', {})
-                    if 'directional_bias' in summary:
-                        bias = summary['directional_bias']
-                        if isinstance(bias, dict) and 'bias' in bias and 'strength' in bias:
-                            self.log_test(
-                                test_name, 
-                                "PASS", 
-                                f"Enhanced data with timeframe: {timeframe}, bias: {bias.get('bias', 'unknown')} (strength: {bias.get('strength', 0):.2f})",
-                                f"Valid enhanced data with {timeframe} timeframe",
-                                f"Bias: {bias.get('bias', 'unknown')}, Strength: {bias.get('strength', 0):.2f}"
-                            )
-                        else:
-                            self.log_test(test_name, "WARN", f"Directional bias data incomplete for {timeframe}")
-                    else:
-                        self.log_test(test_name, "WARN", f"Missing directional bias for {timeframe}")
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token available")
+            return
+        
+        # Get account info
+        account_response = await self.test_api_endpoint("/trading/account", auth=True)
+        
+        if not account_response['success']:
+            self.log_test(test_name, "FAIL", f"Account API failed: {account_response.get('error')}")
+            return
+        
+        # Place a market order (should use live prices)
+        order_data = {
+            "symbol": "BTC/USDT",
+            "side": "buy",
+            "order_type": "market",
+            "quantity": 0.001,
+            "leverage": 1
+        }
+        
+        order_response = await self.test_api_endpoint("/trading/order", method="POST", data=order_data, auth=True)
+        
+        if order_response['success']:
+            order_data = order_response['data']
+            if 'fill_price' in order_data and order_data['fill_price'] > 0:
+                # Check if fill price is realistic (between 30k-100k for BTC)
+                fill_price = order_data['fill_price']
+                if 30000 <= fill_price <= 100000:
+                    self.log_test(
+                        test_name, 
+                        "PASS", 
+                        f"Paper trading using live prices: BTC filled at ${fill_price:.2f}",
+                        "Paper trading integrated with real-time market prices",
+                        f"Realistic fill price: ${fill_price:.2f}"
+                    )
                 else:
-                    self.log_test(test_name, "FAIL", f"Invalid or missing liquidation heatmap 2D data for {timeframe}")
+                    self.log_test(test_name, "WARN", f"Fill price may be unrealistic: ${fill_price:.2f}")
+            else:
+                self.log_test(test_name, "FAIL", "Order executed but no fill price available")
+        else:
+            self.log_test(test_name, "FAIL", f"Paper trading order failed: {order_response.get('error')}")
 
-    async def test_enhanced_liquidation_heatmap_2d_timeframes(self):
-        """Test /api/enhanced-smart-money/liquidation-heatmap-2d endpoint with timeframes"""
-        test_symbols = ['BTC/USDT', 'ETH/USDT']
-        test_timeframes = ['1day', '3day', '1week']
+    async def test_ai_trading_with_realtime_data(self):
+        """Test AI Trading integration with real-time market data"""
+        test_name = "AI Trading with Real-time Market Data"
         
-        for symbol in test_symbols:
-            for timeframe in test_timeframes:
-                test_name = f"Enhanced Liquidation Heatmap 2D - {symbol} ({timeframe})"
-                
-                response = await self.test_api_endpoint(f"/enhanced-smart-money/liquidation-heatmap-2d?symbol={symbol}&timeframe={timeframe}")
-                
-                if not response['success']:
-                    self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
-                    continue
-                
-                data = response['data']
-                
-                # Check response structure
-                if 'status' not in data:
-                    self.log_test(test_name, "FAIL", "Invalid response structure")
-                    continue
-                
-                if data['status'] != 'success':
-                    self.log_test(test_name, "FAIL", f"API returned error: {data}")
-                    continue
-                
-                # Check for liquidation levels with cluster strength and timeframe impact
-                # The data might be nested under 'data' field
-                levels_data = data.get('data', data)  # Try nested first, fallback to root
-                if 'liquidation_levels' in levels_data:
-                    levels = levels_data['liquidation_levels']
-                    if isinstance(levels, list) and len(levels) > 0:
-                        # Check if levels have timeframe-specific fields
-                        sample_level = levels[0]
-                        timeframe_fields = ['cluster_strength', 'timeframe_impact']
-                        has_timeframe_fields = all(field in sample_level for field in timeframe_fields)
-                        
-                        if has_timeframe_fields:
-                            # Check if timeframe_impact matches requested timeframe
-                            if sample_level.get('timeframe_impact') == timeframe:
-                                self.log_test(
-                                    test_name, 
-                                    "PASS", 
-                                    f"Liquidation heatmap 2D with {timeframe} timeframe: {len(levels)} levels, cluster strength: {sample_level.get('cluster_strength')}",
-                                    f"Valid 2D heatmap with {timeframe} timeframe features",
-                                    f"{len(levels)} levels with timeframe impact"
-                                )
-                            else:
-                                self.log_test(test_name, "WARN", f"Timeframe impact mismatch: expected {timeframe}, got {sample_level.get('timeframe_impact')}")
-                        else:
-                            self.log_test(test_name, "WARN", f"Missing timeframe-specific fields: {timeframe_fields}")
-                    else:
-                        self.log_test(test_name, "FAIL", f"No liquidation levels found for {timeframe}")
-                else:
-                    self.log_test(test_name, "FAIL", f"Missing liquidation_levels in response for {timeframe}")
-
-    async def test_directional_bias_calculations(self):
-        """Test directional bias calculations with different timeframes"""
-        test_name = "Directional Bias Calculations"
+        # First get real-time data
+        realtime_response = await self.test_api_endpoint("/realtime/latest")
         
-        # Test with BTC/USDT for different timeframes
-        symbol = "BTC/USDT"
-        timeframes = ['1day', '3day', '1week']
-        bias_results = []
+        if not realtime_response['success']:
+            self.log_test(test_name, "FAIL", "Could not get real-time data for AI integration test")
+            return
         
-        for timeframe in timeframes:
-            response = await self.test_api_endpoint(f"/enhanced-smart-money/data?symbol={symbol}&timeframe={timeframe}")
+        realtime_data = realtime_response['data'].get('data', {})
+        btc_price = realtime_data.get('BTC/USDT', {}).get('price', 0)
+        
+        if btc_price == 0:
+            self.log_test(test_name, "FAIL", "No BTC real-time price available")
+            return
+        
+        # Now test AI analysis with current market context
+        analyze_data = {
+            "symbol": "BTC/USDT",
+            "timeframe": "1h",
+            "analysis_type": "realtime",
+            "current_price": btc_price
+        }
+        
+        ai_response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=analyze_data, auth=True)
+        
+        if ai_response['success']:
+            analysis = ai_response['data'].get('analysis', '')
+            # Check if analysis mentions current price or real-time data
+            realtime_indicators = ['current', 'price', str(int(btc_price)), 'real-time', 'live']
+            realtime_mentions = sum(1 for indicator in realtime_indicators if indicator.lower() in analysis.lower())
             
-            if response['success'] and response['data'].get('status') == 'success':
-                data = response['data']
-                # Handle nested data structure
-                nested_data = data.get('data', {})
-                heatmap_2d = nested_data.get('liquidation_heatmap_2d', {})
-                
-                # Check for directional bias in summary
-                summary = heatmap_2d.get('summary', {})
-                if 'directional_bias' in summary:
-                    bias = summary['directional_bias']
-                    bias_results.append({
-                        'timeframe': timeframe,
-                        'bias': bias.get('bias', 'unknown'),
-                        'strength': bias.get('strength', 0),
-                        'above_ratio': bias.get('above_ratio', 0),
-                        'below_ratio': bias.get('below_ratio', 0)
-                    })
-        
-        if len(bias_results) >= 2:
-            # Check if different timeframes return different data (they should)
-            different_data = False
-            for i in range(1, len(bias_results)):
-                if (bias_results[i]['strength'] != bias_results[0]['strength'] or 
-                    bias_results[i]['above_ratio'] != bias_results[0]['above_ratio']):
-                    different_data = True
-                    break
-            
-            if different_data:
-                bias_summary = ', '.join([f"{r['timeframe']}: {r['bias']} ({r['strength']:.2f})" for r in bias_results])
+            if realtime_mentions >= 2:
                 self.log_test(
                     test_name, 
                     "PASS", 
-                    f"Directional bias varies by timeframe: {bias_summary}",
-                    "Different bias calculations for different timeframes",
-                    f"{len(bias_results)} timeframes with varying bias data"
+                    f"AI analysis integrated with real-time data: {realtime_mentions} real-time references",
+                    "AI analysis incorporating current market prices",
+                    f"Real-time integration: {realtime_mentions} references"
                 )
             else:
+                self.log_test(test_name, "WARN", "Limited real-time data integration in AI analysis")
+        else:
+            self.log_test(test_name, "FAIL", f"AI analysis with real-time data failed: {ai_response.get('error')}")
+
+    async def test_cross_module_communication(self):
+        """Test cross-module communication (AI ↔ Paper Trading ↔ Smart Money)"""
+        test_name = "Cross-Module Communication"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token for cross-module test")
+            return
+        
+        # Test 1: Get Smart Money data
+        smart_money_response = await self.test_api_endpoint("/smart-money/all?symbols=BTC/USDT")
+        
+        if not smart_money_response['success']:
+            self.log_test(test_name, "FAIL", "Smart Money module not responding")
+            return
+        
+        # Test 2: Use Smart Money data in AI analysis
+        smart_data = smart_money_response['data'].get('data', {})
+        btc_smart_data = smart_data.get('BTC/USDT', {})
+        
+        ai_context = {
+            "symbol": "BTC/USDT",
+            "analysis_type": "smart_money_enhanced",
+            "smart_money_context": {
+                "has_liquidation_data": 'liquidation_heatmap' in btc_smart_data,
+                "has_oi_data": 'open_interest' in btc_smart_data,
+                "has_funding_data": 'funding_rates' in btc_smart_data
+            }
+        }
+        
+        ai_response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=ai_context, auth=True)
+        
+        if not ai_response['success']:
+            self.log_test(test_name, "FAIL", "AI module not responding to Smart Money context")
+            return
+        
+        # Test 3: Check if AI can influence Paper Trading decisions
+        analysis = ai_response['data'].get('analysis', '')
+        recommendation = ai_response['data'].get('recommendation', '')
+        
+        if recommendation in ['long', 'short'] and len(analysis) > 50:
+            # Test if we can place order based on AI recommendation
+            order_side = "buy" if recommendation == "long" else "sell"
+            order_data = {
+                "symbol": "BTC/USDT",
+                "side": order_side,
+                "order_type": "market",
+                "quantity": 0.001,
+                "leverage": 1
+            }
+            
+            order_response = await self.test_api_endpoint("/trading/order", method="POST", data=order_data, auth=True)
+            
+            if order_response['success']:
                 self.log_test(
                     test_name, 
-                    "WARN", 
-                    f"Directional bias appears identical across timeframes",
-                    "Different bias for different timeframes",
-                    "Same bias values across timeframes"
+                    "PASS", 
+                    f"Cross-module communication working: Smart Money → AI → Paper Trading ({recommendation})",
+                    "Seamless data flow between all modules",
+                    "All modules communicating successfully"
                 )
+            else:
+                self.log_test(test_name, "WARN", "Smart Money → AI working, but Paper Trading integration failed")
         else:
-            self.log_test(test_name, "FAIL", f"Insufficient bias data collected: {len(bias_results)} timeframes")
+            self.log_test(test_name, "WARN", "Smart Money → AI communication limited")
 
-    async def test_timeframe_validation(self):
-        """Test timeframe parameter validation"""
-        test_name = "Timeframe Parameter Validation"
+    # ============= PERFORMANCE & STABILITY TESTS =============
+    
+    async def test_gemini_api_integration(self):
+        """Test Gemini API integration for AI analysis"""
+        test_name = "Gemini API Integration"
         
-        symbol = "BTC/USDT"
-        valid_timeframes = ['1day', '3day', '1week']
-        invalid_timeframes = ['1hour', '5min', 'invalid']
+        # Test pattern analysis which should use Gemini
+        pattern_data = {
+            "symbol": "BTC/USDT",
+            "timeframe": "1h",
+            "limit": 100,
+            "indicators": ["rsi", "ema50", "ema200"]
+        }
         
-        valid_count = 0
-        invalid_handled = 0
+        response = await self.test_api_endpoint("/analyze-patterns", method="POST", data=pattern_data)
         
-        # Test valid timeframes
-        for timeframe in valid_timeframes:
-            response = await self.test_api_endpoint(f"/enhanced-smart-money/data?symbol={symbol}&timeframe={timeframe}")
-            if response['success'] and response['data'].get('status') == 'success':
-                valid_count += 1
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"Pattern analysis API failed: {response.get('error')}")
+            return
         
-        # Test invalid timeframes (should return error or default)
-        for timeframe in invalid_timeframes:
-            response = await self.test_api_endpoint(f"/enhanced-smart-money/data?symbol={symbol}&timeframe={timeframe}")
-            if not response['success'] or response['data'].get('status') != 'success':
-                invalid_handled += 1
+        data = response['data']
         
-        if valid_count == len(valid_timeframes) and invalid_handled == len(invalid_timeframes):
+        # Check if Gemini AI analysis is present
+        ai_analysis = data.get('ai_analysis', '')
+        
+        if ai_analysis and len(ai_analysis) > 100 and 'fehler' not in ai_analysis.lower():
+            # Check if analysis is in German (Gemini should respond in German)
+            german_indicators = ['analyse', 'bitcoin', 'preis', 'trend', 'empfehlung']
+            german_count = sum(1 for word in german_indicators if word.lower() in ai_analysis.lower())
+            
+            if german_count >= 2:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Gemini API integration working: {len(ai_analysis)} chars, German analysis",
+                    "Gemini AI providing detailed German analysis",
+                    f"Analysis length: {len(ai_analysis)}, German indicators: {german_count}"
+                )
+            else:
+                self.log_test(test_name, "WARN", "Gemini responding but may not be in German")
+        else:
+            self.log_test(test_name, "FAIL", f"Gemini API integration failed or error in response")
+
+    async def test_all_30_crypto_assets_availability(self):
+        """Test that all 30 crypto assets are available"""
+        test_name = "All 30 Crypto Assets Availability"
+        
+        response = await self.test_api_endpoint("/trading/symbols")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"Trading symbols API failed: {response.get('error')}")
+            return
+        
+        data = response['data']
+        symbols = data.get('symbols', [])
+        
+        # Expected top 30 crypto assets
+        expected_assets = [
+            'BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'XRP/USDT', 'ADA/USDT', 'SOL/USDT',
+            'DOGE/USDT', 'DOT/USDT', 'MATIC/USDT', 'LTC/USDT', 'AVAX/USDT', 'LINK/USDT',
+            'UNI/USDT', 'ATOM/USDT', 'AAVE/USDT', 'ALGO/USDT', 'VET/USDT', 'ICP/USDT',
+            'FIL/USDT', 'TRX/USDT', 'ETC/USDT', 'XLM/USDT', 'THETA/USDT', 'FTT/USDT',
+            'HBAR/USDT', 'EGLD/USDT', 'NEAR/USDT', 'FLOW/USDT', 'XTZ/USDT', 'MANA/USDT'
+        ]
+        
+        available_assets = []
+        if isinstance(symbols, list):
+            for symbol_data in symbols:
+                if isinstance(symbol_data, dict):
+                    symbol = symbol_data.get('symbol', '')
+                else:
+                    symbol = str(symbol_data)
+                
+                if symbol in expected_assets:
+                    available_assets.append(symbol)
+        
+        if len(available_assets) >= 25:  # At least 25 out of 30
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"Timeframe validation working: {valid_count} valid accepted, {invalid_handled} invalid rejected",
-                "Valid timeframes accepted, invalid rejected",
-                f"{valid_count}/{len(valid_timeframes)} valid, {invalid_handled}/{len(invalid_timeframes)} invalid handled"
+                f"Excellent crypto asset coverage: {len(available_assets)}/30 top assets available",
+                "All 30 top crypto assets available for trading",
+                f"{len(available_assets)} assets available"
             )
-        elif valid_count == len(valid_timeframes):
+        elif len(available_assets) >= 20:
             self.log_test(
                 test_name, 
                 "WARN", 
-                f"Valid timeframes work but invalid handling unclear: {invalid_handled}/{len(invalid_timeframes)} invalid handled",
-                "All timeframes properly validated",
-                f"Valid: {valid_count}/{len(valid_timeframes)}, Invalid handled: {invalid_handled}/{len(invalid_timeframes)}"
+                f"Good crypto asset coverage: {len(available_assets)}/30 top assets available",
+                "All 30 top crypto assets",
+                f"{len(available_assets)} assets available"
             )
         else:
-            self.log_test(
-                test_name, 
-                "FAIL", 
-                f"Timeframe validation issues: {valid_count}/{len(valid_timeframes)} valid work, {invalid_handled}/{len(invalid_timeframes)} invalid handled",
-                "All valid timeframes should work",
-                f"Only {valid_count} valid timeframes working"
-            )
+            self.log_test(test_name, "FAIL", f"Limited crypto asset coverage: only {len(available_assets)}/30 available")
+
+    async def test_realtime_price_updates_stability(self):
+        """Test real-time price updates stability"""
+        test_name = "Real-time Price Updates Stability"
+        
+        # Test multiple calls to check consistency
+        prices_over_time = []
+        
+        for i in range(3):
+            response = await self.test_api_endpoint("/realtime/latest")
+            if response['success']:
+                data = response['data'].get('data', {})
+                btc_price = data.get('BTC/USDT', {}).get('price', 0)
+                if btc_price > 0:
+                    prices_over_time.append(btc_price)
+            
+            if i < 2:  # Don't wait after last iteration
+                await asyncio.sleep(2)  # Wait 2 seconds between calls
+        
+        if len(prices_over_time) >= 2:
+            # Check if prices are updating (some variation expected)
+            price_variation = max(prices_over_time) - min(prices_over_time)
+            avg_price = sum(prices_over_time) / len(prices_over_time)
+            variation_percent = (price_variation / avg_price) * 100
+            
+            if 0 <= variation_percent <= 5:  # Reasonable variation (0-5%)
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Stable real-time updates: {len(prices_over_time)} samples, {variation_percent:.2f}% variation",
+                    "Stable real-time price updates with reasonable variation",
+                    f"Price stability: {variation_percent:.2f}% variation"
+                )
+            elif variation_percent <= 10:
+                self.log_test(test_name, "WARN", f"Real-time updates working but high variation: {variation_percent:.2f}%")
+            else:
+                self.log_test(test_name, "FAIL", f"Unstable real-time updates: {variation_percent:.2f}% variation")
+        else:
+            self.log_test(test_name, "FAIL", "Could not collect sufficient price samples for stability test")
+
+    async def test_ki_based_trade_analysis_performance(self):
+        """Test KI-based trade analysis performance"""
+        test_name = "KI-based Trade Analysis Performance"
+        
+        start_time = datetime.now()
+        
+        # Test AI analysis performance
+        analyze_data = {
+            "symbol": "BTC/USDT",
+            "timeframe": "1h",
+            "analysis_type": "comprehensive"
+        }
+        
+        response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=analyze_data, auth=True)
+        
+        end_time = datetime.now()
+        response_time = (end_time - start_time).total_seconds()
+        
+        if response['success']:
+            data = response['data']
+            analysis = data.get('analysis', '')
+            
+            # Check both response time and quality
+            if response_time < 10 and len(analysis) > 100:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"KI analysis performance excellent: {response_time:.2f}s, {len(analysis)} chars",
+                    "Fast KI analysis with comprehensive output",
+                    f"Response time: {response_time:.2f}s"
+                )
+            elif response_time < 20:
+                self.log_test(test_name, "WARN", f"KI analysis acceptable: {response_time:.2f}s response time")
+            else:
+                self.log_test(test_name, "FAIL", f"KI analysis too slow: {response_time:.2f}s")
+        else:
+            self.log_test(test_name, "FAIL", f"KI analysis failed: {response.get('error')}")
 
     async def run_all_tests(self):
-        """Run all test cases for Smart Money Indicators system"""
+        """Run all test cases for Trading System with Real-time Data and AI Integration"""
         await self.setup()
         
         try:
-            # Core Smart Money functionality tests
-            await self.test_smart_money_all_api()
-            await self.test_liquidation_heatmap_api()
-            await self.test_open_interest_api()
-            await self.test_funding_rates_api()
-            await self.test_focus_symbols_api()
-            await self.test_data_quality_validation()
-            await self.test_data_sources_verification()
-            await self.test_api_performance()
+            print("🔄 Running Real-time Integration Tests...")
+            await self.test_realtime_latest_all_assets()
+            await self.test_realtime_live_prices_verification()
+            await self.test_smart_money_extended_assets()
             
-            # Enhanced Smart Money functionality tests (NEW)
-            await self.test_enhanced_smart_money_supported_symbols()
-            await self.test_enhanced_smart_money_data_with_timeframes()
-            await self.test_enhanced_liquidation_heatmap_2d_timeframes()
-            await self.test_directional_bias_calculations()
-            await self.test_timeframe_validation()
+            print("\n🤖 Running AI Trading Engine Tests...")
+            await self.test_ai_trading_analyze_btc()
+            await self.test_ai_trading_analyze_eth_with_context()
+            await self.test_ai_trading_chat_commands()
+            
+            print("\n📊 Running Enhanced Smart Money Tests...")
+            await self.test_enhanced_smart_money_avax_1day()
+            await self.test_enhanced_smart_money_link_3day()
+            await self.test_enhanced_smart_money_dot_1week()
+            await self.test_enhanced_smart_money_top30_support()
+            
+            print("\n🔗 Running Integration Tests...")
+            await self.test_paper_trading_with_live_prices()
+            await self.test_ai_trading_with_realtime_data()
+            await self.test_cross_module_communication()
+            
+            print("\n⚡ Running Performance & Stability Tests...")
+            await self.test_gemini_api_integration()
+            await self.test_all_30_crypto_assets_availability()
+            await self.test_realtime_price_updates_stability()
+            await self.test_ki_based_trade_analysis_performance()
             
         finally:
             await self.cleanup()
@@ -902,9 +933,9 @@ class SmartMoneyTester:
     
     def print_summary(self):
         """Print test summary"""
-        print("=" * 60)
-        print("📊 SMART MONEY INDICATORS TEST SUMMARY")
-        print("=" * 60)
+        print("=" * 80)
+        print("📊 TRADING SYSTEM WITH REAL-TIME DATA AND AI INTEGRATION TEST SUMMARY")
+        print("=" * 80)
         
         total_tests = len(self.test_results)
         passed_tests = len([r for r in self.test_results if r['status'] == 'PASS'])
@@ -916,6 +947,37 @@ class SmartMoneyTester:
         print(f"❌ Failed: {failed_tests}")
         print(f"⚠️  Warnings: {warned_tests}")
         print(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
+        print()
+        
+        # Categorize results
+        categories = {
+            'Real-time Integration': [],
+            'AI Trading Engine': [],
+            'Enhanced Smart Money': [],
+            'Integration Tests': [],
+            'Performance & Stability': []
+        }
+        
+        for result in self.test_results:
+            test_name = result['test']
+            if 'Real-time' in test_name or 'Smart Money Extended' in test_name:
+                categories['Real-time Integration'].append(result)
+            elif 'AI Trading' in test_name:
+                categories['AI Trading Engine'].append(result)
+            elif 'Enhanced Smart Money' in test_name:
+                categories['Enhanced Smart Money'].append(result)
+            elif 'Integration' in test_name or 'Cross-Module' in test_name:
+                categories['Integration Tests'].append(result)
+            else:
+                categories['Performance & Stability'].append(result)
+        
+        # Print category summaries
+        for category, results in categories.items():
+            if results:
+                passed = len([r for r in results if r['status'] == 'PASS'])
+                total = len(results)
+                print(f"📋 {category}: {passed}/{total} passed ({(passed/total)*100:.0f}%)")
+        
         print()
         
         # Show failed tests
@@ -934,11 +996,11 @@ class SmartMoneyTester:
                     print(f"  - {result['test']}: {result['details']}")
             print()
         
-        print("=" * 60)
+        print("=" * 80)
 
 async def main():
     """Main test runner"""
-    tester = SmartMoneyTester()
+    tester = TradingSystemTester()
     await tester.run_all_tests()
 
 if __name__ == "__main__":
