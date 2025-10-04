@@ -77,7 +77,7 @@ class AITradingEngine:
         
         # Initialize Gemini model with custom settings for trading
         self.model = genai.GenerativeModel(
-            model_name="gemini-1.5-pro",
+            model_name="gemini-2.5-pro",
             generation_config={
                 "temperature": 0.2,  # Lower temperature for more consistent trading decisions
                 "top_p": 0.8,
