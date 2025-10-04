@@ -339,13 +339,11 @@ class RealTimeWebSocketStreamer:
             # Store in ticks collection
             await self.db.real_time_ticks.insert_one(tick_doc)
             
-            # Keep only recent ticks (last 1000 per symbol)
+            # Keep only recent ticks (last 1 hour)
+            one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
             await self.db.real_time_ticks.delete_many({
                 'symbol': tick_data['symbol'],
-                'timestamp': {
-                    '$lt': (datetime.now(timezone.utc) - 
-                           pd.Timedelta(hours=1)).isoformat()
-                }
+                'timestamp': {'$lt': one_hour_ago.isoformat()}
             })
             
         except Exception as e:
