@@ -1876,6 +1876,8 @@ async def startup_event():
 async def shutdown_event():
     if enhanced_streamer:
         await enhanced_streamer.stop_streams()
+    if smart_money:
+        await smart_money.close_session()
     if exchange:
         await exchange.close()
     if redis_client:
