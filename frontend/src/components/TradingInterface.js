@@ -321,6 +321,13 @@ const TradingInterface = () => {
                         <div className="current-price">
                             Preis: ${formatNumber(getCurrentPrice(selectedSymbol), 4)}
                         </div>
+                        <button 
+                            onClick={() => getAiAnalysis(selectedSymbol)}
+                            disabled={analysisLoading}
+                            className="ai-analysis-btn"
+                        >
+                            {analysisLoading ? 'Analysiere...' : '🤖 KI Analyse'}
+                        </button>
                     </div>
 
                     <div className="order-form">
