@@ -80,12 +80,20 @@ const TradingInterface = () => {
 
     const fetchCurrentPrices = async () => {
         try {
-            // Get prices for all symbols from real-time API
+            // Get prices for all Top 30 symbols from real-time API
             const symbolList = symbols.map(s => s.symbol).join(',');
             if (symbolList) {
                 const response = await axios.get(`${BACKEND_URL}/api/realtime/latest?symbols=${symbolList}`);
                 if (response.data.status === 'success') {
                     setCurrentPrices(response.data.data);
+                    
+                    // Update positions with current prices for real-time PnL
+                    setPositions(prevPositions => 
+                        prevPositions.map(position => ({
+                            ...position,
+                            current_price: response.data.data[position.symbol]?.price || position.mark_price
+                        }))
+                    );
                 }
             }
         } catch (err) {
