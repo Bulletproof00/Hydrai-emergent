@@ -72,6 +72,22 @@ class SmartMoneyIndicators:
         
         self.last_update = {}
 
+    def _normalize_symbol(self, symbol: str) -> str:
+        """Normalize symbol format to BTC/USDT style"""
+        # If symbol is already in BTC/USDT format, return as is
+        if '/' in symbol:
+            return symbol
+        
+        # Convert BTCUSDT to BTC/USDT
+        symbol_map = {
+            'BTCUSDT': 'BTC/USDT',
+            'ETHUSDT': 'ETH/USDT',
+            'SOLUSDT': 'SOL/USDT',
+            'XRPUSDT': 'XRP/USDT'
+        }
+        
+        return symbol_map.get(symbol, symbol)
+
     async def get_session(self):
         """Get or create aiohttp session"""
         if self.session is None:
