@@ -1052,6 +1052,38 @@ async def get_dominance_metrics():
         logging.error(f"Dominance error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/gaps/{symbol}")
+async def get_cme_gaps(symbol: str):
+    """Get CME gaps for a symbol"""
+    try:
+        from modules.gap_detection import GapDetector
+        from modules.market_data import MarketDataFetcher
+        
+        symbol = symbol.replace('-', '/')
+        
+        # Get historical data
+        fetcher = MarketDataFetcher(exchange, db)
+        stored_data = await fetcher.get_stored_ohlcv(symbol, '1d', 500)
+        
+        if not stored_data:
+            return {"gaps": []}
+        
+        # Detect gaps
+        detector = GapDetector(db)
+        gaps = detector.detect_gaps(stored_data)
+        
+        # Store gaps
+        await detector.store_gaps(symbol, '1d', gaps)
+        
+        return {
+            "symbol": symbol,
+            "gaps_detected": len(gaps),
+            "gaps": gaps
+        }
+    except Exception as e:
+        logging.error(f"Gap detection error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/data/update")
 async def update_market_data(symbols: list = None, timeframes: list = None):
     """Update market data for specified symbols and timeframes"""
