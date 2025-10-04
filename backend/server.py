@@ -67,6 +67,9 @@ enhanced_smart_money = None
 # Paper Trading Engine
 paper_trading = None
 
+# AI Trading Engine
+ai_trading = None
+
 # Create the main app without a prefix
 app = FastAPI()
 
