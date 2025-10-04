@@ -696,6 +696,10 @@ class EnhancedSmartMoneyIndicators:
 
     async def get_enhanced_smart_money_data(self, symbol: str) -> Dict:
         """Get all enhanced smart money data for a symbol"""
+        return await self.get_enhanced_smart_money_data_with_timeframe(symbol, "1day")
+
+    async def get_enhanced_smart_money_data_with_timeframe(self, symbol: str, timeframe: str = "1day") -> Dict:
+        """Get all enhanced smart money data for a symbol with timeframe support"""
         try:
             if symbol not in self.supported_symbols:
                 return {
@@ -705,23 +709,25 @@ class EnhancedSmartMoneyIndicators:
             
             # Check if data needs refresh (15 minutes)
             needs_refresh = True
-            if symbol in self.last_update:
-                time_diff = datetime.now(timezone.utc) - self.last_update[symbol]
+            cache_key = f"{symbol}_{timeframe}"
+            if cache_key in self.last_update:
+                time_diff = datetime.now(timezone.utc) - self.last_update[cache_key]
                 needs_refresh = time_diff.total_seconds() > 900  # 15 minutes
             
             if needs_refresh:
-                # Fetch fresh enhanced data
-                liquidation_data = await self.fetch_enhanced_liquidation_heatmap(symbol)
+                # Fetch fresh enhanced data with timeframe
+                liquidation_data = await self.fetch_enhanced_liquidation_heatmap_with_timeframe(symbol, timeframe)
                 oi_data = await self.fetch_enhanced_open_interest(symbol)
                 
-                self.last_update[symbol] = datetime.now(timezone.utc)
+                self.last_update[cache_key] = datetime.now(timezone.utc)
             else:
                 # Use cached data
-                liquidation_data = self.cache.get('liquidation_heatmap_2d', {}).get(symbol)
+                liquidation_data = self.cache.get('liquidation_heatmap_2d', {}).get(cache_key)
                 oi_data = self.cache.get('open_interest_detailed', {}).get(symbol)
             
             return {
                 'symbol': symbol,
+                'timeframe': timeframe,
                 'liquidation_heatmap_2d': liquidation_data,
                 'open_interest_detailed': oi_data,
                 'timestamp': datetime.now(timezone.utc).isoformat(),
@@ -729,7 +735,7 @@ class EnhancedSmartMoneyIndicators:
             }
             
         except Exception as e:
-            logger.error(f"Error getting enhanced smart money data for {symbol}: {e}")
+            logger.error(f"Error getting enhanced smart money data for {symbol} ({timeframe}): {e}")
             return {
                 'error': str(e),
                 'status': 'error'
