@@ -53,23 +53,31 @@ const EnhancedSmartMoneyPanel = () => {
                 currentPrice = priceResponse.data.data[selectedSymbol].price;
             }
             
-            // Then fetch Smart Money data
-            const response = await axios.get(`${BACKEND_URL}/api/smart-money/all?symbols=${selectedSymbol}`);
+            // Then fetch Enhanced Smart Money data with timeframe
+            const encodedSymbol = encodeURIComponent(selectedSymbol);
+            const response = await axios.get(`${BACKEND_URL}/api/enhanced-smart-money/data/${encodedSymbol}?timeframe=${selectedTimeframe}`);
             
             if (response.data.status === 'success') {
-                const symbolData = response.data.data[selectedSymbol];
-                if (symbolData) {
-                    const enhancedData = transformToEnhancedFormat(symbolData, selectedSymbol, currentPrice);
+                const enhancedData = response.data.data;
+                if (enhancedData) {
+                    // Update current price if we have real-time data
+                    if (currentPrice && enhancedData.liquidation_heatmap_2d) {
+                        enhancedData.liquidation_heatmap_2d.current_price = currentPrice;
+                    }
+                    if (currentPrice && enhancedData.open_interest_detailed) {
+                        enhancedData.open_interest_detailed.current_price = currentPrice;
+                    }
+                    
                     setSmartMoneyData(enhancedData);
                 } else {
-                    setError('No data available for selected symbol');
+                    setError('No enhanced data available for selected symbol');
                 }
             } else {
-                setError(response.data.message || 'Failed to fetch smart money data');
+                setError(response.data.message || 'Failed to fetch enhanced smart money data');
             }
         } catch (err) {
-            console.error('Smart money data fetch error:', err);
-            setError('Failed to load smart money data');
+            console.error('Enhanced smart money data fetch error:', err);
+            setError('Failed to load enhanced smart money data');
         } finally {
             setLoading(false);
         }
