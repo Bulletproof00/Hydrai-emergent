@@ -457,21 +457,57 @@ const EnhancedSmartMoneyPanel = () => {
                     </div>
                 </div>
 
+                {summary.directional_bias && (
+                    <div className="directional-analysis-card">
+                        <div className="analysis-header">
+                            <h4>📊 Directional Analysis</h4>
+                        </div>
+                        <div className="bias-breakdown">
+                            <div className={`bias-main ${summary.directional_bias.bias}`}>
+                                <div className="bias-text">
+                                    {summary.directional_bias.bias.toUpperCase()} BIAS
+                                </div>
+                                <div className="bias-percentage">
+                                    {(summary.directional_bias.strength * 100).toFixed(0)}% Confidence
+                                </div>
+                            </div>
+                            <div className="bias-ratios">
+                                <div className="ratio-item above">
+                                    <span className="ratio-label">Above:</span>
+                                    <span className="ratio-value">{(summary.directional_bias.above_ratio * 100).toFixed(1)}%</span>
+                                </div>
+                                <div className="ratio-item below">
+                                    <span className="ratio-label">Below:</span>
+                                    <span className="ratio-value">{(summary.directional_bias.below_ratio * 100).toFixed(1)}%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bias-recommendation">
+                            {summary.directional_bias.recommendation}
+                        </div>
+                    </div>
+                )}
+
                 <div className="liquidation-summary-cards">
                     <div className="summary-card above">
                         <div className="card-header">
                             <span className="card-title">Above Current Price</span>
-                            <span className="card-subtitle">Short Liquidations</span>
+                            <span className="card-subtitle">Resistance Clusters</span>
                         </div>
                         <div className="card-value">
                             ${(summary.total_liquidations_above / 1000000)?.toFixed(1)}M
                         </div>
                         <div className="card-levels">
-                            {summary.levels_count_above} levels
+                            {summary.levels_count_above} clusters
                         </div>
                         {summary.strongest_level_above && (
                             <div className="card-strongest">
-                                Strongest: ${summary.strongest_level_above.price?.toFixed(2)}
+                                Key Level: ${summary.strongest_level_above.price?.toFixed(2)}
+                            </div>
+                        )}
+                        {summary.directional_bias && (
+                            <div className="card-near-clusters">
+                                Near Price: {summary.directional_bias.near_clusters_above} clusters
                             </div>
                         )}
                     </div>
@@ -479,17 +515,22 @@ const EnhancedSmartMoneyPanel = () => {
                     <div className="summary-card below">
                         <div className="card-header">
                             <span className="card-title">Below Current Price</span>
-                            <span className="card-subtitle">Long Liquidations</span>
+                            <span className="card-subtitle">Support Clusters</span>
                         </div>
                         <div className="card-value">
                             ${(summary.total_liquidations_below / 1000000)?.toFixed(1)}M
                         </div>
                         <div className="card-levels">
-                            {summary.levels_count_below} levels
+                            {summary.levels_count_below} clusters
                         </div>
                         {summary.strongest_level_below && (
                             <div className="card-strongest">
-                                Strongest: ${summary.strongest_level_below.price?.toFixed(2)}
+                                Key Level: ${summary.strongest_level_below.price?.toFixed(2)}
+                            </div>
+                        )}
+                        {summary.directional_bias && (
+                            <div className="card-near-clusters">
+                                Near Price: {summary.directional_bias.near_clusters_below} clusters
                             </div>
                         )}
                     </div>
