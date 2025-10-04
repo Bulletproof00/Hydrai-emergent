@@ -783,8 +783,10 @@ class SmartMoneyTester:
                 nested_data = data.get('data', {})
                 heatmap_2d = nested_data.get('liquidation_heatmap_2d', {})
                 
-                if 'directional_bias' in heatmap_2d:
-                    bias = heatmap_2d['directional_bias']
+                # Check for directional bias in summary
+                summary = heatmap_2d.get('summary', {})
+                if 'directional_bias' in summary:
+                    bias = summary['directional_bias']
                     bias_results.append({
                         'timeframe': timeframe,
                         'bias': bias.get('bias', 'unknown'),
