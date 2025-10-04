@@ -49,76 +49,8 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
   };
 
   const initChart = () => {
-    if (!chartContainerRef.current) return;
-
-    const chartInstance = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth,
-      height: 600,
-      layout: {
-        background: { color: '#0f172a' },
-        textColor: '#94a3b8',
-      },
-      grid: {
-        vertLines: { color: 'rgba(255, 255, 255, 0.05)' },
-        horzLines: { color: 'rgba(255, 255, 255, 0.05)' },
-      },
-      crosshair: {
-        mode: 1,
-      },
-      rightPriceScale: {
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-      },
-      timeScale: {
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        timeVisible: true,
-        secondsVisible: false,
-      },
-    });
-
-    chart.current = chartInstance;
-
-    // Candlestick series
-    const candleSeries = chartInstance.addCandlestickSeries({
-      upColor: '#10b981',
-      downColor: '#ef4444',
-      borderUpColor: '#10b981',
-      borderDownColor: '#ef4444',
-      wickUpColor: '#10b981',
-      wickDownColor: '#ef4444',
-    });
-    candlestickSeries.current = candleSeries;
-
-    // Volume series
-    const volSeries = chartInstance.addHistogramSeries({
-      color: '#3b82f6',
-      priceFormat: {
-        type: 'volume',
-      },
-      priceScaleId: '',
-      scaleMargins: {
-        top: 0.8,
-        bottom: 0,
-      },
-    });
-    volumeSeries.current = volSeries;
-
-    // Handle resize
-    const handleResize = () => {
-      if (chartInstance && chartContainerRef.current) {
-        chartInstance.applyOptions({
-          width: chartContainerRef.current.clientWidth,
-        });
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (chartInstance) {
-        chartInstance.remove();
-      }
-    };
+    // Chart will be rendered using Recharts instead
+    return;
   };
 
   const loadChartData = async () => {
