@@ -1405,6 +1405,27 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+async def update_market_data_background():
+    """Background task to update market data every 5 minutes"""
+    while True:
+        try:
+            await asyncio.sleep(300)  # 5 minutes
+            
+            from modules.market_data import MarketDataFetcher
+            fetcher = MarketDataFetcher(exchange, db)
+            
+            # Update top coins with recent data
+            for symbol in TOP_COINS[:5]:  # Top 5 to avoid rate limits
+                try:
+                    await fetcher.fetch_and_store_crypto(symbol, '1h', 100)
+                    await asyncio.sleep(1)  # Rate limit protection
+                except Exception as e:
+                    logger.error(f"Background update error for {symbol}: {str(e)}")
+            
+            logger.info("Background market data update completed")
+        except Exception as e:
+            logger.error(f"Background update task error: {str(e)}")
+
 @app.on_event("startup")
 async def startup_event():
     global exchange, redis_client
@@ -1425,7 +1446,6 @@ async def startup_event():
             logger.info("Binance exchange initialized")
         except Exception as e2:
             logger.error(f"Exchange initialization failed: {str(e2)}")
-            # Use mock data as fallback
             exchange = None
     
     # Initialize Redis
@@ -1434,6 +1454,10 @@ async def startup_event():
         logger.info("Redis connected")
     except Exception as e:
         logger.warning(f"Redis connection failed: {str(e)}")
+    
+    # Start background data update task
+    asyncio.create_task(update_market_data_background())
+    logger.info("Background data update task started")
     
     logger.info("Hydra AI started successfully!")
 
