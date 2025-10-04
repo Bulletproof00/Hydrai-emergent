@@ -1,11 +1,12 @@
 """
-Market Data Module - Fetches and stores OHLCV data
+Market Data Module - Fetches and stores OHLCV data with real-time enhancements
 """
 import ccxt.async_support as ccxt
 import yfinance as yf
 from datetime import datetime, timezone, timedelta
 import logging
 import asyncio
+from .real_time_market_data import RealTimeMarketDataFetcher
 
 logger = logging.getLogger(__name__)
 
