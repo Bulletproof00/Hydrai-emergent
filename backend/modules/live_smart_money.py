@@ -42,27 +42,40 @@ class LiveSmartMoneyDataFetcher:
         # Symbol mappings for ALL Top 30 cryptocurrencies
         self.symbol_mappings = {
             # Top 10
-            'BTC/USDT': {
-                'binance': 'BTCUSDT', 'coinglass': 'BTC', 'coinank': 'BTCUSDT', 'cryptocompare': 'BTC'
-            },
-            'ETH/USDT': {
-                'binance': 'ETHUSDT',
-                'coinglass': 'ETH', 
-                'coinank': 'ETHUSDT',
-                'cryptocompare': 'ETH'
-            },
-            'SOL/USDT': {
-                'binance': 'SOLUSDT',
-                'coinglass': 'SOL',
-                'coinank': 'SOLUSDT', 
-                'cryptocompare': 'SOL'
-            },
-            'XRP/USDT': {
-                'binance': 'XRPUSDT',
-                'coinglass': 'XRP',
-                'coinank': 'XRPUSDT',
-                'cryptocompare': 'XRP'
-            }
+            'BTC/USDT': {'binance': 'BTCUSDT', 'coinglass': 'BTC', 'coinank': 'BTCUSDT', 'cryptocompare': 'BTC'},
+            'ETH/USDT': {'binance': 'ETHUSDT', 'coinglass': 'ETH', 'coinank': 'ETHUSDT', 'cryptocompare': 'ETH'},
+            'BNB/USDT': {'binance': 'BNBUSDT', 'coinglass': 'BNB', 'coinank': 'BNBUSDT', 'cryptocompare': 'BNB'},
+            'SOL/USDT': {'binance': 'SOLUSDT', 'coinglass': 'SOL', 'coinank': 'SOLUSDT', 'cryptocompare': 'SOL'},
+            'XRP/USDT': {'binance': 'XRPUSDT', 'coinglass': 'XRP', 'coinank': 'XRPUSDT', 'cryptocompare': 'XRP'},
+            'DOGE/USDT': {'binance': 'DOGEUSDT', 'coinglass': 'DOGE', 'coinank': 'DOGEUSDT', 'cryptocompare': 'DOGE'},
+            'ADA/USDT': {'binance': 'ADAUSDT', 'coinglass': 'ADA', 'coinank': 'ADAUSDT', 'cryptocompare': 'ADA'},
+            'MATIC/USDT': {'binance': 'MATICUSDT', 'coinglass': 'MATIC', 'coinank': 'MATICUSDT', 'cryptocompare': 'MATIC'},
+            'AVAX/USDT': {'binance': 'AVAXUSDT', 'coinglass': 'AVAX', 'coinank': 'AVAXUSDT', 'cryptocompare': 'AVAX'},
+            'LINK/USDT': {'binance': 'LINKUSDT', 'coinglass': 'LINK', 'coinank': 'LINKUSDT', 'cryptocompare': 'LINK'},
+            
+            # Top 11-20
+            'DOT/USDT': {'binance': 'DOTUSDT', 'coinglass': 'DOT', 'coinank': 'DOTUSDT', 'cryptocompare': 'DOT'},
+            'UNI/USDT': {'binance': 'UNIUSDT', 'coinglass': 'UNI', 'coinank': 'UNIUSDT', 'cryptocompare': 'UNI'},
+            'LTC/USDT': {'binance': 'LTCUSDT', 'coinglass': 'LTC', 'coinank': 'LTCUSDT', 'cryptocompare': 'LTC'},
+            'ATOM/USDT': {'binance': 'ATOMUSDT', 'coinglass': 'ATOM', 'coinank': 'ATOMUSDT', 'cryptocompare': 'ATOM'},
+            'FIL/USDT': {'binance': 'FILUSDT', 'coinglass': 'FIL', 'coinank': 'FILUSDT', 'cryptocompare': 'FIL'},
+            'ICP/USDT': {'binance': 'ICPUSDT', 'coinglass': 'ICP', 'coinank': 'ICPUSDT', 'cryptocompare': 'ICP'},
+            'NEAR/USDT': {'binance': 'NEARUSDT', 'coinglass': 'NEAR', 'coinank': 'NEARUSDT', 'cryptocompare': 'NEAR'},
+            'ALGO/USDT': {'binance': 'ALGOUSDT', 'coinglass': 'ALGO', 'coinank': 'ALGOUSDT', 'cryptocompare': 'ALGO'},
+            'VET/USDT': {'binance': 'VETUSDT', 'coinglass': 'VET', 'coinank': 'VETUSDT', 'cryptocompare': 'VET'},
+            'MANA/USDT': {'binance': 'MANAUSDT', 'coinglass': 'MANA', 'coinank': 'MANAUSDT', 'cryptocompare': 'MANA'},
+            
+            # Top 21-30
+            'SAND/USDT': {'binance': 'SANDUSDT', 'coinglass': 'SAND', 'coinank': 'SANDUSDT', 'cryptocompare': 'SAND'},
+            'APE/USDT': {'binance': 'APEUSDT', 'coinglass': 'APE', 'coinank': 'APEUSDT', 'cryptocompare': 'APE'},
+            'THETA/USDT': {'binance': 'THETAUSDT', 'coinglass': 'THETA', 'coinank': 'THETAUSDT', 'cryptocompare': 'THETA'},
+            'AAVE/USDT': {'binance': 'AAVEUSDT', 'coinglass': 'AAVE', 'coinank': 'AAVEUSDT', 'cryptocompare': 'AAVE'},
+            'AXS/USDT': {'binance': 'AXSUSDT', 'coinglass': 'AXS', 'coinank': 'AXSUSDT', 'cryptocompare': 'AXS'},
+            'FTM/USDT': {'binance': 'FTMUSDT', 'coinglass': 'FTM', 'coinank': 'FTMUSDT', 'cryptocompare': 'FTM'},
+            'GRT/USDT': {'binance': 'GRTUSDT', 'coinglass': 'GRT', 'coinank': 'GRTUSDT', 'cryptocompare': 'GRT'},
+            'ENJ/USDT': {'binance': 'ENJUSDT', 'coinglass': 'ENJ', 'coinank': 'ENJUSDT', 'cryptocompare': 'ENJ'},
+            'CRV/USDT': {'binance': 'CRVUSDT', 'coinglass': 'CRV', 'coinank': 'CRVUSDT', 'cryptocompare': 'CRV'},
+            'SUSHI/USDT': {'binance': 'SUSHIUSDT', 'coinglass': 'SUSHI', 'coinank': 'SUSHIUSDT', 'cryptocompare': 'SUSHI'}
         }
 
     async def get_session(self):
