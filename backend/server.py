@@ -1507,8 +1507,8 @@ async def websocket_realtime(websocket: WebSocket):
         logging.error(f"WebSocket connection error: {e}")
     finally:
         # Remove subscriber
-        if real_time_streamer:
-            real_time_streamer.remove_subscriber(subscriber_id)
+        if enhanced_streamer:
+            enhanced_streamer.remove_subscriber(subscriber_id)
 
 @api_router.get("/realtime/latest")
 async def get_latest_realtime_data(symbols: str = None):
