@@ -2148,6 +2148,178 @@ body {
   font-weight: 500;
 }
 
+.card-near-clusters {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Directional Bias Styles */
+.directional-bias {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bias-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.bias-indicator.bullish {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.bias-indicator.bearish {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.bias-indicator.neutral {
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.bias-label {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bias-value {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.bias-indicator.bullish .bias-value {
+  color: #10b981;
+}
+
+.bias-indicator.bearish .bias-value {
+  color: #ef4444;
+}
+
+.bias-indicator.neutral .bias-value {
+  color: #94a3b8;
+}
+
+.bias-strength {
+  font-size: 9px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.timeframe-display {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* Directional Analysis Card */
+.directional-analysis-card {
+  background: rgba(30, 41, 59, 0.4);
+  border-radius: 12px;
+  padding: 16px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+}
+
+.analysis-header h4 {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.bias-breakdown {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.bias-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bias-text {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.bias-main.bullish .bias-text {
+  color: #10b981;
+}
+
+.bias-main.bearish .bias-text {
+  color: #ef4444;
+}
+
+.bias-main.neutral .bias-text {
+  color: #94a3b8;
+}
+
+.bias-percentage {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.bias-ratios {
+  display: flex;
+  gap: 16px;
+}
+
+.ratio-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.ratio-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.ratio-value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ratio-item.above .ratio-value {
+  color: #ef4444;
+}
+
+.ratio-item.below .ratio-value {
+  color: #10b981;
+}
+
+.bias-recommendation {
+  font-size: 13px;
+  color: #e2e8f0;
+  line-height: 1.4;
+  font-weight: 500;
+  background: rgba(15, 23, 42, 0.5);
+  padding: 10px 12px;
+  border-radius: 8px;
+  border-left: 3px solid #10b981;
+}
+
 .liquidation-levels-enhanced {
   background: rgba(30, 41, 59, 0.3);
   border-radius: 12px;
