@@ -1026,6 +1026,59 @@ async def get_portfolio(authorization: str = Header(None)):
 async def get_available_coins():
     return {"coins": TOP_COINS}
 
+@api_router.get("/markets")
+async def get_all_markets():
+    """Get all available markets (crypto + traditional)"""
+    return {
+        "crypto": TOP_COINS,
+        "traditional": {
+            "indices": ["SPX", "NASDAQ", "DAX", "NIKKEI", "US2000"],
+            "forex": ["EURUSD", "DXY"],
+            "commodities": ["GOLD"],
+            "bonds": ["US10Y"]
+        },
+        "dominance": ["BTC_DOMINANCE", "ETH_DOMINANCE", "USDT_DOMINANCE"]
+    }
+
+@api_router.get("/dominance")
+async def get_dominance_metrics():
+    """Get crypto dominance metrics"""
+    try:
+        from modules.market_data import MarketDataFetcher
+        fetcher = MarketDataFetcher(exchange, db)
+        dominance_data = await fetcher.fetch_dominance_data()
+        return dominance_data
+    except Exception as e:
+        logging.error(f"Dominance error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/data/update")
+async def update_market_data(symbols: list = None, timeframes: list = None):
+    """Update market data for specified symbols and timeframes"""
+    try:
+        from modules.market_data import MarketDataFetcher
+        fetcher = MarketDataFetcher(exchange, db)
+        
+        if not symbols:
+            symbols = TOP_COINS
+        if not timeframes:
+            timeframes = ['1h', '4h', '1d']
+        
+        results = []
+        for symbol in symbols:
+            for timeframe in timeframes:
+                data = await fetcher.fetch_and_store_crypto(symbol, timeframe, 1000)
+                results.append({
+                    'symbol': symbol,
+                    'timeframe': timeframe,
+                    'bars': len(data)
+                })
+        
+        return {"updated": results}
+    except Exception as e:
+        logging.error(f"Update error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ============= EXISTING ROUTES =============
 @api_router.get("/")
 async def root():
