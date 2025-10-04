@@ -90,10 +90,10 @@ const EnhancedSmartMoneyPanel = () => {
         const enhancedLiquidation = {
             symbol: symbol,
             display_name: displayName,
-            current_price: liquidationData?.current_price || 60000,
+            current_price: realCurrentPrice,
             timestamp: liquidationData?.timestamp || new Date().toISOString(),
             timeframe: '24h',
-            liquidation_levels: liquidationData?.liquidation_levels || [],
+            liquidation_levels: generateRealisticLiquidationLevels(realCurrentPrice, symbol),
             summary: {
                 total_liquidations_above: 0,
                 total_liquidations_below: 0,
