@@ -1605,7 +1605,7 @@ async def get_liquidation_heatmap(symbol: str):
         
         return {
             'status': 'success',
-            'symbol': symbol,
+            'symbol': decoded_symbol,
             'data': heatmap_data,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
