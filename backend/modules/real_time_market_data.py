@@ -272,9 +272,11 @@ class RealTimeMarketDataFetcher:
         
         # Try sources in order of preference
         sources = [
+            self.fetch_twelve_data_quote,
+            self.fetch_polygon_free_quote,
+            self.fetch_investing_com_price,
             self.fetch_finnhub_quote,
-            self.fetch_yahoo_quote,
-            self.fetch_market_watch_price
+            self.fetch_yahoo_quote
         ]
         
         for source_func in sources:
