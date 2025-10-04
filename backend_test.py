@@ -77,41 +77,67 @@ class RealTimeTickDataTester:
                 'error': str(e)
             }
     
-    async def test_nasdaq_current_price(self):
-        """Test NASDAQ current price - should show ~$24,127 not $22,775"""
-        test_name = "NASDAQ Current Price Fix"
+    async def test_realtime_latest_api(self):
+        """Test /api/realtime/latest endpoint for current prices"""
+        test_name = "Real-Time Latest Prices API"
         
-        response = await self.test_api_endpoint("/chart-data/NASDAQ?timeframe=1d&limit=1")
+        response = await self.test_api_endpoint("/realtime/latest")
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
             return
         
         data = response['data']
-        if 'data' not in data or not data['data']:
-            self.log_test(test_name, "FAIL", "No chart data returned")
+        
+        # Check response structure
+        if 'status' not in data or 'data' not in data:
+            self.log_test(test_name, "FAIL", "Invalid response structure")
             return
         
-        latest_candle = data['data'][-1]
-        current_price = latest_candle['close']
+        if data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error status: {data}")
+            return
         
-        # Check if price is in expected range (should be around $24,127, not $22,775)
-        if current_price > 23000:  # Should be above 23k
+        prices_data = data['data']
+        
+        # Check if we have price data for expected symbols
+        expected_symbols = ['NASDAQ', 'SPX', 'BTC/USDT', 'ETH/USDT']
+        found_symbols = []
+        
+        for symbol in expected_symbols:
+            if symbol in prices_data and prices_data[symbol]:
+                price_info = prices_data[symbol]
+                if 'price' in price_info and price_info['price'] > 0:
+                    found_symbols.append(symbol)
+                    
+                    # Validate NASDAQ is showing current price (~$24,800)
+                    if symbol == 'NASDAQ' and price_info['price'] > 24000:
+                        self.log_test(
+                            f"NASDAQ Real-Time Price", 
+                            "PASS", 
+                            f"NASDAQ shows ${price_info['price']:.2f} (current market level)",
+                            "Price > $24,000",
+                            f"${price_info['price']:.2f}"
+                        )
+                    elif symbol == 'NASDAQ':
+                        self.log_test(
+                            f"NASDAQ Real-Time Price", 
+                            "FAIL", 
+                            f"NASDAQ shows ${price_info['price']:.2f} (may be outdated)",
+                            "Price > $24,000",
+                            f"${price_info['price']:.2f}"
+                        )
+        
+        if len(found_symbols) >= 2:  # At least 2 symbols working
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"NASDAQ price is ${current_price:.2f} - appears to be current/real-time",
-                "Price > $23,000 (current market)",
-                f"${current_price:.2f}"
+                f"Found real-time data for {len(found_symbols)} symbols: {', '.join(found_symbols)}",
+                "Real-time data for multiple assets",
+                f"{len(found_symbols)} symbols with valid prices"
             )
         else:
-            self.log_test(
-                test_name, 
-                "FAIL", 
-                f"NASDAQ price ${current_price:.2f} appears outdated",
-                "Price > $23,000 (current market)", 
-                f"${current_price:.2f}"
-            )
+            self.log_test(test_name, "FAIL", f"Insufficient real-time data. Found: {found_symbols}")
     
     async def test_traditional_markets(self):
         """Test all traditional market symbols"""
