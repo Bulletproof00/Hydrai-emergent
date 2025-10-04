@@ -194,10 +194,19 @@ class MarketDataTester:
         """Test the new force-refresh endpoint"""
         test_name = "Force Refresh Endpoint"
         
-        response = await self.test_api_endpoint("/data/force-refresh/NASDAQ?timeframe=1d", expected_status=200)
-        
-        if not response['success']:
-            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+        try:
+            url = f"{BACKEND_URL}/data/force-refresh/NASDAQ?timeframe=1d"
+            async with self.session.post(url) as response:
+                status = response.status
+                data = await response.json() if response.content_type == 'application/json' else await response.text()
+                
+                if status != 200:
+                    self.log_test(test_name, "FAIL", f"HTTP {status}: {data}")
+                    return
+                
+                response = {'status': status, 'data': data, 'success': True}
+        except Exception as e:
+            self.log_test(test_name, "FAIL", f"Request failed: {str(e)}")
             return
         
         data = response['data']
