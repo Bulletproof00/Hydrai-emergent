@@ -97,6 +97,9 @@ class EnhancedSmartMoneyIndicators:
         if self.session:
             await self.session.close()
             self.session = None
+        
+        if self.live_fetcher:
+            await self.live_fetcher.close_session()
 
     async def fetch_enhanced_liquidation_heatmap(self, symbol: str) -> Optional[Dict]:
         """Fetch enhanced 2D liquidation heatmap data with LIVE data like Coinglass"""
