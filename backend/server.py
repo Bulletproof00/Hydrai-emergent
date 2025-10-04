@@ -1880,6 +1880,13 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Smart Money initialization failed: {str(e)}")
     
+    # Initialize Enhanced Smart Money Indicators (Coinglass-style)
+    try:
+        enhanced_smart_money = EnhancedSmartMoneyIndicators(db)
+        logger.info("Enhanced Smart Money Indicators initialized")
+    except Exception as e:
+        logger.warning(f"Enhanced Smart Money initialization failed: {str(e)}")
+    
     # Start background data update task
     asyncio.create_task(update_market_data_background())
     logger.info("Background data update task started")
