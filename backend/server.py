@@ -30,6 +30,8 @@ import google.generativeai as genai
 from PIL import Image
 import io
 import base64
+import uuid
+from modules.real_time_websocket import RealTimeWebSocketStreamer
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
