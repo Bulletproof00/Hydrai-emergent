@@ -1651,11 +1651,15 @@ async def get_funding_rates(symbol: str):
                 'message': 'Smart Money system not initialized'
             }
         
-        funding_data = await smart_money.fetch_funding_rates(symbol)
+        # URL decode the symbol parameter
+        import urllib.parse
+        decoded_symbol = urllib.parse.unquote(symbol)
+        
+        funding_data = await smart_money.fetch_funding_rates(decoded_symbol)
         
         return {
             'status': 'success',
-            'symbol': symbol,
+            'symbol': decoded_symbol,
             'data': funding_data,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
