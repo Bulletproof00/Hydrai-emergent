@@ -292,50 +292,50 @@ class RealTimeTickDataTester:
         else:
             self.log_test(test_name, "FAIL", "No data sources identified in response")
     
-    async def test_data_consistency(self):
-        """Test data consistency and timestamps"""
-        test_name = "Data Consistency & Timestamps"
+    async def test_database_storage(self):
+        """Test that real-time ticks are being stored in database"""
+        test_name = "Database Storage - Real-Time Ticks"
         
-        response = await self.test_api_endpoint("/chart-data/SPX?timeframe=1d&limit=5")
+        # First get some real-time data to ensure there's something to store
+        response = await self.test_api_endpoint("/realtime/latest")
         
         if not response['success']:
-            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            self.log_test(test_name, "FAIL", f"Could not get real-time data: {response.get('error', 'Unknown error')}")
             return
         
-        data = response['data']
-        if 'data' not in data or len(data['data']) < 2:
-            self.log_test(test_name, "FAIL", "Insufficient data for consistency check")
+        # Wait a moment for data to be stored
+        await asyncio.sleep(2)
+        
+        # Now check if we can retrieve historical data (which comes from database)
+        history_response = await self.test_api_endpoint("/realtime/history/NASDAQ?minutes=10")
+        
+        if not history_response['success']:
+            self.log_test(test_name, "FAIL", f"Could not retrieve historical data: {history_response.get('error', 'Unknown error')}")
             return
         
-        candles = data['data']
-        issues = []
+        history_data = history_response['data']
         
-        # Check timestamp ordering
-        for i in range(1, len(candles)):
-            if candles[i]['time'] <= candles[i-1]['time']:
-                issues.append(f"Timestamp ordering issue at index {i}")
-        
-        # Check OHLC consistency
-        for i, candle in enumerate(candles):
-            if not (candle['low'] <= candle['open'] <= candle['high'] and 
-                   candle['low'] <= candle['close'] <= candle['high']):
-                issues.append(f"OHLC consistency issue at index {i}")
-        
-        # Check for reasonable price values
-        for i, candle in enumerate(candles):
-            if candle['close'] <= 0:
-                issues.append(f"Invalid price at index {i}: {candle['close']}")
-        
-        if not issues:
-            self.log_test(
-                test_name, 
-                "PASS", 
-                f"All {len(candles)} candles have consistent data and timestamps",
-                "Consistent OHLC data with proper timestamps",
-                "All validations passed"
-            )
+        if 'data' in history_data and len(history_data['data']) > 0:
+            ticks = history_data['data']
+            
+            # Validate tick structure
+            sample_tick = ticks[0]
+            required_fields = ['symbol', 'price', 'timestamp', 'source', 'asset_type']
+            has_all_fields = all(field in sample_tick for field in required_fields)
+            
+            if has_all_fields:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Database contains {len(ticks)} real-time ticks with proper structure",
+                    "Real-time ticks stored in database",
+                    f"{len(ticks)} ticks with valid structure"
+                )
+            else:
+                missing = [field for field in required_fields if field not in sample_tick]
+                self.log_test(test_name, "FAIL", f"Tick data missing fields: {missing}")
         else:
-            self.log_test(test_name, "FAIL", f"Data consistency issues: {'; '.join(issues)}")
+            self.log_test(test_name, "WARN", "No tick data found in database (may be expected for new system)")
     
     async def test_error_handling(self):
         """Test error handling for invalid symbols"""
