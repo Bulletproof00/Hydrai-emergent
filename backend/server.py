@@ -1857,7 +1857,7 @@ async def place_trading_order(
         user = await get_current_user(authorization)
         
         result = await paper_trading.place_order(
-            user['user_id'], symbol, side, order_type, quantity,
+            user['_id'], symbol, side, order_type, quantity,
             price, leverage, stop_loss, take_profit, reduce_only
         )
         
