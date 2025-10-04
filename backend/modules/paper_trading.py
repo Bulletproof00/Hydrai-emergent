@@ -34,8 +34,9 @@ class OrderStatus(Enum):
     REJECTED = "rejected"
 
 class PaperTradingEngine:
-    def __init__(self, db):
+    def __init__(self, db, enhanced_smart_money=None):
         self.db = db
+        self._enhanced_smart_money = enhanced_smart_money
         
         # Trading Fees (similar to Binance futures)
         self.maker_fee = 0.0002  # 0.02%
