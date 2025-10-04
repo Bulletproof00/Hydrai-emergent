@@ -1735,8 +1735,11 @@ async def get_enhanced_smart_money_data(symbol: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/enhanced-smart-money/liquidation-heatmap-2d/{symbol}")
-async def get_enhanced_liquidation_heatmap(symbol: str):
-    """Get 2D liquidation heatmap like Coinglass"""
+async def get_enhanced_liquidation_heatmap(
+    symbol: str, 
+    timeframe: str = "1day"
+):
+    """Get 2D liquidation heatmap like Coinglass with timeframe support"""
     try:
         if not enhanced_smart_money:
             return {
@@ -1748,11 +1751,17 @@ async def get_enhanced_liquidation_heatmap(symbol: str):
         import urllib.parse
         decoded_symbol = urllib.parse.unquote(symbol)
         
-        heatmap_data = await enhanced_smart_money.fetch_enhanced_liquidation_heatmap(decoded_symbol)
+        # Validate timeframe
+        valid_timeframes = ["12h", "1day", "3day", "1week", "2week", "monthly"]
+        if timeframe not in valid_timeframes:
+            timeframe = "1day"
+        
+        heatmap_data = await enhanced_smart_money.fetch_enhanced_liquidation_heatmap_with_timeframe(decoded_symbol, timeframe)
         
         return {
             'status': 'success',
             'symbol': decoded_symbol,
+            'timeframe': timeframe,
             'data': heatmap_data,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
