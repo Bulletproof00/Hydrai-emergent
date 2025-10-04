@@ -27,6 +27,7 @@ class MarketDataFetcher:
     def __init__(self, exchange_instance, db):
         self.exchange = exchange_instance
         self.db = db
+        self.real_time_fetcher = RealTimeMarketDataFetcher(db)
     
     async def fetch_crypto_ohlcv(self, symbol, timeframe='1h', limit=1000):
         """Fetch OHLCV data from crypto exchange"""
