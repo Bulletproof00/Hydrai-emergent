@@ -800,6 +800,12 @@ class PaperTradingTester:
             self.log_test(test_name, "FAIL", "No authentication token available")
             return
         
+        # First ensure trading account exists
+        account_response = await self.test_api_endpoint("/trading/account", auth_required=True)
+        if not account_response['success']:
+            self.log_test(test_name, "FAIL", "Could not access trading account")
+            return
+        
         # Create a leveraged position to test liquidation price
         order_data = {
             "symbol": "BTC/USDT",
