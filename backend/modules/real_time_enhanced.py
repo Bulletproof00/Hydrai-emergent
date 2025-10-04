@@ -426,7 +426,7 @@ class EnhancedRealTimeStreamer:
             for subscriber_id, websocket in self.subscribers.items():
                 try:
                     await websocket.send(json.dumps(message))
-                except:
+                except Exception:
                     disconnected.append(subscriber_id)
             
             # Clean up disconnected subscribers
