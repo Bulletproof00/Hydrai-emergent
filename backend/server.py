@@ -1473,16 +1473,16 @@ async def websocket_realtime(websocket: WebSocket):
     subscriber_id = str(uuid.uuid4())
     
     try:
-        # Add subscriber to real-time streamer
-        if real_time_streamer:
-            real_time_streamer.add_subscriber(subscriber_id, websocket)
+        # Add subscriber to enhanced streamer
+        if enhanced_streamer:
+            enhanced_streamer.add_subscriber(subscriber_id, websocket)
         
         # Send initial data
-        if real_time_streamer:
-            latest_ticks = await real_time_streamer.get_latest_ticks()
+        if enhanced_streamer:
+            latest_prices = await enhanced_streamer.get_latest_prices()
             await websocket.send_text(json.dumps({
                 'type': 'initial_data',
-                'data': latest_ticks
+                'data': latest_prices
             }))
         
         # Keep connection alive and handle messages
