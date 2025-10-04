@@ -186,6 +186,14 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
         <button onClick={loadData} className="refresh-btn" disabled={loading}>
           {loading ? 'Lädt...' : 'Aktualisieren'}
         </button>
+        {gaps.length > 0 && (
+          <button 
+            onClick={() => setShowGaps(!showGaps)} 
+            className={`gap-toggle-btn ${showGaps ? 'active' : ''}`}
+          >
+            {showGaps ? '✓' : ''} Gaps ({gaps.length})
+          </button>
+        )}
       </div>
 
       {loading ? (
