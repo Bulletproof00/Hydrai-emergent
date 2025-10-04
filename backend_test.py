@@ -610,7 +610,7 @@ class SmartMoneyTester:
     def print_summary(self):
         """Print test summary"""
         print("=" * 60)
-        print("📊 TEST SUMMARY")
+        print("📊 SMART MONEY INDICATORS TEST SUMMARY")
         print("=" * 60)
         
         total_tests = len(self.test_results)
