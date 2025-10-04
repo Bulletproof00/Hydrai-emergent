@@ -735,8 +735,10 @@ class SmartMoneyTester:
                     continue
                 
                 # Check for liquidation levels with cluster strength and timeframe impact
-                if 'liquidation_levels' in data:
-                    levels = data['liquidation_levels']
+                # The data might be nested under 'data' field
+                levels_data = data.get('data', data)  # Try nested first, fallback to root
+                if 'liquidation_levels' in levels_data:
+                    levels = levels_data['liquidation_levels']
                     if isinstance(levels, list) and len(levels) > 0:
                         # Check if levels have timeframe-specific fields
                         sample_level = levels[0]
