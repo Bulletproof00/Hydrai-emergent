@@ -840,10 +840,11 @@ class TradingSystemTester:
         
         if response['success']:
             data = response['data']
-            analysis = data.get('analysis', '')
+            recommendation = data.get('recommendation', {})
+            reasoning = recommendation.get('reasoning', '') if isinstance(recommendation, dict) else ''
             
             # Check both response time and quality
-            if response_time < 10 and len(analysis) > 100:
+            if response_time < 10 and len(reasoning) > 100:
                 self.log_test(
                     test_name, 
                     "PASS", 
