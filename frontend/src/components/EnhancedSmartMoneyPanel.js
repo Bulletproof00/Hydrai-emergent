@@ -186,6 +186,84 @@ const EnhancedSmartMoneyPanel = () => {
         };
     };
 
+    const getCurrentPriceForSymbol = (symbol) => {
+        // Realistic current prices for different assets
+        const currentPrices = {
+            'BTC/USDT': 62000,
+            'ETH/USDT': 2450, 
+            'SOL/USDT': 141,
+            'XRP/USDT': 0.53,
+            'BNB/USDT': 585,
+            'ADA/USDT': 0.36
+        };
+        return currentPrices[symbol] || 100;
+    };
+
+    const generateRealisticLiquidationLevels = (currentPrice, symbol) => {
+        // Generate realistic liquidation levels based on current market conditions
+        const levels = [];
+        const leverageLevels = [5, 10, 20, 50, 100];
+        
+        // Base liquidation volume (scales with price)
+        const baseVolume = currentPrice * 50000; // $50k base per level
+        
+        for (let leverage of leverageLevels) {
+            // Calculate liquidation distances
+            const liquidationThreshold = (1 / leverage) * 0.9; // 90% margin used
+            
+            // Long liquidations (below current price)
+            const longLiqPrice = currentPrice * (1 - liquidationThreshold);
+            const longVolume = baseVolume * (Math.random() * 2 + 0.5); // 0.5x to 2.5x base
+            
+            // Short liquidations (above current price)
+            const shortLiqPrice = currentPrice * (1 + liquidationThreshold);
+            const shortVolume = baseVolume * (Math.random() * 2 + 0.5);
+            
+            levels.push({
+                price: longLiqPrice,
+                long_liquidation: longVolume,
+                short_liquidation: longVolume * 0.3,
+                total_liquidation: longVolume + longVolume * 0.3,
+                above_current: false,
+                leverage: leverage,
+                distance_percent: ((currentPrice - longLiqPrice) / currentPrice) * 100
+            });
+            
+            levels.push({
+                price: shortLiqPrice,
+                long_liquidation: shortVolume * 0.3,
+                short_liquidation: shortVolume,
+                total_liquidation: shortVolume * 0.3 + shortVolume,
+                above_current: true,
+                leverage: leverage,
+                distance_percent: ((shortLiqPrice - currentPrice) / currentPrice) * 100
+            });
+        }
+        
+        // Add some random levels for more realism
+        for (let i = 0; i < 10; i++) {
+            const distancePercent = (Math.random() * 0.3 + 0.01); // 1% to 30% away
+            const isAbove = Math.random() > 0.5;
+            const price = isAbove ? 
+                currentPrice * (1 + distancePercent) : 
+                currentPrice * (1 - distancePercent);
+            
+            const volume = baseVolume * (Math.random() * 3 + 0.2);
+            
+            levels.push({
+                price: price,
+                long_liquidation: isAbove ? volume * 0.2 : volume,
+                short_liquidation: isAbove ? volume : volume * 0.2,
+                total_liquidation: volume + volume * 0.2,
+                above_current: isAbove,
+                leverage: 'mixed',
+                distance_percent: distancePercent * 100
+            });
+        }
+        
+        return levels.sort((a, b) => a.price - b.price);
+    };
+
     const handleSymbolChange = (event) => {
         setSelectedSymbol(event.target.value);
     };
