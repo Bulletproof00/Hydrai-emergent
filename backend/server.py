@@ -1148,28 +1148,73 @@ async def get_cme_gaps(symbol: str):
 @api_router.post("/data/update")
 async def update_market_data(symbols: list = None, timeframes: list = None):
     """Update market data for specified symbols and timeframes"""
+    if not symbols:
+        symbols = TOP_COINS + ['SPX', 'NASDAQ', 'DXY', 'GOLD']
+    if not timeframes:
+        timeframes = ['1h', '4h', '1d']
+    
     try:
         from modules.market_data import MarketDataFetcher
         fetcher = MarketDataFetcher(exchange, db)
         
-        if not symbols:
-            symbols = TOP_COINS
-        if not timeframes:
-            timeframes = ['1h', '4h', '1d']
-        
         results = []
         for symbol in symbols:
             for timeframe in timeframes:
-                data = await fetcher.fetch_and_store_crypto(symbol, timeframe, 1000)
+                # Check if it's crypto or traditional
+                if symbol in ['SPX', 'NASDAQ', 'DXY', 'GOLD']:
+                    data = await fetcher.fetch_and_store_traditional(symbol, timeframe, 500)
+                else:
+                    data = await fetcher.fetch_and_store_crypto(symbol, timeframe, 500)
+                
                 results.append({
                     'symbol': symbol,
                     'timeframe': timeframe,
-                    'bars': len(data)
+                    'bars_updated': len(data)
                 })
         
-        return {"updated": results}
+        return {'status': 'success', 'updated': results}
     except Exception as e:
-        logging.error(f"Update error: {str(e)}")
+        logging.error(f"Data update error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/data/force-refresh/{symbol}")
+async def force_refresh_data(symbol: str, timeframe: str = "1h"):
+    """Force refresh data for a specific symbol by clearing cache"""
+    try:
+        from modules.market_data import MarketDataFetcher
+        
+        # Clear existing data for this symbol
+        await db.ohlcv_data.delete_many({
+            'symbol': symbol,
+            'timeframe': timeframe
+        })
+        
+        fetcher = MarketDataFetcher(exchange, db)
+        
+        # Check asset type
+        asset_type = 'crypto'
+        if symbol in ['SPX', 'NASDAQ', 'DXY', 'GOLD', 'EURUSD', 'US2000', 'US10Y', 'DAX', 'NIKKEI']:
+            asset_type = 'traditional'
+        
+        # Fetch fresh data
+        if asset_type == 'traditional':
+            data = await fetcher.fetch_and_store_traditional(symbol, timeframe, 1000)
+        else:
+            data = await fetcher.fetch_and_store_crypto(symbol, timeframe, 1000)
+        
+        # Get latest price
+        latest_price = data[-1]['close'] if data else 0
+        
+        return {
+            'status': 'success',
+            'symbol': symbol,
+            'timeframe': timeframe,
+            'bars_refreshed': len(data),
+            'latest_price': latest_price,
+            'asset_type': asset_type
+        }
+    except Exception as e:
+        logging.error(f"Force refresh error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============= EXISTING ROUTES =============
