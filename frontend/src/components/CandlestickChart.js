@@ -46,6 +46,17 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
     }
   };
 
+  const loadGaps = async () => {
+    try {
+      const response = await axios.get(`${API}/gaps/${symbol.replace('/', '-')}`);
+      if (response.data.gaps) {
+        setGaps(response.data.gaps);
+      }
+    } catch (error) {
+      console.error('Error loading gaps:', error);
+    }
+  };
+
   const drawChart = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
