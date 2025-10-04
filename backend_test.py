@@ -612,10 +612,11 @@ class TradingSystemTester:
         ai_response = await self.test_api_endpoint(f"/ai-trading/analyze?symbol=BTC/USDT&context={context}", method="POST", auth=True)
         
         if ai_response['success']:
-            analysis = ai_response['data'].get('analysis', '')
+            recommendation = ai_response['data'].get('recommendation', {})
+            reasoning = recommendation.get('reasoning', '') if isinstance(recommendation, dict) else ''
             # Check if analysis mentions current price or real-time data
             realtime_indicators = ['current', 'price', str(int(btc_price)), 'real-time', 'live']
-            realtime_mentions = sum(1 for indicator in realtime_indicators if indicator.lower() in analysis.lower())
+            realtime_mentions = sum(1 for indicator in realtime_indicators if indicator.lower() in reasoning.lower())
             
             if realtime_mentions >= 2:
                 self.log_test(
