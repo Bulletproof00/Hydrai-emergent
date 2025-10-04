@@ -1376,6 +1376,469 @@ body {
   51%, 100% { opacity: 0; }
 }
 
+/* Smart Money Panel */
+.smart-money-panel {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px;
+  margin-top: 16px;
+  height: 500px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.smart-money-panel.loading,
+.smart-money-panel.error {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(16, 185, 129, 0.3);
+  border-top: 3px solid #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.symbol-focus {
+  font-size: 14px;
+  font-weight: 500;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.tab-navigation {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 12px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.tab:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+}
+
+.tab.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #10b981;
+}
+
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Liquidation Heatmap */
+.liquidation-heatmap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.heatmap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.heatmap-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.current-price {
+  font-size: 14px;
+  font-weight: 500;
+  color: #10b981;
+}
+
+.heatmap-legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.color-box {
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.color-box.long {
+  background: #ef4444;
+}
+
+.color-box.short {
+  background: #10b981;
+}
+
+.liquidation-levels {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.liquidation-level {
+  display: grid;
+  grid-template-columns: 80px 1fr 60px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.liquidation-level.high-liquidation {
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 4px;
+  padding: 8px 8px;
+}
+
+.level-price {
+  font-size: 12px;
+  font-weight: 500;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.liquidation-bars {
+  position: relative;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.long-bar,
+.short-bar {
+  position: absolute;
+  height: 50%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.long-bar {
+  top: 0;
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.short-bar {
+  bottom: 0;
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.level-amount {
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Open Interest */
+.open-interest {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.oi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.oi-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.total-oi {
+  font-size: 14px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.oi-breakdown {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.oi-exchange {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(30, 41, 59, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.exchange-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.exchange-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.synthetic-badge {
+  font-size: 9px;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.2);
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-left: 6px;
+}
+
+.exchange-percentage {
+  font-size: 12px;
+  font-weight: 500;
+  color: #10b981;
+}
+
+.oi-bar-container {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+
+.oi-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.oi-amount {
+  font-size: 11px;
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Funding Rates */
+.funding-rates {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.funding-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.funding-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.avg-funding {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.avg-funding.positive {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.avg-funding.negative {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.funding-breakdown {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.funding-exchange {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(30, 41, 59, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.funding-rate {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.funding-rate.positive {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.funding-rate.negative {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.funding-bar-container {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  margin: 6px 0;
+  overflow: hidden;
+}
+
+.funding-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.funding-bar.positive {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.funding-bar.negative {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.next-funding {
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.funding-info {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+}
+
+.info-item {
+  display: flex;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.info-item .label {
+  color: #64748b;
+}
+
+.info-item .value {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.data-source {
+  font-size: 10px;
+  color: #64748b;
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 8px;
+}
+
+.no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.error-message {
+  color: #ef4444;
+  margin-bottom: 12px;
+}
+
+.retry-btn {
+  padding: 8px 16px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.retry-btn:hover {
+  background: #059669;
+}
+
 .patterns-panel {
   margin: 0 32px;
   display: grid;
