@@ -99,61 +99,48 @@ class EnhancedSmartMoneyIndicators:
             self.session = None
 
     async def fetch_enhanced_liquidation_heatmap(self, symbol: str) -> Optional[Dict]:
-        """Fetch enhanced 2D liquidation heatmap data like Coinglass"""
+        """Fetch enhanced 2D liquidation heatmap data with LIVE data like Coinglass"""
         try:
             if symbol not in self.supported_symbols:
                 logger.warning(f"Symbol {symbol} not supported")
                 return None
             
             symbol_info = self.supported_symbols[symbol]
-            current_price = await self._get_current_price(symbol)
             
-            # Generate 2D heatmap data (time x price matrix)
+            # Fetch LIVE liquidation data
+            live_liquidation_data = await self.live_fetcher.fetch_live_liquidation_data(symbol)
+            
+            if not live_liquidation_data:
+                logger.warning(f"Could not fetch live liquidation data for {symbol}")
+                return None
+            
+            current_price = live_liquidation_data['current_price']
+            liquidation_levels = live_liquidation_data['liquidation_levels']
+            summary = live_liquidation_data['summary']
+            
+            logger.info(f"Fetched LIVE liquidation data for {symbol}: ${current_price}, {len(liquidation_levels)} levels")
+            
+            # Enhanced heatmap data with LIVE information
             heatmap_data = {
                 'symbol': symbol,
                 'display_name': symbol_info['display_name'],
                 'current_price': current_price,
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': live_liquidation_data['timestamp'],
                 'timeframe': '24h',
                 'price_range': self._calculate_price_range(current_price, symbol_info),
-                'liquidation_matrix': [],
-                'liquidation_levels': [],
-                'summary': {
-                    'total_liquidations_above': 0,
-                    'total_liquidations_below': 0,
-                    'strongest_level_above': None,
-                    'strongest_level_below': None,
-                    'risk_score': 0
-                },
-                'exchanges': {},
-                'source': 'aggregated'
+                'liquidation_levels': liquidation_levels,
+                'summary': summary,
+                'total_liquidations_24h': live_liquidation_data.get('total_liquidations_24h', 0),
+                'data_sources': live_liquidation_data.get('data_sources', {}),
+                'source': 'live_aggregated',
+                'last_updated': datetime.now(timezone.utc).isoformat()
             }
-            
-            # Fetch real data from exchanges
-            binance_data = await self._fetch_binance_liquidation_detailed(symbol)
-            if binance_data:
-                heatmap_data['exchanges']['binance'] = binance_data
-            
-            # Generate synthetic data for other exchanges
-            for exchange in ['bybit', 'okx', 'deribit', 'bitmex']:
-                synthetic_data = await self._generate_synthetic_exchange_liquidations(
-                    symbol, exchange, current_price
-                )
-                heatmap_data['exchanges'][exchange] = synthetic_data
-            
-            # Create 2D liquidation matrix
-            matrix_data = self._create_liquidation_matrix(
-                heatmap_data['exchanges'], 
-                heatmap_data['price_range'],
-                current_price
-            )
-            heatmap_data['liquidation_matrix'] = matrix_data['matrix']
-            heatmap_data['liquidation_levels'] = matrix_data['levels']
-            heatmap_data['summary'] = matrix_data['summary']
             
             # Store in cache and database
             self.cache['liquidation_heatmap_2d'][symbol] = heatmap_data
             await self._store_enhanced_smart_money_data('liquidation_heatmap_2d', symbol, heatmap_data)
+            
+            logger.info(f"Enhanced liquidation heatmap ready for {symbol}: {len(liquidation_levels)} levels, ${current_price} current price")
             
             return heatmap_data
             
