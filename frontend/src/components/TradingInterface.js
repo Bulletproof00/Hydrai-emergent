@@ -156,6 +156,46 @@ const TradingInterface = () => {
         }
     };
 
+    const getAiAnalysis = async (symbol, context = "") => {
+        try {
+            setAnalysisLoading(true);
+            const token = localStorage.getItem('token');
+            const headers = { 'Authorization': `Bearer ${token}` };
+
+            const response = await axios.post(`${BACKEND_URL}/api/ai-trading/analyze`, {
+                symbol: symbol,
+                context: context
+            }, { headers });
+
+            if (response.data.status === 'success') {
+                setAiAnalysis(response.data.recommendation);
+                setShowAiPanel(true);
+                
+                // Auto-fill order form with AI suggestions
+                if (response.data.recommendation.entry_price) {
+                    setOrderForm(prev => ({
+                        ...prev,
+                        side: response.data.recommendation.action === 'buy' ? 'buy' : 'sell',
+                        quantity: (response.data.recommendation.position_size / 100).toString(),
+                        leverage: response.data.recommendation.leverage,
+                        price: response.data.recommendation.entry_price?.toString() || '',
+                        stopLoss: response.data.recommendation.stop_loss?.toString() || '',
+                        takeProfit: response.data.recommendation.take_profit?.toString() || ''
+                    }));
+                }
+                
+                setError(null);
+            } else {
+                setError('AI Analysis failed');
+            }
+        } catch (err) {
+            console.error('AI Analysis error:', err);
+            setError('Failed to get AI analysis');
+        } finally {
+            setAnalysisLoading(false);
+        }
+    };
+
     const modifyPositionMargin = async (positionId, action, amount) => {
         try {
             const token = localStorage.getItem('token');
