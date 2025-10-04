@@ -392,12 +392,61 @@ class RealTimeTickDataTester:
                 "No changes detected"
             )
     
+    async def test_multi_asset_support(self):
+        """Test support for crypto and traditional markets"""
+        test_name = "Multi-Asset Support"
+        
+        response = await self.test_api_endpoint("/realtime/latest")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data'].get('data', {})
+        
+        crypto_assets = []
+        traditional_assets = []
+        
+        for symbol, price_info in data.items():
+            if price_info and 'asset_type' in price_info:
+                if price_info['asset_type'] == 'crypto':
+                    crypto_assets.append(symbol)
+                elif price_info['asset_type'] == 'traditional':
+                    traditional_assets.append(symbol)
+        
+        if len(crypto_assets) > 0 and len(traditional_assets) > 0:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"Both asset types supported: {len(crypto_assets)} crypto, {len(traditional_assets)} traditional",
+                "Both crypto and traditional assets",
+                f"Crypto: {crypto_assets[:3]}, Traditional: {traditional_assets[:3]}"
+            )
+        elif len(crypto_assets) > 0:
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Only crypto assets found: {crypto_assets}",
+                "Both asset types",
+                f"Only crypto: {crypto_assets}"
+            )
+        elif len(traditional_assets) > 0:
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Only traditional assets found: {traditional_assets}",
+                "Both asset types",
+                f"Only traditional: {traditional_assets}"
+            )
+        else:
+            self.log_test(test_name, "FAIL", "No assets with asset_type found")
+
     async def test_api_performance(self):
-        """Test API response times"""
-        test_name = "API Performance"
+        """Test real-time API response times"""
+        test_name = "Real-Time API Performance"
         
         start_time = datetime.now()
-        response = await self.test_api_endpoint("/chart-data/NASDAQ?timeframe=1h&limit=100")
+        response = await self.test_api_endpoint("/realtime/latest")
         end_time = datetime.now()
         
         response_time = (end_time - start_time).total_seconds()
@@ -406,22 +455,30 @@ class RealTimeTickDataTester:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
             return
         
-        # Response should be under 10 seconds for good performance
-        if response_time < 10.0:
+        # Real-time API should be very fast (under 1 second)
+        if response_time < 1.0:
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"Response time: {response_time:.2f}s",
-                "Response time < 10s",
-                f"{response_time:.2f}s"
+                f"Excellent response time: {response_time:.3f}s",
+                "Response time < 1s",
+                f"{response_time:.3f}s"
+            )
+        elif response_time < 3.0:
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Acceptable response time: {response_time:.3f}s",
+                "Response time < 1s",
+                f"{response_time:.3f}s"
             )
         else:
             self.log_test(
                 test_name, 
-                "WARN", 
-                f"Slow response time: {response_time:.2f}s",
-                "Response time < 10s",
-                f"{response_time:.2f}s"
+                "FAIL", 
+                f"Slow response time: {response_time:.3f}s",
+                "Response time < 1s",
+                f"{response_time:.3f}s"
             )
     
     async def run_all_tests(self):
