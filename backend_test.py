@@ -662,8 +662,9 @@ class TradingSystemTester:
             return
         
         # Test 3: Check if AI can influence Paper Trading decisions
-        analysis = ai_response['data'].get('analysis', '')
-        recommendation = ai_response['data'].get('recommendation', '')
+        recommendation_data = ai_response['data'].get('recommendation', {})
+        recommendation = recommendation_data.get('action', '') if isinstance(recommendation_data, dict) else ''
+        reasoning = recommendation_data.get('reasoning', '') if isinstance(recommendation_data, dict) else ''
         
         if recommendation in ['long', 'short'] and len(analysis) > 50:
             # Test if we can place order based on AI recommendation
