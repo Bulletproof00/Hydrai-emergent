@@ -137,12 +137,14 @@ class SmartMoneyTester:
     
     async def test_liquidation_heatmap_api(self):
         """Test /api/smart-money/liquidation-heatmap/{symbol} endpoint"""
-        test_symbols = ['BTC%2FUSDT', 'ETH%2FUSDT', 'SOL%2FUSDT', 'XRP%2FUSDT']
+        test_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
         
-        for encoded_symbol in test_symbols:
-            display_symbol = encoded_symbol.replace('%2F', '/')
-            test_name = f"Liquidation Heatmap API - {display_symbol}"
+        for symbol in test_symbols:
+            test_name = f"Liquidation Heatmap API - {symbol}"
             
+            # URL encode the symbol properly
+            import urllib.parse
+            encoded_symbol = urllib.parse.quote(symbol, safe='')
             response = await self.test_api_endpoint(f"/smart-money/liquidation-heatmap/{encoded_symbol}")
             
             if not response['success']:
