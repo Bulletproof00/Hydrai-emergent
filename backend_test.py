@@ -247,45 +247,50 @@ class RealTimeTickDataTester:
         except Exception as e:
             self.log_test(test_name, "FAIL", f"WebSocket connection failed: {str(e)}")
     
-    async def test_force_refresh_endpoint(self):
-        """Test the new force-refresh endpoint"""
-        test_name = "Force Refresh Endpoint"
+    async def test_data_sources_verification(self):
+        """Test multiple data sources are working (CoinGecko, Yahoo Finance, Market-Adjusted)"""
+        test_name = "Multiple Data Sources Verification"
         
-        try:
-            url = f"{BACKEND_URL}/data/force-refresh/NASDAQ?timeframe=1d"
-            async with self.session.post(url) as response:
-                status = response.status
-                data = await response.json() if response.content_type == 'application/json' else await response.text()
-                
-                if status != 200:
-                    self.log_test(test_name, "FAIL", f"HTTP {status}: {data}")
-                    return
-                
-                response = {'status': status, 'data': data, 'success': True}
-        except Exception as e:
-            self.log_test(test_name, "FAIL", f"Request failed: {str(e)}")
+        response = await self.test_api_endpoint("/realtime/latest")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
             return
         
         data = response['data']
-        
-        # Check response structure
-        required_fields = ['status', 'symbol', 'timeframe', 'bars_refreshed', 'latest_price', 'asset_type']
-        missing_fields = [field for field in required_fields if field not in data]
-        
-        if missing_fields:
-            self.log_test(test_name, "FAIL", f"Missing fields: {missing_fields}")
+        if 'data' not in data:
+            self.log_test(test_name, "FAIL", "No data in response")
             return
         
-        if data['status'] == 'success' and data['latest_price'] > 0:
+        prices_data = data['data']
+        sources_found = set()
+        
+        # Check what data sources are being used
+        for symbol, price_info in prices_data.items():
+            if price_info and 'source' in price_info:
+                sources_found.add(price_info['source'])
+        
+        expected_sources = ['coingecko', 'market_adjusted', 'yahoo_fallback', 'marketwatch']
+        found_expected = [source for source in expected_sources if source in sources_found]
+        
+        if len(found_expected) >= 2:
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"Refreshed {data['bars_refreshed']} bars, latest price: ${data['latest_price']:.2f}",
-                "Successful refresh with valid price",
-                f"Status: {data['status']}, Price: ${data['latest_price']:.2f}"
+                f"Multiple data sources active: {', '.join(sources_found)}",
+                "At least 2 different data sources",
+                f"{len(sources_found)} sources: {', '.join(sources_found)}"
+            )
+        elif len(sources_found) > 0:
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Only one data source found: {', '.join(sources_found)}",
+                "Multiple data sources",
+                f"1 source: {', '.join(sources_found)}"
             )
         else:
-            self.log_test(test_name, "FAIL", f"Refresh failed or invalid price: {data}")
+            self.log_test(test_name, "FAIL", "No data sources identified in response")
     
     async def test_data_consistency(self):
         """Test data consistency and timestamps"""
