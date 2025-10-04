@@ -540,7 +540,7 @@ class RealTimeTickDataTester:
 
 async def main():
     """Main test runner"""
-    tester = MarketDataTester()
+    tester = RealTimeTickDataTester()
     await tester.run_all_tests()
 
 if __name__ == "__main__":
