@@ -101,3 +101,48 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "NASDAQ price showing 22,775 USD but actual price is over 24,000 USD. All asset values need verification and correction for real-time data."
+
+backend:
+  - task: "Fix MarketData module for real-time traditional market data"
+    implemented: false
+    working: false
+    file: "/app/backend/modules/market_data.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "yfinance returning cached/outdated data with incorrect timestamps (showing Oct 2025 instead of Sep 2025). NASDAQ shows 22,775 instead of current 24,000+. Need alternative real-time data source."
+
+frontend:
+  - task: "Display real-time market data in charts and indicators"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/AdvancedChart.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "Frontend correctly displays data from backend, but backend providing outdated market data. Will work once backend issue is resolved."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Fix MarketData module for real-time traditional market data"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "main"
+      message: "Identified yfinance caching/outdated data issue. Planning to implement alternative real-time data sources for traditional markets (Alpha Vantage, IEX Cloud, or web scraping). Will test solution before proceeding with Smart Money indicators."
