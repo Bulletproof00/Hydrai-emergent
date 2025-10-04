@@ -546,11 +546,12 @@ class SmartMoneyTester:
             self.log_test(test_name, "FAIL", "No data sources identified in response")
 
     async def test_api_performance(self):
-        """Test real-time API response times"""
-        test_name = "Real-Time API Performance"
+        """Test Smart Money API response times"""
+        test_name = "Smart Money API Performance"
         
+        # Test performance of the main endpoint
         start_time = datetime.now()
-        response = await self.test_api_endpoint("/realtime/latest")
+        response = await self.test_api_endpoint("/smart-money/all?symbols=BTC/USDT,ETH/USDT")
         end_time = datetime.now()
         
         response_time = (end_time - start_time).total_seconds()
@@ -559,21 +560,21 @@ class SmartMoneyTester:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
             return
         
-        # Real-time API should be very fast (under 1 second)
-        if response_time < 1.0:
+        # Smart Money API should respond within 2 seconds
+        if response_time < 2.0:
             self.log_test(
                 test_name, 
                 "PASS", 
                 f"Excellent response time: {response_time:.3f}s",
-                "Response time < 1s",
+                "Response time < 2s",
                 f"{response_time:.3f}s"
             )
-        elif response_time < 3.0:
+        elif response_time < 5.0:
             self.log_test(
                 test_name, 
                 "WARN", 
                 f"Acceptable response time: {response_time:.3f}s",
-                "Response time < 1s",
+                "Response time < 2s",
                 f"{response_time:.3f}s"
             )
         else:
@@ -581,7 +582,7 @@ class SmartMoneyTester:
                 test_name, 
                 "FAIL", 
                 f"Slow response time: {response_time:.3f}s",
-                "Response time < 1s",
+                "Response time < 2s",
                 f"{response_time:.3f}s"
             )
     
