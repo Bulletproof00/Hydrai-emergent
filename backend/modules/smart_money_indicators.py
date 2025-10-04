@@ -87,8 +87,11 @@ class SmartMoneyIndicators:
     async def fetch_liquidation_heatmap(self, symbol: str) -> Optional[Dict]:
         """Fetch liquidation heatmap data from multiple sources"""
         try:
+            # Convert symbol format if needed (BTCUSDT -> BTC/USDT)
+            normalized_symbol = self._normalize_symbol(symbol)
+            
             heatmap_data = {
-                'symbol': symbol,
+                'symbol': normalized_symbol,
                 'timestamp': datetime.now(timezone.utc).isoformat(),
                 'liquidation_levels': [],
                 'long_liquidations': [],
