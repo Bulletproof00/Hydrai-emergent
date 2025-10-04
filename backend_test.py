@@ -193,8 +193,8 @@ class RealTimeTickDataTester:
         test_name = "WebSocket Real-Time Connection"
         
         try:
-            # Test WebSocket connection with timeout
-            async with websockets.connect(WEBSOCKET_URL, timeout=10) as websocket:
+            # Test WebSocket connection
+            async with websockets.connect(WEBSOCKET_URL) as websocket:
                 self.log_test(
                     f"{test_name} - Connection", 
                     "PASS", 
