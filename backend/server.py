@@ -1151,28 +1151,52 @@ async def get_market_overview():
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/chart-data/{symbol}")
-async def get_chart_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit: int = 100):
-    """Get OHLCV chart data for candlestick display"""
+async def get_chart_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit: int = 1000):
+    """Get OHLCV chart data with historical data up to 1000 bars"""
     try:
+        from modules.market_data import MarketDataFetcher
+        
         # Convert symbol format (BTC-USDT to BTC/USDT)
         symbol = symbol.replace('-', '/')
-        data = await get_market_data(symbol, timeframe, limit)
+        
+        # Initialize data fetcher
+        fetcher = MarketDataFetcher(exchange, db)
+        
+        # Check if it's crypto or traditional market
+        asset_type = 'crypto'
+        if symbol in ['SPX', 'NASDAQ', 'DXY', 'GOLD', 'EURUSD', 'US2000', 'US10Y', 'DAX', 'NIKKEI']:
+            asset_type = 'traditional'
+        
+        # Try to get from database first
+        stored_data = await fetcher.get_stored_ohlcv(symbol, timeframe, limit)
+        
+        # If not enough data in DB, fetch fresh data
+        if len(stored_data) < limit * 0.9:  # If less than 90% of requested data
+            if asset_type == 'crypto':
+                fresh_data = await fetcher.fetch_and_store_crypto(symbol, timeframe, limit)
+            else:
+                fresh_data = await fetcher.fetch_and_store_traditional(symbol, timeframe, limit)
+            
+            # Get from DB again to ensure consistency
+            stored_data = await fetcher.get_stored_ohlcv(symbol, timeframe, limit)
         
         # Convert to chart-friendly format
         chart_data = []
-        for idx, row in data.iterrows():
+        for candle in stored_data:
             chart_data.append({
-                'time': int(row['timestamp'].timestamp()),
-                'open': float(row['open']),
-                'high': float(row['high']),
-                'low': float(row['low']),
-                'close': float(row['close']),
-                'volume': float(row['volume'])
+                'time': int(candle['timestamp'] / 1000) if candle['timestamp'] > 9999999999 else candle['timestamp'],
+                'open': float(candle['open']),
+                'high': float(candle['high']),
+                'low': float(candle['low']),
+                'close': float(candle['close']),
+                'volume': float(candle['volume'])
             })
         
         return {
             'symbol': symbol,
             'timeframe': timeframe,
+            'asset_type': asset_type,
+            'bars_count': len(chart_data),
             'data': chart_data
         }
     except Exception as e:
