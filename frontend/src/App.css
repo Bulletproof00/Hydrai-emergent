@@ -1256,10 +1256,124 @@ body {
 }
 
 .chart-wrapper {
-  margin: 0 32px;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Real-time price display */
+.realtime-price-display {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 16px;
+  margin-bottom: 0;
+}
+
+.price-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.symbol-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.connected {
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.status-indicator.disconnected {
+  background: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+}
+
+.status-indicator.error {
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+  animation: none;
+}
+
+.status-text {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.price-info {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.current-price {
+  font-size: 32px;
+  font-weight: 700;
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-change {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-change.positive {
+  color: #10b981;
+}
+
+.price-change.negative {
+  color: #ef4444;
+}
+
+.live-indicator {
+  color: #10b981;
+  font-size: 8px;
+  animation: blink 1s infinite;
+}
+
+.data-source {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }
 
 .patterns-panel {
