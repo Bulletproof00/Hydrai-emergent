@@ -192,7 +192,7 @@ class SmartMoneyTester:
                         'XRP/USDT': (0.3, 0.8)
                     }
                     
-                    expected_min, expected_max = expected_ranges.get(display_symbol, (0, 999999))
+                    expected_min, expected_max = expected_ranges.get(symbol, (0, 999999))
                     
                     if expected_min <= min(prices) and max(prices) <= expected_max * 1.2:  # Allow 20% buffer
                         self.log_test(
