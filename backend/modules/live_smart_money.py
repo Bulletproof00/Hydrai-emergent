@@ -39,13 +39,11 @@ class LiveSmartMoneyDataFetcher:
             }
         }
         
-        # Symbol mappings for different sources
+        # Symbol mappings for ALL Top 30 cryptocurrencies
         self.symbol_mappings = {
+            # Top 10
             'BTC/USDT': {
-                'binance': 'BTCUSDT',
-                'coinglass': 'BTC',
-                'coinank': 'BTCUSDT',
-                'cryptocompare': 'BTC'
+                'binance': 'BTCUSDT', 'coinglass': 'BTC', 'coinank': 'BTCUSDT', 'cryptocompare': 'BTC'
             },
             'ETH/USDT': {
                 'binance': 'ETHUSDT',
