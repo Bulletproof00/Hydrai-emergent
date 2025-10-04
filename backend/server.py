@@ -53,6 +53,9 @@ TOP_COINS = ["BTC/USDT", "ETH/USDT", "BNB/USDT", "XRP/USDT", "ADA/USDT",
 # Redis connection
 redis_client = None
 
+# Real-time WebSocket streamer
+real_time_streamer = None
+
 # Create the main app without a prefix
 app = FastAPI()
 
