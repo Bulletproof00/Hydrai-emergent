@@ -24,6 +24,15 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
   const [markets, setMarkets] = useState({ crypto: [], traditional: {} });
   const [assetType, setAssetType] = useState('crypto');
   const [selectedSymbol, setSelectedSymbol] = useState(symbol);
+  
+  // Real-time data hook
+  const { 
+    realTimeData, 
+    connectionStatus, 
+    getCurrentPrice, 
+    getPriceChange, 
+    isLive 
+  } = useRealTimeData(selectedSymbol);
 
   useEffect(() => {
     fetchMarkets();
