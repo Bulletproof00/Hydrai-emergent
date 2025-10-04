@@ -1907,9 +1907,7 @@ async def get_trading_positions(authorization: str = Header(None)):
 
 @api_router.post("/trading/position/margin")
 async def modify_position_margin(
-    position_id: str,
-    action: str,  # 'add' or 'reduce'
-    amount: float,
+    margin_data: MarginModify,
     authorization: str = Header(None)
 ):
     """Add or reduce margin for a position"""
@@ -1922,10 +1920,10 @@ async def modify_position_margin(
         
         user = await get_current_user(authorization)
         
-        if action == 'add':
-            result = await paper_trading.add_margin_to_position(user['_id'], position_id, amount)
-        elif action == 'reduce':
-            result = await paper_trading.reduce_margin_from_position(user['_id'], position_id, amount)
+        if margin_data.action == 'add':
+            result = await paper_trading.add_margin_to_position(user['_id'], margin_data.position_id, margin_data.amount)
+        elif margin_data.action == 'reduce':
+            result = await paper_trading.reduce_margin_from_position(user['_id'], margin_data.position_id, margin_data.amount)
         else:
             return {
                 'status': 'error',
