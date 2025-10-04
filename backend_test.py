@@ -292,17 +292,18 @@ class TradingSystemTester:
         data = response['data']
         
         # Check for AI analysis response structure
-        required_fields = ['symbol', 'analysis', 'recommendation']
+        required_fields = ['symbol', 'recommendation']
         missing_fields = [field for field in required_fields if field not in data]
         
         if missing_fields:
             self.log_test(test_name, "FAIL", f"Missing fields in AI analysis: {missing_fields}")
             return
         
-        analysis = data.get('analysis', '')
-        recommendation = data.get('recommendation', '')
+        recommendation_data = data.get('recommendation', {})
+        reasoning = recommendation_data.get('reasoning', '') if isinstance(recommendation_data, dict) else ''
+        action = recommendation_data.get('action', '') if isinstance(recommendation_data, dict) else ''
         
-        if len(analysis) > 50 and recommendation in ['long', 'short', 'neutral', 'hold']:
+        if len(reasoning) > 50 and action in ['long', 'short', 'neutral', 'hold']:
             self.log_test(
                 test_name, 
                 "PASS", 
