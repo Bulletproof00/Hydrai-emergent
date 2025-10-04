@@ -650,17 +650,12 @@ class TradingSystemTester:
         smart_data = smart_money_response['data'].get('data', {})
         btc_smart_data = smart_data.get('BTC/USDT', {})
         
-        ai_context = {
-            "symbol": "BTC/USDT",
-            "analysis_type": "smart_money_enhanced",
-            "smart_money_context": {
-                "has_liquidation_data": 'liquidation_heatmap' in btc_smart_data,
-                "has_oi_data": 'open_interest' in btc_smart_data,
-                "has_funding_data": 'funding_rates' in btc_smart_data
-            }
-        }
+        has_liquidation = 'liquidation_heatmap' in btc_smart_data
+        has_oi = 'open_interest' in btc_smart_data
+        has_funding = 'funding_rates' in btc_smart_data
         
-        ai_response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=ai_context, auth=True)
+        context = f"smart_money_enhanced_liquidation_{has_liquidation}_oi_{has_oi}_funding_{has_funding}"
+        ai_response = await self.test_api_endpoint(f"/ai-trading/analyze?symbol=BTC/USDT&context={context}", method="POST", auth=True)
         
         if not ai_response['success']:
             self.log_test(test_name, "FAIL", "AI module not responding to Smart Money context")
