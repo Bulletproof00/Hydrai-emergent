@@ -1356,9 +1356,12 @@ async def get_messages(session_id: str):
     return [ChatMessage(**msg) for msg in messages]
 
 @api_router.post("/chat")
-async def chat(message: ChatMessageCreate):
-    """Send a chat message and get AI response"""
+async def chat(message: ChatMessageCreate, authorization: str = Header(None)):
+    """Send a chat message and get AI response with full historical context"""
     try:
+        # Get current user
+        user = await get_current_user(authorization)
+        
         # Save user message
         user_msg = ChatMessage(
             session_id=message.session_id,
@@ -1367,27 +1370,71 @@ async def chat(message: ChatMessageCreate):
         )
         await db.chat_messages.insert_one(user_msg.dict())
         
-        # Get live market data for context
+        # Get comprehensive market context
+        from modules.market_data import MarketDataFetcher
+        from modules.gap_detection import GapDetector
+        
+        fetcher = MarketDataFetcher(exchange, db)
+        
         try:
-            live_price = await get_live_price()
-            market_data = await get_market_data(limit=50)
+            # Get historical data (last 200 bars)
+            btc_data = await fetcher.get_stored_ohlcv('BTC/USDT', '1h', 200)
             
-            # Calculate indicators
-            rsi = await plugin_manager.calculate_rsi(market_data)
-            mfi = await plugin_manager.calculate_mfi(market_data)
-            bb = await plugin_manager.calculate_bollinger(market_data)
+            # Get current price
+            live_price = await get_live_price()
+            
+            # Calculate indicators on historical data
+            if btc_data and len(btc_data) > 50:
+                import pandas as pd
+                df = pd.DataFrame(btc_data)
+                
+                rsi = await plugin_manager.calculate_rsi(df)
+                mfi = await plugin_manager.calculate_mfi(df)
+                bb = await plugin_manager.calculate_bollinger(df)
+                ema50 = await plugin_manager.calculate_ema(df, 50)
+                ema200 = await plugin_manager.calculate_ema(df, 200)
+                
+                indicators = {
+                    'rsi': float(rsi) if rsi and not pd.isna(rsi) else None,
+                    'mfi': float(mfi) if mfi and not pd.isna(mfi) else None,
+                    'bollinger': bb,
+                    'ema50': float(ema50) if ema50 and not pd.isna(ema50) else None,
+                    'ema200': float(ema200) if ema200 and not pd.isna(ema200) else None
+                }
+            else:
+                indicators = {}
+            
+            # Get gaps
+            detector = GapDetector(db)
+            gaps = await detector.get_gaps('BTC/USDT', 10)
+            
+            # Get dominance
+            dominance = await fetcher.fetch_dominance_data()
+            
+            # Get macro data
+            macro_data = await get_macro_data()
+            
+            # Get user's trades for context
+            user_trades = await db.trades.find({"user_id": user["_id"]}).sort("opened_at", -1).limit(10).to_list(10)
             
             context_data = {
-                'price': live_price,
-                'rsi': float(rsi) if rsi else None,
-                'mfi': float(mfi) if mfi else None,
-                'bollinger': bb
+                'current_price': live_price,
+                'indicators': indicators,
+                'gaps': gaps[:5],  # Last 5 gaps
+                'dominance': dominance,
+                'macro_data': {
+                    'SPX': macro_data.get('SPX', {}),
+                    'DXY': macro_data.get('DXY', {}),
+                    'Gold': macro_data.get('Gold', {})
+                },
+                'recent_trades': len(user_trades),
+                'historical_bars': len(btc_data)
             }
         except Exception as e:
-            logging.warning(f"Could not fetch market context: {str(e)}")
-            context_data = None
+            logging.warning(f"Could not fetch full market context: {str(e)}")
+            context_data = {'error': 'Limited context available'}
         
-        # Get AI response
+        # Get AI response with full context
         ai_response = await analyze_with_ai(message.content, context_data)
         
         # Save assistant response
