@@ -608,14 +608,8 @@ class TradingSystemTester:
             return
         
         # Now test AI analysis with current market context
-        analyze_data = {
-            "symbol": "BTC/USDT",
-            "timeframe": "1h",
-            "analysis_type": "realtime",
-            "current_price": btc_price
-        }
-        
-        ai_response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=analyze_data, auth=True)
+        context = f"realtime_analysis_current_price_{int(btc_price)}"
+        ai_response = await self.test_api_endpoint(f"/ai-trading/analyze?symbol=BTC/USDT&context={context}", method="POST", auth=True)
         
         if ai_response['success']:
             analysis = ai_response['data'].get('analysis', '')
