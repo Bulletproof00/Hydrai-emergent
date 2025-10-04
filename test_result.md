@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Teste das neue Paper Trading System vollständig: Trading System APIs (Account Management, Order Management, Position Management, Trading Data), Trading Engine Features (Order Execution, Risk Management, Portfolio Tracking), und Top 30 Crypto Assets validation."
+user_problem_statement: "Teste das vollständig erweiterte Trading System mit Real-time Daten und KI-Integration: Real-time Integration Tests, AI Trading Engine Tests, Enhanced Smart Money Tests, Integration Tests, Performance & Stability Tests."
 
 backend:
   - task: "Paper Trading Account Management - GET /api/trading/account"
