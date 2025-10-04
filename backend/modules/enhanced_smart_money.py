@@ -103,6 +103,10 @@ class EnhancedSmartMoneyIndicators:
 
     async def fetch_enhanced_liquidation_heatmap(self, symbol: str) -> Optional[Dict]:
         """Fetch enhanced 2D liquidation heatmap data with LIVE data like Coinglass"""
+        return await self.fetch_enhanced_liquidation_heatmap_with_timeframe(symbol, "1day")
+
+    async def fetch_enhanced_liquidation_heatmap_with_timeframe(self, symbol: str, timeframe: str = "1day") -> Optional[Dict]:
+        """Fetch enhanced 2D liquidation heatmap data with LIVE data like Coinglass with timeframe support"""
         try:
             if symbol not in self.supported_symbols:
                 logger.warning(f"Symbol {symbol} not supported")
@@ -118,10 +122,29 @@ class EnhancedSmartMoneyIndicators:
                 return None
             
             current_price = live_liquidation_data['current_price']
-            liquidation_levels = live_liquidation_data['liquidation_levels']
+            base_liquidation_levels = live_liquidation_data['liquidation_levels']
             summary = live_liquidation_data['summary']
             
-            logger.info(f"Fetched LIVE liquidation data for {symbol}: ${current_price}, {len(liquidation_levels)} levels")
+            logger.info(f"Fetched LIVE liquidation data for {symbol}: ${current_price}, {len(base_liquidation_levels)} levels")
+            
+            # Generate timeframe-enhanced liquidation levels
+            enhanced_levels = self._generate_timeframe_liquidation_levels(
+                current_price, symbol_info, timeframe, base_liquidation_levels
+            )
+            
+            # Calculate directional bias based on enhanced levels
+            directional_bias = self._calculate_directional_bias(enhanced_levels, current_price, timeframe)
+            
+            # Enhanced summary with directional bias
+            enhanced_summary = {
+                **summary,
+                'timeframe': timeframe,
+                'directional_bias': directional_bias,
+                'total_liquidations_above': sum(level['total_liquidation'] for level in enhanced_levels if level['above_current']),
+                'total_liquidations_below': sum(level['total_liquidation'] for level in enhanced_levels if not level['above_current']),
+                'levels_count_above': len([l for l in enhanced_levels if l['above_current']]),
+                'levels_count_below': len([l for l in enhanced_levels if not l['above_current']])
+            }
             
             # Enhanced heatmap data with LIVE information
             heatmap_data = {
@@ -129,26 +152,27 @@ class EnhancedSmartMoneyIndicators:
                 'display_name': symbol_info['display_name'],
                 'current_price': current_price,
                 'timestamp': live_liquidation_data['timestamp'],
-                'timeframe': '24h',
-                'price_range': self._calculate_price_range(current_price, symbol_info),
-                'liquidation_levels': liquidation_levels,
-                'summary': summary,
+                'timeframe': timeframe,
+                'price_range': self._calculate_price_range_for_timeframe(current_price, symbol_info, timeframe),
+                'liquidation_levels': enhanced_levels,
+                'summary': enhanced_summary,
                 'total_liquidations_24h': live_liquidation_data.get('total_liquidations_24h', 0),
                 'data_sources': live_liquidation_data.get('data_sources', {}),
-                'source': 'live_aggregated',
+                'source': 'live_aggregated_timeframe',
                 'last_updated': datetime.now(timezone.utc).isoformat()
             }
             
             # Store in cache and database
-            self.cache['liquidation_heatmap_2d'][symbol] = heatmap_data
-            await self._store_enhanced_smart_money_data('liquidation_heatmap_2d', symbol, heatmap_data)
+            cache_key = f"{symbol}_{timeframe}"
+            self.cache['liquidation_heatmap_2d'][cache_key] = heatmap_data
+            await self._store_enhanced_smart_money_data('liquidation_heatmap_2d', cache_key, heatmap_data)
             
-            logger.info(f"Enhanced liquidation heatmap ready for {symbol}: {len(liquidation_levels)} levels, ${current_price} current price")
+            logger.info(f"Enhanced liquidation heatmap ready for {symbol} ({timeframe}): {len(enhanced_levels)} levels, ${current_price} current price")
             
             return heatmap_data
             
         except Exception as e:
-            logger.error(f"Error fetching enhanced liquidation heatmap for {symbol}: {e}")
+            logger.error(f"Error fetching enhanced liquidation heatmap for {symbol} ({timeframe}): {e}")
             return None
 
     async def fetch_enhanced_open_interest(self, symbol: str) -> Optional[Dict]:
