@@ -1052,6 +1052,58 @@ body {
   color: white;
 }
 
+.timeframe-selector-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timeframe-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Coinglass-style Timeframe Dropdown */
+.timeframe-select {
+  padding: 8px 32px 8px 12px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  max-width: 140px;
+  appearance: none;
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik02IDhMMCAwSDEyTDYgOFoiIGZpbGw9IiM5NGEzYjgiLz4KPHN2Zz4K');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.timeframe-select:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  background-color: rgba(30, 41, 59, 1.0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.timeframe-select:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.timeframe-select option {
+  background: #1e293b;
+  color: #f8fafc;
+  padding: 8px 12px;
+  font-weight: 500;
+}
+
 .current-price {
   margin-left: auto;
   display: flex;
