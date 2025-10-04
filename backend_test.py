@@ -598,6 +598,268 @@ class SmartMoneyTester:
                 f"{response_time:.3f}s"
             )
     
+    async def test_enhanced_smart_money_supported_symbols(self):
+        """Test /api/enhanced-smart-money/supported-symbols endpoint"""
+        test_name = "Enhanced Smart Money Supported Symbols API"
+        
+        response = await self.test_api_endpoint("/enhanced-smart-money/supported-symbols")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check response structure
+        if 'status' not in data or 'symbols' not in data:
+            self.log_test(test_name, "FAIL", "Invalid response structure")
+            return
+        
+        if data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error status: {data}")
+            return
+        
+        symbols = data['symbols']
+        expected_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
+        
+        # Check if all expected symbols are present
+        found_symbols = [s['symbol'] for s in symbols if isinstance(s, dict) and 'symbol' in s]
+        missing_symbols = [s for s in expected_symbols if s not in found_symbols]
+        
+        if not missing_symbols:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"All expected symbols supported: {', '.join(found_symbols)}",
+                "BTC, ETH, SOL, XRP supported",
+                f"{len(found_symbols)} symbols: {', '.join(found_symbols)}"
+            )
+        else:
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Missing symbols: {', '.join(missing_symbols)}. Found: {', '.join(found_symbols)}",
+                "All expected symbols present",
+                f"Missing: {', '.join(missing_symbols)}"
+            )
+
+    async def test_enhanced_smart_money_data_with_timeframes(self):
+        """Test /api/enhanced-smart-money/data endpoint with different timeframes"""
+        test_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
+        test_timeframes = ['1day', '3day', '1week']
+        
+        for symbol in test_symbols:
+            for timeframe in test_timeframes:
+                test_name = f"Enhanced Smart Money Data - {symbol} ({timeframe})"
+                
+                response = await self.test_api_endpoint(f"/enhanced-smart-money/data?symbol={symbol}&timeframe={timeframe}")
+                
+                if not response['success']:
+                    self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+                    continue
+                
+                data = response['data']
+                
+                # Check response structure
+                if 'status' not in data:
+                    self.log_test(test_name, "FAIL", "Invalid response structure - missing status")
+                    continue
+                
+                if data['status'] != 'success':
+                    self.log_test(test_name, "FAIL", f"API returned error: {data}")
+                    continue
+                
+                # Check for required fields
+                required_fields = ['symbol', 'timeframe', 'liquidation_heatmap_2d']
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if missing_fields:
+                    self.log_test(test_name, "FAIL", f"Missing required fields: {missing_fields}")
+                    continue
+                
+                # Validate timeframe matches request
+                if data.get('timeframe') != timeframe:
+                    self.log_test(test_name, "FAIL", f"Timeframe mismatch: expected {timeframe}, got {data.get('timeframe')}")
+                    continue
+                
+                # Check liquidation heatmap 2D data
+                heatmap_2d = data.get('liquidation_heatmap_2d')
+                if heatmap_2d and isinstance(heatmap_2d, dict):
+                    # Check for directional bias
+                    if 'directional_bias' in heatmap_2d:
+                        bias = heatmap_2d['directional_bias']
+                        if isinstance(bias, dict) and 'bias' in bias and 'strength' in bias:
+                            self.log_test(
+                                test_name, 
+                                "PASS", 
+                                f"Enhanced data with timeframe: {timeframe}, bias: {bias.get('bias', 'unknown')} (strength: {bias.get('strength', 0):.2f})",
+                                f"Valid enhanced data with {timeframe} timeframe",
+                                f"Bias: {bias.get('bias', 'unknown')}, Strength: {bias.get('strength', 0):.2f}"
+                            )
+                        else:
+                            self.log_test(test_name, "WARN", f"Directional bias data incomplete for {timeframe}")
+                    else:
+                        self.log_test(test_name, "WARN", f"Missing directional bias for {timeframe}")
+                else:
+                    self.log_test(test_name, "FAIL", f"Invalid or missing liquidation heatmap 2D data for {timeframe}")
+
+    async def test_enhanced_liquidation_heatmap_2d_timeframes(self):
+        """Test /api/enhanced-smart-money/liquidation-heatmap-2d endpoint with timeframes"""
+        test_symbols = ['BTC/USDT', 'ETH/USDT']
+        test_timeframes = ['1day', '3day', '1week']
+        
+        for symbol in test_symbols:
+            for timeframe in test_timeframes:
+                test_name = f"Enhanced Liquidation Heatmap 2D - {symbol} ({timeframe})"
+                
+                response = await self.test_api_endpoint(f"/enhanced-smart-money/liquidation-heatmap-2d?symbol={symbol}&timeframe={timeframe}")
+                
+                if not response['success']:
+                    self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+                    continue
+                
+                data = response['data']
+                
+                # Check response structure
+                if 'status' not in data:
+                    self.log_test(test_name, "FAIL", "Invalid response structure")
+                    continue
+                
+                if data['status'] != 'success':
+                    self.log_test(test_name, "FAIL", f"API returned error: {data}")
+                    continue
+                
+                # Check for liquidation levels with cluster strength and timeframe impact
+                if 'liquidation_levels' in data:
+                    levels = data['liquidation_levels']
+                    if isinstance(levels, list) and len(levels) > 0:
+                        # Check if levels have timeframe-specific fields
+                        sample_level = levels[0]
+                        timeframe_fields = ['cluster_strength', 'timeframe_impact']
+                        has_timeframe_fields = all(field in sample_level for field in timeframe_fields)
+                        
+                        if has_timeframe_fields:
+                            # Check if timeframe_impact matches requested timeframe
+                            if sample_level.get('timeframe_impact') == timeframe:
+                                self.log_test(
+                                    test_name, 
+                                    "PASS", 
+                                    f"Liquidation heatmap 2D with {timeframe} timeframe: {len(levels)} levels, cluster strength: {sample_level.get('cluster_strength')}",
+                                    f"Valid 2D heatmap with {timeframe} timeframe features",
+                                    f"{len(levels)} levels with timeframe impact"
+                                )
+                            else:
+                                self.log_test(test_name, "WARN", f"Timeframe impact mismatch: expected {timeframe}, got {sample_level.get('timeframe_impact')}")
+                        else:
+                            self.log_test(test_name, "WARN", f"Missing timeframe-specific fields: {timeframe_fields}")
+                    else:
+                        self.log_test(test_name, "FAIL", f"No liquidation levels found for {timeframe}")
+                else:
+                    self.log_test(test_name, "FAIL", f"Missing liquidation_levels in response for {timeframe}")
+
+    async def test_directional_bias_calculations(self):
+        """Test directional bias calculations with different timeframes"""
+        test_name = "Directional Bias Calculations"
+        
+        # Test with BTC/USDT for different timeframes
+        symbol = "BTC/USDT"
+        timeframes = ['1day', '3day', '1week']
+        bias_results = []
+        
+        for timeframe in timeframes:
+            response = await self.test_api_endpoint(f"/enhanced-smart-money/data?symbol={symbol}&timeframe={timeframe}")
+            
+            if response['success'] and response['data'].get('status') == 'success':
+                data = response['data']
+                heatmap_2d = data.get('liquidation_heatmap_2d', {})
+                
+                if 'directional_bias' in heatmap_2d:
+                    bias = heatmap_2d['directional_bias']
+                    bias_results.append({
+                        'timeframe': timeframe,
+                        'bias': bias.get('bias', 'unknown'),
+                        'strength': bias.get('strength', 0),
+                        'above_ratio': bias.get('above_ratio', 0),
+                        'below_ratio': bias.get('below_ratio', 0)
+                    })
+        
+        if len(bias_results) >= 2:
+            # Check if different timeframes return different data (they should)
+            different_data = False
+            for i in range(1, len(bias_results)):
+                if (bias_results[i]['strength'] != bias_results[0]['strength'] or 
+                    bias_results[i]['above_ratio'] != bias_results[0]['above_ratio']):
+                    different_data = True
+                    break
+            
+            if different_data:
+                bias_summary = ', '.join([f"{r['timeframe']}: {r['bias']} ({r['strength']:.2f})" for r in bias_results])
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Directional bias varies by timeframe: {bias_summary}",
+                    "Different bias calculations for different timeframes",
+                    f"{len(bias_results)} timeframes with varying bias data"
+                )
+            else:
+                self.log_test(
+                    test_name, 
+                    "WARN", 
+                    f"Directional bias appears identical across timeframes",
+                    "Different bias for different timeframes",
+                    "Same bias values across timeframes"
+                )
+        else:
+            self.log_test(test_name, "FAIL", f"Insufficient bias data collected: {len(bias_results)} timeframes")
+
+    async def test_timeframe_validation(self):
+        """Test timeframe parameter validation"""
+        test_name = "Timeframe Parameter Validation"
+        
+        symbol = "BTC/USDT"
+        valid_timeframes = ['1day', '3day', '1week']
+        invalid_timeframes = ['1hour', '5min', 'invalid']
+        
+        valid_count = 0
+        invalid_handled = 0
+        
+        # Test valid timeframes
+        for timeframe in valid_timeframes:
+            response = await self.test_api_endpoint(f"/enhanced-smart-money/data?symbol={symbol}&timeframe={timeframe}")
+            if response['success'] and response['data'].get('status') == 'success':
+                valid_count += 1
+        
+        # Test invalid timeframes (should return error or default)
+        for timeframe in invalid_timeframes:
+            response = await self.test_api_endpoint(f"/enhanced-smart-money/data?symbol={symbol}&timeframe={timeframe}")
+            if not response['success'] or response['data'].get('status') != 'success':
+                invalid_handled += 1
+        
+        if valid_count == len(valid_timeframes) and invalid_handled == len(invalid_timeframes):
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"Timeframe validation working: {valid_count} valid accepted, {invalid_handled} invalid rejected",
+                "Valid timeframes accepted, invalid rejected",
+                f"{valid_count}/{len(valid_timeframes)} valid, {invalid_handled}/{len(invalid_timeframes)} invalid handled"
+            )
+        elif valid_count == len(valid_timeframes):
+            self.log_test(
+                test_name, 
+                "WARN", 
+                f"Valid timeframes work but invalid handling unclear: {invalid_handled}/{len(invalid_timeframes)} invalid handled",
+                "All timeframes properly validated",
+                f"Valid: {valid_count}/{len(valid_timeframes)}, Invalid handled: {invalid_handled}/{len(invalid_timeframes)}"
+            )
+        else:
+            self.log_test(
+                test_name, 
+                "FAIL", 
+                f"Timeframe validation issues: {valid_count}/{len(valid_timeframes)} valid work, {invalid_handled}/{len(invalid_timeframes)} invalid handled",
+                "All valid timeframes should work",
+                f"Only {valid_count} valid timeframes working"
+            )
+
     async def run_all_tests(self):
         """Run all test cases for Smart Money Indicators system"""
         await self.setup()
@@ -612,6 +874,13 @@ class SmartMoneyTester:
             await self.test_data_quality_validation()
             await self.test_data_sources_verification()
             await self.test_api_performance()
+            
+            # Enhanced Smart Money functionality tests (NEW)
+            await self.test_enhanced_smart_money_supported_symbols()
+            await self.test_enhanced_smart_money_data_with_timeframes()
+            await self.test_enhanced_liquidation_heatmap_2d_timeframes()
+            await self.test_directional_bias_calculations()
+            await self.test_timeframe_validation()
             
         finally:
             await self.cleanup()
