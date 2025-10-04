@@ -143,6 +143,17 @@ class TradeCreate(BaseModel):
     stop_loss: Optional[float] = None
     take_profit: Optional[float] = None
 
+class OrderCreate(BaseModel):
+    symbol: str
+    side: Literal["buy", "sell"]
+    order_type: Literal["market", "limit", "stop_loss", "take_profit"]
+    quantity: float = Field(gt=0)
+    price: Optional[float] = None
+    leverage: int = Field(ge=1, le=100, default=1)
+    stop_loss: Optional[float] = None
+    take_profit: Optional[float] = None
+    reduce_only: bool = False
+
 class Trade(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
