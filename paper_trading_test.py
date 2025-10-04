@@ -82,7 +82,8 @@ class PaperTradingTester:
         print()
     
     async def test_api_endpoint(self, endpoint: str, method: str = "GET", data: Dict = None, 
-                               expected_status: int = 200, auth_required: bool = False) -> Dict[str, Any]:
+                               expected_status: int = 200, auth_required: bool = False, 
+                               use_form_data: bool = False) -> Dict[str, Any]:
         """Test API endpoint and return response"""
         try:
             url = f"{BACKEND_URL}{endpoint}"
@@ -97,10 +98,20 @@ class PaperTradingTester:
                     response_data = await response.json() if response.content_type == 'application/json' else await response.text()
             elif method.upper() == "POST":
                 if data:
-                    headers['Content-Type'] = 'application/json'
-                async with self.session.post(url, json=data, headers=headers) as response:
-                    status = response.status
-                    response_data = await response.json() if response.content_type == 'application/json' else await response.text()
+                    if use_form_data:
+                        # Send as form data for endpoints that expect individual parameters
+                        async with self.session.post(url, data=data, headers=headers) as response:
+                            status = response.status
+                            response_data = await response.json() if response.content_type == 'application/json' else await response.text()
+                    else:
+                        headers['Content-Type'] = 'application/json'
+                        async with self.session.post(url, json=data, headers=headers) as response:
+                            status = response.status
+                            response_data = await response.json() if response.content_type == 'application/json' else await response.text()
+                else:
+                    async with self.session.post(url, headers=headers) as response:
+                        status = response.status
+                        response_data = await response.json() if response.content_type == 'application/json' else await response.text()
             else:
                 return {'status': 0, 'data': 'Unsupported method', 'success': False}
                 
