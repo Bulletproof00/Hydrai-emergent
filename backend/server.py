@@ -2218,6 +2218,14 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Paper Trading initialization failed: {str(e)}")
     
+    # Initialize AI Trading Engine
+    try:
+        global ai_trading
+        ai_trading = AITradingEngine(db, paper_trading, enhanced_smart_money)
+        logger.info("AI Trading Engine initialized with Gemini Pro")
+    except Exception as e:
+        logger.warning(f"AI Trading initialization failed: {str(e)}")
+    
     # Start background data update task
     asyncio.create_task(update_market_data_background())
     logger.info("Background data update task started")
