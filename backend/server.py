@@ -1466,6 +1466,73 @@ async def get_messages(session_id: str):
     messages = await db.chat_messages.find({"session_id": session_id}).sort("timestamp", 1).to_list(1000)
     return [ChatMessage(**msg) for msg in messages]
 
+@api_router.websocket("/realtime")
+async def websocket_realtime(websocket: WebSocket):
+    """WebSocket endpoint for real-time market data"""
+    await websocket.accept()
+    subscriber_id = str(uuid.uuid4())
+    
+    try:
+        # Add subscriber to real-time streamer
+        if real_time_streamer:
+            real_time_streamer.add_subscriber(subscriber_id, websocket)
+        
+        # Send initial data
+        if real_time_streamer:
+            latest_ticks = await real_time_streamer.get_latest_ticks()
+            await websocket.send_text(json.dumps({
+                'type': 'initial_data',
+                'data': latest_ticks
+            }))
+        
+        # Keep connection alive and handle messages
+        while True:
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                
+                # Handle different message types
+                if message.get('type') == 'subscribe':
+                    symbols = message.get('symbols', [])
+                    logging.info(f"Client {subscriber_id} subscribed to: {symbols}")
+                
+                elif message.get('type') == 'ping':
+                    await websocket.send_text(json.dumps({'type': 'pong'}))
+                    
+            except Exception as e:
+                logging.error(f"WebSocket message error: {e}")
+                break
+                
+    except Exception as e:
+        logging.error(f"WebSocket connection error: {e}")
+    finally:
+        # Remove subscriber
+        if real_time_streamer:
+            real_time_streamer.remove_subscriber(subscriber_id)
+
+@api_router.get("/realtime/latest")
+async def get_latest_realtime_data(symbols: str = None):
+    """Get latest real-time tick data"""
+    try:
+        symbol_list = symbols.split(',') if symbols else None
+        
+        if real_time_streamer:
+            latest_data = await real_time_streamer.get_latest_ticks(symbol_list)
+            return {
+                'status': 'success',
+                'data': latest_data,
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+        else:
+            return {
+                'status': 'error',
+                'message': 'Real-time streamer not initialized'
+            }
+            
+    except Exception as e:
+        logging.error(f"Latest realtime data error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/chat")
 async def chat(message: ChatMessageCreate, authorization: str = Header(None)):
     """Send a chat message and get AI response with full historical context"""
