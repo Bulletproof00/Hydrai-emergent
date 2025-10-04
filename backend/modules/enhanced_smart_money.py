@@ -149,61 +149,45 @@ class EnhancedSmartMoneyIndicators:
             return None
 
     async def fetch_enhanced_open_interest(self, symbol: str) -> Optional[Dict]:
-        """Fetch enhanced open interest with detailed exchange breakdown like Coinglass table"""
+        """Fetch enhanced open interest with detailed exchange breakdown using LIVE data like Coinglass"""
         try:
             if symbol not in self.supported_symbols:
                 return None
             
             symbol_info = self.supported_symbols[symbol]
-            current_price = await self._get_current_price(symbol)
             
+            # Fetch LIVE open interest data
+            live_oi_data = await self.live_fetcher.fetch_live_open_interest_data(symbol)
+            
+            if not live_oi_data:
+                logger.warning(f"Could not fetch live open interest data for {symbol}")
+                return None
+            
+            current_price = live_oi_data['current_price']
+            
+            logger.info(f"Fetched LIVE open interest data for {symbol}: ${current_price}, Total OI: {live_oi_data['total_open_interest']}")
+            
+            # Enhanced OI data with LIVE information
             oi_data = {
                 'symbol': symbol,
                 'display_name': symbol_info['display_name'],
                 'current_price': current_price,
-                'timestamp': datetime.now(timezone.utc).isoformat(),
-                'total_open_interest': 0,
-                'total_volume_24h': 0,
-                'oi_change_24h': 0,
-                'exchanges_detail': {},
-                'market_metrics': {
-                    'oi_volume_ratio': 0,
-                    'oi_dominance': 0,
-                    'avg_funding_rate': 0,
-                    'liquidations_24h': 0
-                },
-                'source': 'aggregated'
+                'timestamp': live_oi_data['timestamp'],
+                'total_open_interest': live_oi_data['total_open_interest'],
+                'total_volume_24h': live_oi_data['total_volume_24h'],
+                'oi_change_24h': live_oi_data['market_metrics'].get('oi_change_24h', 0),
+                'exchanges_detail': live_oi_data['exchanges_detail'],
+                'market_metrics': live_oi_data['market_metrics'],
+                'data_sources': live_oi_data.get('data_sources', {}),
+                'source': 'live_aggregated',
+                'last_updated': datetime.now(timezone.utc).isoformat()
             }
-            
-            # Fetch from real exchanges
-            binance_oi = await self._fetch_binance_open_interest_detailed(symbol)
-            if binance_oi:
-                oi_data['exchanges_detail']['binance'] = binance_oi
-                oi_data['total_open_interest'] += binance_oi['open_interest']
-                oi_data['total_volume_24h'] += binance_oi['volume_24h']
-            
-            # Generate detailed synthetic data for other exchanges
-            for exchange_key, exchange_info in self.exchanges.items():
-                if exchange_key == 'binance':
-                    continue
-                    
-                synthetic_oi = self._generate_synthetic_exchange_oi(
-                    symbol, exchange_key, exchange_info, current_price
-                )
-                oi_data['exchanges_detail'][exchange_key] = synthetic_oi
-                oi_data['total_open_interest'] += synthetic_oi['open_interest']
-                oi_data['total_volume_24h'] += synthetic_oi['volume_24h']
-            
-            # Calculate derived metrics
-            oi_data['market_metrics'] = self._calculate_market_metrics(oi_data)
-            
-            # Calculate OI change (synthetic for now)
-            import random
-            oi_data['oi_change_24h'] = random.uniform(-15, 15)  # -15% to +15%
             
             # Store in cache and database
             self.cache['open_interest_detailed'][symbol] = oi_data
             await self._store_enhanced_smart_money_data('open_interest_detailed', symbol, oi_data)
+            
+            logger.info(f"Enhanced open interest ready for {symbol}: {len(oi_data['exchanges_detail'])} exchanges, Total OI: ${oi_data['total_open_interest']/1000000:.1f}M")
             
             return oi_data
             
