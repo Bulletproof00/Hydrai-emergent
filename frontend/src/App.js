@@ -631,6 +631,12 @@ function App() {
             <EnhancedSmartMoneyPanel />
           </div>
         )}
+
+        {activeView === 'trading' && (
+          <div className="trading-view">
+            <TradingInterface />
+          </div>
+        )}
       </div>
     </div>
   );
