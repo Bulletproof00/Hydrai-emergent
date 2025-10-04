@@ -2186,8 +2186,38 @@ async def chat(message: ChatMessageCreate, authorization: str = Header(None)):
             logging.warning(f"Could not fetch full market context: {str(e)}")
             context_data = {'error': 'Limited context available'}
         
-        # Get AI response with full context
-        ai_response = await analyze_with_ai(message.content, context_data)
+        # Check if this is a trading command and handle with AI Trading Engine
+        trading_response = None
+        if ai_trading:
+            try:
+                # Check if message contains trading keywords
+                trading_keywords = [
+                    'long', 'short', 'buy', 'sell', 'trade', 'position', 'leverage', 
+                    'stop loss', 'take profit', 'close', 'analyze', 'analysis',
+                    'bollinger', 'rsi', 'strategy', 'entry', 'exit'
+                ]
+                
+                message_lower = message.content.lower()
+                if any(keyword in message_lower for keyword in trading_keywords):
+                    # This looks like a trading command or request
+                    try:
+                        command_result = await ai_trading.execute_chat_command(user['_id'], message.content)
+                        if command_result.get('success'):
+                            trading_response = command_result
+                    except Exception as e:
+                        logging.warning(f"Trading command execution failed: {e}")
+                
+            except Exception as e:
+                logging.warning(f"AI Trading integration error: {e}")
+        
+        # Get AI response with full context including trading response
+        enhanced_context_data = {
+            **context_data,
+            'trading_response': trading_response,
+            'ai_trading_available': ai_trading is not None
+        }
+        
+        ai_response = await analyze_with_ai(message.content, enhanced_context_data)
         
         # Save assistant response
         assistant_msg = ChatMessage(
