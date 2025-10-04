@@ -1533,6 +1533,29 @@ async def get_latest_realtime_data(symbols: str = None):
         logging.error(f"Latest realtime data error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/realtime/history/{symbol}")
+async def get_realtime_history(symbol: str, minutes: int = 60):
+    """Get real-time price history for a symbol"""
+    try:
+        if enhanced_streamer:
+            history = await enhanced_streamer.get_price_history(symbol, minutes)
+            return {
+                'status': 'success',
+                'symbol': symbol,
+                'minutes': minutes,
+                'data': history,
+                'count': len(history)
+            }
+        else:
+            return {
+                'status': 'error',
+                'message': 'Enhanced streamer not initialized'
+            }
+            
+    except Exception as e:
+        logging.error(f"Realtime history error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/chat")
 async def chat(message: ChatMessageCreate, authorization: str = Header(None)):
     """Send a chat message and get AI response with full historical context"""
