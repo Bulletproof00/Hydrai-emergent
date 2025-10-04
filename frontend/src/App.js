@@ -579,8 +579,11 @@ function App() {
         )}
 
         {activeView === 'chart' && (
-          <div className="chart-view">
-            <TradingChart symbol="BTC/USDT" timeframe="1h" />
+          <div className="chart-view" style={{padding: '24px', height: '100%'}}>
+            <AdvancedChart 
+              symbol={selectedSymbol} 
+              onSymbolChange={setSelectedSymbol}
+            />
           </div>
         )}
 
