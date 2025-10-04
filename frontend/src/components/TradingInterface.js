@@ -21,6 +21,11 @@ const TradingInterface = () => {
         takeProfit: ''
     });
     
+    // AI Analysis state
+    const [aiAnalysis, setAiAnalysis] = useState(null);
+    const [analysisLoading, setAnalysisLoading] = useState(false);
+    const [showAiPanel, setShowAiPanel] = useState(false);
+    
     // Current prices (from real-time data)
     const [currentPrices, setCurrentPrices] = useState({});
 
