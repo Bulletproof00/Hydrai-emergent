@@ -1708,8 +1708,11 @@ async def get_enhanced_supported_symbols():
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/enhanced-smart-money/data/{symbol}")
-async def get_enhanced_smart_money_data(symbol: str):
-    """Get comprehensive enhanced smart money data for a symbol (Coinglass-style)"""
+async def get_enhanced_smart_money_data(
+    symbol: str, 
+    timeframe: str = "1day"
+):
+    """Get comprehensive enhanced smart money data for a symbol (Coinglass-style) with timeframe support"""
     try:
         if not enhanced_smart_money:
             return {
@@ -1721,11 +1724,17 @@ async def get_enhanced_smart_money_data(symbol: str):
         import urllib.parse
         decoded_symbol = urllib.parse.unquote(symbol)
         
-        data = await enhanced_smart_money.get_enhanced_smart_money_data(decoded_symbol)
+        # Validate timeframe
+        valid_timeframes = ["12h", "1day", "3day", "1week", "2week", "monthly"]
+        if timeframe not in valid_timeframes:
+            timeframe = "1day"
+        
+        data = await enhanced_smart_money.get_enhanced_smart_money_data_with_timeframe(decoded_symbol, timeframe)
         
         return {
             'status': 'success',
             'symbol': decoded_symbol,
+            'timeframe': timeframe,
             'data': data,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
