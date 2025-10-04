@@ -1883,7 +1883,7 @@ async def get_trading_positions(authorization: str = Header(None)):
         
         user = await get_current_user(authorization)
         
-        positions = await paper_trading.get_positions(user['user_id'])
+        positions = await paper_trading.get_positions(user['_id'])
         
         return {
             'status': 'success',
