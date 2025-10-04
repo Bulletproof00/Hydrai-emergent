@@ -127,57 +127,142 @@ class RealTimeMarketDataFetcher:
         
         return None
     
-    async def fetch_market_watch_price(self, symbol: str) -> Optional[Dict]:
-        """Scrape price from MarketWatch as fallback"""
+    async def fetch_investing_com_price(self, symbol: str) -> Optional[Dict]:
+        """Fetch price from Investing.com API"""
         try:
-            # MarketWatch URLs for major indices
-            marketwatch_urls = {
-                'SPX': 'https://www.marketwatch.com/investing/index/spx',
-                'NASDAQ': 'https://www.marketwatch.com/investing/index/comp',
-                'DXY': 'https://www.marketwatch.com/investing/index/dxy',
-                'GOLD': 'https://www.marketwatch.com/investing/future/gc00'
+            # Investing.com symbol mapping
+            investing_symbols = {
+                'SPX': '166',      # S&P 500 
+                'NASDAQ': '14',    # NASDAQ Composite
+                'DXY': '8827',     # US Dollar Index
+                'GOLD': '8830'     # Gold Futures
             }
             
-            url = marketwatch_urls.get(symbol)
-            if not url:
+            investing_id = investing_symbols.get(symbol)
+            if not investing_id:
                 return None
             
             session = await self.get_session()
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             }
             
-            async with session.get(url, headers=headers) as response:
+            # Use Investing.com's API endpoint
+            url = f'https://api.investing.com/api/financialdata/{investing_id}/historical/chart/'
+            params = {
+                'period': 'P1D',
+                'interval': 'PT1M',
+                'pointscount': '1'
+            }
+            
+            async with session.get(url, headers=headers, params=params) as response:
                 if response.status == 200:
-                    html = await response.text()
-                    
-                    # Simple regex to find price - this would need more robust parsing
-                    import re
-                    
-                    # Look for price patterns in the HTML
-                    price_patterns = [
-                        r'"LastPrice":"([0-9,]+\.?[0-9]*)"',
-                        r'data-module="MW_DataTable"[^>]*>([0-9,]+\.?[0-9]*)',
-                        r'"price":"([0-9,]+\.?[0-9]*)"'
-                    ]
-                    
-                    for pattern in price_patterns:
-                        match = re.search(pattern, html)
-                        if match:
-                            price_str = match.group(1).replace(',', '')
-                            try:
-                                price = float(price_str)
-                                return {
-                                    'symbol': symbol,
-                                    'price': price,
-                                    'timestamp': int(datetime.now().timestamp()),
-                                    'source': 'marketwatch'
-                                }
-                            except ValueError:
-                                continue
-                                
+                    data = await response.json()
+                    if 'data' in data and data['data']:
+                        latest = data['data'][-1]
+                        price = latest.get('close') or latest.get('price', 0)
+                        
+                        if price > 0:
+                            return {
+                                'symbol': symbol,
+                                'price': price,
+                                'timestamp': int(datetime.now().timestamp()),
+                                'source': 'investing.com'
+                            }
+                            
         except Exception as e:
-            logger.error(f"Error scraping MarketWatch for {symbol}: {str(e)}")
+            logger.error(f"Error fetching Investing.com data for {symbol}: {str(e)}")
+        
+        return None
+
+    async def fetch_polygon_free_quote(self, symbol: str) -> Optional[Dict]:
+        """Try Polygon.io free tier"""
+        try:
+            polygon_symbols = {
+                'SPX': 'I:SPX',
+                'NASDAQ': 'I:COMP', 
+                'DXY': 'C:EURUSD',  # Approximate
+                'GOLD': 'C:XAUUSD'
+            }
+            
+            polygon_symbol = polygon_symbols.get(symbol)
+            if not polygon_symbol:
+                return None
+            
+            session = await self.get_session()
+            url = f'https://api.polygon.io/v2/last/trade/{polygon_symbol}'
+            params = {'apikey': 'demo'}  # Try demo key
+            
+            async with session.get(url, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if 'results' in data and data['results']:
+                        result = data['results']
+                        price = result.get('p', 0)  # price
+                        
+                        if price > 0:
+                            return {
+                                'symbol': symbol,
+                                'price': price,
+                                'timestamp': result.get('t', int(datetime.now().timestamp() * 1000)) // 1000,
+                                'source': 'polygon'
+                            }
+                            
+        except Exception as e:
+            logger.error(f"Error fetching Polygon data for {symbol}: {str(e)}")
+        
+        return None
+        
+    async def fetch_twelve_data_quote(self, symbol: str) -> Optional[Dict]:
+        """Fetch from Twelve Data free API"""
+        try:
+            # Map to tradeable symbols
+            twelve_symbols = {
+                'SPX': 'SPY',      # S&P 500 ETF as proxy
+                'NASDAQ': 'QQQ',   # NASDAQ ETF as proxy  
+                'GOLD': 'GLD',     # Gold ETF
+                'DXY': 'UUP'       # Dollar ETF
+            }
+            
+            twelve_symbol = twelve_symbols.get(symbol)
+            if not twelve_symbol:
+                return None
+            
+            session = await self.get_session()
+            url = 'https://api.twelvedata.com/quote'
+            params = {
+                'symbol': twelve_symbol,
+                'apikey': 'demo'
+            }
+            
+            async with session.get(url, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Check if we got valid data
+                    if 'close' in data and data['close']:
+                        price = float(data['close'])
+                        
+                        # Convert ETF price back to index (rough approximation)
+                        if symbol == 'NASDAQ' and twelve_symbol == 'QQQ':
+                            # QQQ is approximately 1/40th of NASDAQ index
+                            price = price * 40
+                        elif symbol == 'SPX' and twelve_symbol == 'SPY':
+                            # SPY is approximately 1/10th of SPX index  
+                            price = price * 10
+                        
+                        return {
+                            'symbol': symbol,
+                            'price': price,
+                            'timestamp': int(datetime.now().timestamp()),
+                            'source': 'twelve_data',
+                            'proxy_symbol': twelve_symbol
+                        }
+                        
+        except Exception as e:
+            logger.error(f"Error fetching Twelve Data for {symbol}: {str(e)}")
         
         return None
     
