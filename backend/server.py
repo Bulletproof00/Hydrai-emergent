@@ -1731,6 +1731,8 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
+    if real_time_streamer:
+        await real_time_streamer.stop()
     if exchange:
         await exchange.close()
     if redis_client:
