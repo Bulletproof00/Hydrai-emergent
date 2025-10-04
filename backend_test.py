@@ -587,18 +587,18 @@ class SmartMoneyTester:
             )
     
     async def run_all_tests(self):
-        """Run all test cases for real-time tick data system"""
+        """Run all test cases for Smart Money Indicators system"""
         await self.setup()
         
         try:
-            # Core real-time functionality tests
-            await self.test_realtime_latest_api()
-            await self.test_realtime_history_api()
-            await self.test_websocket_connection()
+            # Core Smart Money functionality tests
+            await self.test_smart_money_all_api()
+            await self.test_liquidation_heatmap_api()
+            await self.test_open_interest_api()
+            await self.test_funding_rates_api()
+            await self.test_focus_symbols_api()
+            await self.test_data_quality_validation()
             await self.test_data_sources_verification()
-            await self.test_database_storage()
-            await self.test_tick_simulation()
-            await self.test_multi_asset_support()
             await self.test_api_performance()
             
         finally:
