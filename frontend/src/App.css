@@ -2017,10 +2017,10 @@ body {
 
 /* Liquidation Heatmap 2D */
 .liquidation-heatmap-2d {
-  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-height: 600px;
 }
 
 .heatmap-header-enhanced {
