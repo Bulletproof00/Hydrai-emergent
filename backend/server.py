@@ -1948,7 +1948,7 @@ async def get_trading_history(
         
         user = await get_current_user(authorization)
         
-        history = await paper_trading.get_trade_history(user['user_id'], limit)
+        history = await paper_trading.get_trade_history(user['_id'], limit)
         
         return {
             'status': 'success',
