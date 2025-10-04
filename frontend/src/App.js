@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import "@/App.css";
 import axios from "axios";
 import { Send, TrendingUp, Activity, BarChart3, Brain, Zap, Settings, LineChart, LogOut } from "lucide-react";
-import TradingChart from "./components/TradingChart";
+import AdvancedChart from "./components/AdvancedChart";
 import Login from "./pages/Login";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
