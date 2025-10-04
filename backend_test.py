@@ -283,12 +283,14 @@ class SmartMoneyTester:
     
     async def test_funding_rates_api(self):
         """Test /api/smart-money/funding-rates/{symbol} endpoint"""
-        test_symbols = ['BTC%2FUSDT', 'ETH%2FUSDT', 'SOL%2FUSDT', 'XRP%2FUSDT']
+        test_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
         
-        for encoded_symbol in test_symbols:
-            display_symbol = encoded_symbol.replace('%2F', '/')
-            test_name = f"Funding Rates API - {display_symbol}"
+        for symbol in test_symbols:
+            test_name = f"Funding Rates API - {symbol}"
             
+            # URL encode the symbol properly
+            import urllib.parse
+            encoded_symbol = urllib.parse.quote(symbol, safe='')
             response = await self.test_api_endpoint(f"/smart-money/funding-rates/{encoded_symbol}")
             
             if not response['success']:
