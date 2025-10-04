@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { createChart } from 'lightweight-charts';
+import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
