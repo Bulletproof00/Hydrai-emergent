@@ -1739,9 +1739,9 @@ async def get_enhanced_smart_money_data(
         logging.error(f"Enhanced smart money data error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/enhanced-smart-money/liquidation-heatmap-2d/{symbol}")
+@api_router.get("/enhanced-smart-money/liquidation-heatmap-2d")
 async def get_enhanced_liquidation_heatmap(
-    symbol: str, 
+    symbol: str,
     timeframe: str = "1day"
 ):
     """Get 2D liquidation heatmap like Coinglass with timeframe support"""
@@ -1752,20 +1752,16 @@ async def get_enhanced_liquidation_heatmap(
                 'message': 'Enhanced Smart Money system not initialized'
             }
         
-        # URL decode the symbol parameter
-        import urllib.parse
-        decoded_symbol = urllib.parse.unquote(symbol)
-        
         # Validate timeframe
         valid_timeframes = ["12h", "1day", "3day", "1week", "2week", "monthly"]
         if timeframe not in valid_timeframes:
             timeframe = "1day"
         
-        heatmap_data = await enhanced_smart_money.fetch_enhanced_liquidation_heatmap_with_timeframe(decoded_symbol, timeframe)
+        heatmap_data = await enhanced_smart_money.fetch_enhanced_liquidation_heatmap_with_timeframe(symbol, timeframe)
         
         return {
             'status': 'success',
-            'symbol': decoded_symbol,
+            'symbol': symbol,
             'timeframe': timeframe,
             'data': heatmap_data,
             'timestamp': datetime.now(timezone.utc).isoformat()
