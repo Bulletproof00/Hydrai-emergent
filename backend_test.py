@@ -328,13 +328,14 @@ class TradingSystemTester:
         data = response['data']
         
         # Check if context was considered in analysis
-        analysis = data.get('analysis', '')
+        recommendation_data = data.get('recommendation', {})
+        reasoning = recommendation_data.get('reasoning', '') if isinstance(recommendation_data, dict) else ''
         
         # Look for context-aware analysis (mentions of market sentiment, risk, etc.)
         context_indicators = ['sentiment', 'risk', 'market', 'bullish', 'bearish']
-        context_mentions = sum(1 for indicator in context_indicators if indicator.lower() in analysis.lower())
+        context_mentions = sum(1 for indicator in context_indicators if indicator.lower() in reasoning.lower())
         
-        if context_mentions >= 2 and len(analysis) > 100:
+        if context_mentions >= 2 and len(reasoning) > 100:
             self.log_test(
                 test_name, 
                 "PASS", 
