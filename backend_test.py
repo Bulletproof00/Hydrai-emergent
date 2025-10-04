@@ -219,15 +219,17 @@ class SmartMoneyTester:
     
     async def test_open_interest_api(self):
         """Test /api/smart-money/open-interest/{symbol} endpoint"""
-        test_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
+        test_symbols = [
+            ('BTC/USDT', 'BTCUSDT'),
+            ('ETH/USDT', 'ETHUSDT'), 
+            ('SOL/USDT', 'SOLUSDT'),
+            ('XRP/USDT', 'XRPUSDT')
+        ]
         
-        for symbol in test_symbols:
-            test_name = f"Open Interest API - {symbol}"
+        for display_symbol, api_symbol in test_symbols:
+            test_name = f"Open Interest API - {display_symbol}"
             
-            # URL encode the symbol properly
-            import urllib.parse
-            encoded_symbol = urllib.parse.quote(symbol, safe='')
-            response = await self.test_api_endpoint(f"/smart-money/open-interest/{encoded_symbol}")
+            response = await self.test_api_endpoint(f"/smart-money/open-interest/{api_symbol}")
             
             if not response['success']:
                 self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
