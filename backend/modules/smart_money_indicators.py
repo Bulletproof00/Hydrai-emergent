@@ -331,8 +331,11 @@ class SmartMoneyIndicators:
     async def fetch_open_interest(self, symbol: str) -> Optional[Dict]:
         """Fetch open interest data from multiple exchanges"""
         try:
+            # Convert symbol format if needed (BTCUSDT -> BTC/USDT)
+            normalized_symbol = self._normalize_symbol(symbol)
+            
             oi_data = {
-                'symbol': symbol,
+                'symbol': normalized_symbol,
                 'timestamp': datetime.now(timezone.utc).isoformat(),
                 'total_oi': 0,
                 'exchanges': {},
