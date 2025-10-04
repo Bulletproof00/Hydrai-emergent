@@ -1914,9 +1914,9 @@ async def modify_position_margin(
         user = await get_current_user(authorization)
         
         if action == 'add':
-            result = await paper_trading.add_margin_to_position(user['user_id'], position_id, amount)
+            result = await paper_trading.add_margin_to_position(user['_id'], position_id, amount)
         elif action == 'reduce':
-            result = await paper_trading.reduce_margin_from_position(user['user_id'], position_id, amount)
+            result = await paper_trading.reduce_margin_from_position(user['_id'], position_id, amount)
         else:
             return {
                 'status': 'error',
