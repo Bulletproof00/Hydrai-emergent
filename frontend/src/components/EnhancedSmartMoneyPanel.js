@@ -362,10 +362,39 @@ const EnhancedSmartMoneyPanel = () => {
         setSelectedSymbol(event.target.value);
     };
 
+    const renderTimeframeSelector = () => {
+        const timeframes = [
+            { value: '12h', label: '12 Hours' },
+            { value: '1day', label: '1 Day' },
+            { value: '3day', label: '3 Days' },
+            { value: '1week', label: '1 Week' },
+            { value: '2week', label: '2 Weeks' },
+            { value: 'monthly', label: 'Monthly' }
+        ];
+
+        return (
+            <div className="timeframe-selector-container">
+                <label htmlFor="timeframe-select" className="timeframe-label">Timeframe:</label>
+                <select 
+                    id="timeframe-select"
+                    value={selectedTimeframe} 
+                    onChange={(e) => setSelectedTimeframe(e.target.value)}
+                    className="timeframe-select"
+                >
+                    {timeframes.map((tf) => (
+                        <option key={tf.value} value={tf.value}>
+                            {tf.label}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        );
+    };
+
     const renderSymbolSelector = () => {
         return (
             <div className="symbol-selector-container">
-                <label htmlFor="symbol-select" className="symbol-label">Asset Selection:</label>
+                <label htmlFor="symbol-select" className="symbol-label">Asset:</label>
                 <select 
                     id="symbol-select"
                     value={selectedSymbol} 
