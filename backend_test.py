@@ -848,7 +848,7 @@ class TradingSystemTester:
                 self.log_test(
                     test_name, 
                     "PASS", 
-                    f"KI analysis performance excellent: {response_time:.2f}s, {len(analysis)} chars",
+                    f"KI analysis performance excellent: {response_time:.2f}s, {len(reasoning)} chars",
                     "Fast KI analysis with comprehensive output",
                     f"Response time: {response_time:.2f}s"
                 )
