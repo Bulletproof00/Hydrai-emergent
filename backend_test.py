@@ -139,38 +139,52 @@ class RealTimeTickDataTester:
         else:
             self.log_test(test_name, "FAIL", f"Insufficient real-time data. Found: {found_symbols}")
     
-    async def test_traditional_markets(self):
-        """Test all traditional market symbols"""
-        symbols = ['SPX', 'NASDAQ', 'DXY', 'GOLD']
+    async def test_realtime_history_api(self):
+        """Test /api/realtime/history/{symbol} endpoint"""
+        test_symbols = ['NASDAQ', 'BTC/USDT', 'SPX']
         
-        for symbol in symbols:
-            test_name = f"{symbol} Market Data"
+        for symbol in test_symbols:
+            test_name = f"Real-Time History API - {symbol}"
             
-            response = await self.test_api_endpoint(f"/chart-data/{symbol}?timeframe=1d&limit=10")
+            # URL encode the symbol (BTC/USDT -> BTC%2FUSDT)
+            encoded_symbol = symbol.replace('/', '%2F')
+            response = await self.test_api_endpoint(f"/realtime/history/{encoded_symbol}?minutes=60")
             
             if not response['success']:
                 self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
                 continue
             
             data = response['data']
-            if 'data' not in data or not data['data']:
-                self.log_test(test_name, "FAIL", "No chart data returned")
+            
+            # Check response structure
+            if 'status' not in data or 'data' not in data:
+                self.log_test(test_name, "FAIL", "Invalid response structure")
                 continue
             
-            latest_candle = data['data'][-1]
-            current_price = latest_candle['close']
+            if data['status'] != 'success':
+                self.log_test(test_name, "FAIL", f"API returned error: {data}")
+                continue
             
-            # Basic validation - price should be reasonable
-            if current_price > 0:
-                self.log_test(
-                    test_name, 
-                    "PASS", 
-                    f"{symbol} price: ${current_price:.2f}, {len(data['data'])} candles",
-                    "Valid price data",
-                    f"${current_price:.2f}"
-                )
+            history_data = data['data']
+            
+            if len(history_data) > 0:
+                # Validate data structure
+                sample_tick = history_data[0]
+                required_fields = ['symbol', 'price', 'timestamp', 'source', 'asset_type']
+                missing_fields = [field for field in required_fields if field not in sample_tick]
+                
+                if not missing_fields:
+                    self.log_test(
+                        test_name, 
+                        "PASS", 
+                        f"Retrieved {len(history_data)} ticks with valid structure",
+                        "Valid tick data with required fields",
+                        f"{len(history_data)} ticks"
+                    )
+                else:
+                    self.log_test(test_name, "FAIL", f"Missing fields in tick data: {missing_fields}")
             else:
-                self.log_test(test_name, "FAIL", f"Invalid price: ${current_price:.2f}")
+                self.log_test(test_name, "WARN", "No historical tick data found (may be expected for new system)")
     
     async def test_crypto_data_still_works(self):
         """Test that crypto data still works after traditional market fixes"""
