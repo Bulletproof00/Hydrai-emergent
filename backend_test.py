@@ -690,9 +690,10 @@ class SmartMoneyTester:
                 # Check liquidation heatmap 2D data
                 heatmap_2d = nested_data.get('liquidation_heatmap_2d')
                 if heatmap_2d and isinstance(heatmap_2d, dict):
-                    # Check for directional bias
-                    if 'directional_bias' in heatmap_2d:
-                        bias = heatmap_2d['directional_bias']
+                    # Check for directional bias in summary
+                    summary = heatmap_2d.get('summary', {})
+                    if 'directional_bias' in summary:
+                        bias = summary['directional_bias']
                         if isinstance(bias, dict) and 'bias' in bias and 'strength' in bias:
                             self.log_test(
                                 test_name, 
