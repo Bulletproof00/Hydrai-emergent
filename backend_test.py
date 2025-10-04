@@ -357,19 +357,14 @@ class TradingSystemTester:
         successful_commands = 0
         
         for command in commands:
-            command_data = {
-                "command": command,
-                "user_context": {
-                    "balance": 10000,
-                    "risk_level": "medium"
-                }
-            }
-            
-            response = await self.test_api_endpoint("/ai-trading/chat-command", method="POST", data=command_data, auth=True)
+            # Use query parameter instead of JSON body
+            import urllib.parse
+            encoded_command = urllib.parse.quote(command)
+            response = await self.test_api_endpoint(f"/ai-trading/chat-command?command={encoded_command}", method="POST", auth=True)
             
             if response['success']:
                 data = response['data']
-                if 'response' in data and len(data['response']) > 20:
+                if 'result' in data and data.get('status') == 'success':
                     successful_commands += 1
         
         if successful_commands == len(commands):
