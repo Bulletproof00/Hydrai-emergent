@@ -1986,6 +1986,7 @@ async def startup_event():
     
     # Initialize Enhanced Smart Money Indicators (Coinglass-style)
     try:
+        global enhanced_smart_money
         enhanced_smart_money = EnhancedSmartMoneyIndicators(db)
         logger.info("Enhanced Smart Money Indicators initialized")
     except Exception as e:
