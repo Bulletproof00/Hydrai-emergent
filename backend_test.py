@@ -2294,6 +2294,42 @@ class TradingSystemTester:
         else:
             self.log_test(test_name, "FAIL", f"KI analysis failed: {response.get('error')}")
 
+    async def run_self_evolving_ai_tests(self):
+        """Run PRIORITY tests for Self-Evolving AI System"""
+        await self.setup()
+        
+        try:
+            print("🧠 TESTE DAS NEUE SELF-EVOLVING AI SYSTEM AUSFÜHRLICH")
+            print("=" * 80)
+            
+            print("\n🎯 PRIORITÄT 1: AI EVOLUTION STATUS ENDPOINT TEST...")
+            await self.test_ai_evolution_status_endpoint()
+            
+            print("\n🎯 PRIORITÄT 2: AI EVOLUTION TRIGGER TEST...")
+            await self.test_ai_evolution_trigger_endpoint()
+            
+            print("\n🎯 PRIORITÄT 3: AI EVOLUTION HISTORY TEST...")
+            await self.test_ai_evolution_history_endpoint()
+            
+            print("\n🎯 PRIORITÄT 4: AI EVOLUTION REPORT TEST...")
+            await self.test_ai_evolution_report_latest_endpoint()
+            
+            print("\n🎯 PRIORITÄT 5: GEMINI 2.5 FLASH INTEGRATION TEST...")
+            await self.test_gemini_25_flash_integration_test()
+            
+            print("\n🎯 PRIORITÄT 6: CONTINUOUS LEARNING LOOP TEST...")
+            await self.test_continuous_learning_loop_test()
+            
+            print("\n🔬 ZUSÄTZLICHE TESTS...")
+            await self.test_data_gap_analysis_and_algorithm_improvements()
+            await self.test_mongodb_evolution_storage()
+            
+        finally:
+            await self.cleanup()
+        
+        # Print Self-Evolving AI summary
+        self.print_self_evolving_ai_summary()
+
     async def run_priority_tests(self):
         """Run PRIORITY tests for Paper Trading Reparaturen nach den kritischen Fixes"""
         await self.setup()
