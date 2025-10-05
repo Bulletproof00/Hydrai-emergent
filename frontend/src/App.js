@@ -102,7 +102,7 @@ function App() {
       // Add welcome message
       setMessages([{
         role: "assistant",
-        content: "Willkommen bei Hydra AI! 🚀\n\nIch bin dein KI-gestützter Trading-Analyse-Assistent. Ich kann dir helfen mit:\n\n• Live-Marktdaten von Binance\n• Technische Indikatoren (RSI, MFI, Bollinger Bands)\n• Backtesting von Trading-Strategien\n• Marktanalysen und Empfehlungen\n\nWie kann ich dir heute helfen?",
+        content: "Willkommen bei Lunara Analyze AI! 🚀\n\nIch bin dein KI-gestützter Trading-Analyse-Assistent. Ich kann dir helfen mit:\n\n• Live-Marktdaten von Binance\n• Technische Indikatoren (RSI, MFI, Bollinger Bands)\n• Backtesting von Trading-Strategien\n• Marktanalysen und Empfehlungen\n\nWie kann ich dir heute helfen?",
         timestamp: new Date().toISOString()
       }]);
     } catch (error) {
