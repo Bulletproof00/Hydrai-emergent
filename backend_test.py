@@ -541,8 +541,7 @@ class TradingSystemTester:
         """Test POST /api/ai-trading/analyze with Gemini AI for BTC/USDT"""
         test_name = "Gemini AI Integration - BTC/USDT Analysis"
         
-        data = {"symbol": "BTC/USDT", "context": "comprehensive_gemini_analysis"}
-        response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=data, auth=True)
+        response = await self.test_api_endpoint("/ai-trading/analyze?symbol=BTC/USDT&context=comprehensive_gemini_analysis", method="POST", auth=True)
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
