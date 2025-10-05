@@ -2049,9 +2049,8 @@ async def get_trading_symbols():
 
 @api_router.post("/ai-trading/analyze")
 async def analyze_trading_opportunity(
-    symbol: str,
-    context: str = "",
-    authorization: str = Header(None)
+    request: AITradingAnalyzeRequest,
+    authorization: str = Header(...)
 ):
     """Get AI analysis for a trading opportunity"""
     try:
@@ -2063,7 +2062,7 @@ async def analyze_trading_opportunity(
         
         user = await get_current_user(authorization)
         
-        recommendation = await ai_trading.analyze_trade_opportunity(user['_id'], symbol, context)
+        recommendation = await ai_trading.analyze_trade_opportunity(user['_id'], request.symbol, request.context)
         
         return {
             'status': 'success',
