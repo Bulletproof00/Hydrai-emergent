@@ -103,7 +103,7 @@ function App() {
       // Add welcome message
       setMessages([{
         role: "assistant",
-        content: "Willkommen bei Lunara Analyze AI! 🚀\n\nIch bin dein KI-gestützter Trading-Analyse-Assistent. Ich kann dir helfen mit:\n\n• Live-Marktdaten von Binance\n• Technische Indikatoren (RSI, MFI, Bollinger Bands)\n• Backtesting von Trading-Strategien\n• Marktanalysen und Empfehlungen\n\nWie kann ich dir heute helfen?",
+        content: "Willkommen bei Lunara Analyze AI! 🧠\n\nIch bin deine selbst-evolvierende KI für Trading-Analysen. Meine Fähigkeiten:\n\n• 🔄 **Self-Evolution**: Kontinuierliche Selbstoptimierung und Lernen\n• 📊 Live-Marktdaten & Smart Money Analyse\n• 🧮 Technische Indikatoren (RSI, MFI, Bollinger Bands)\n• 💹 Paper Trading mit AI-gestützten Empfehlungen\n• 🎯 Backtesting & Strategieentwicklung\n• 🚀 Neue Algorithmen-Entwicklung\n\n**NEU:** Besuche den 'AI Evolution' Tab um meine Selbstverbesserung zu verfolgen!\n\nWie kann ich dir heute helfen?",
         timestamp: new Date().toISOString()
       }]);
     } catch (error) {
