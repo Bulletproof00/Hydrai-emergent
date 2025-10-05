@@ -2298,9 +2298,9 @@ async def main():
     """Main test runner - FINALE TESTS nach Chat und AI-Reparaturen"""
     tester = TradingSystemTester()
     
-    # Run FINALE TESTS to verify 422 error fixes
-    print("🎯 RUNNING FINALE TESTS NACH CHAT UND AI-REPARATUREN")
-    await tester.run_all_tests()
+    # Run PRIORITY TESTS to verify Paper Trading repairs
+    print("🎯 RUNNING PRIORITY TESTS - PAPER TRADING REPARATUREN")
+    await tester.run_priority_tests()
 
 if __name__ == "__main__":
     asyncio.run(main())
