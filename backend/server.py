@@ -1944,6 +1944,34 @@ async def modify_position_margin(
         logging.error(f"Modify position margin error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/trading/position/close")
+async def close_trading_position(
+    position_id: str,
+    close_percentage: float = 100.0,
+    authorization: str = Header(None)
+):
+    """Close position partially or fully"""
+    try:
+        if not paper_trading:
+            return {
+                'status': 'error',
+                'message': 'Paper Trading system not initialized'
+            }
+        
+        user = await get_current_user(authorization)
+        
+        result = await paper_trading.close_position(user['user_id'], position_id, close_percentage)
+        
+        return {
+            'status': 'success' if result['success'] else 'error',
+            'result': result,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Close position error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/trading/history")
 async def get_trading_history(
     limit: int = 50,
