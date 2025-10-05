@@ -1975,7 +1975,7 @@ async def close_trading_position(
         
         user = await get_current_user(authorization)
         
-        result = await paper_trading.close_position(user['user_id'], request.position_id, request.close_percentage)
+        result = await paper_trading.close_position(user['_id'], request.position_id, request.close_percentage)
         
         return {
             'status': 'success' if result['success'] else 'error',
