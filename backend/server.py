@@ -71,6 +71,9 @@ paper_trading = None
 # AI Trading Engine
 ai_trading = None
 
+# Integrated AI System
+integrated_ai = None
+
 # Create the main app without a prefix
 app = FastAPI()
 
