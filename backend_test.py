@@ -572,8 +572,7 @@ class TradingSystemTester:
         """Test POST /api/ai-trading/chat-command with 'Long BTC 0.1' command"""
         test_name = "Gemini AI Chat Command - Long BTC 0.1"
         
-        data = {"command": "Long BTC 0.1"}
-        response = await self.test_api_endpoint("/ai-trading/chat-command", method="POST", data=data, auth=True)
+        response = await self.test_api_endpoint("/ai-trading/chat-command?command=Long%20BTC%200.1", method="POST", auth=True)
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
