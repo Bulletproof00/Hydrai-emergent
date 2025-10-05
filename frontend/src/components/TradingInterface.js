@@ -196,6 +196,34 @@ const TradingInterface = () => {
         }
     };
 
+    const closePosition = async (positionId, percentage = 100) => {
+        try {
+            const token = localStorage.getItem('token');
+            const headers = { 'Authorization': `Bearer ${token}` };
+
+            const response = await axios.post(`${BACKEND_URL}/api/trading/position/close`, {
+                position_id: positionId,
+                close_percentage: percentage
+            }, { headers });
+
+            if (response.data.status === 'success' && response.data.result.success) {
+                await fetchTradingData();
+                setError(null);
+                
+                // Show success message
+                const result = response.data.result;
+                const pnlText = result.net_pnl >= 0 ? `Gewinn: $${result.net_pnl.toFixed(2)}` : `Verlust: $${Math.abs(result.net_pnl).toFixed(2)}`;
+                alert(`Position ${percentage}% geschlossen\n${pnlText}`);
+            } else {
+                setError(response.data.result?.error || 'Position schließen fehlgeschlagen');
+            }
+            
+        } catch (err) {
+            console.error('Close position error:', err);
+            setError(err.response?.data?.message || 'Fehler beim Schließen der Position');
+        }
+    };
+
     const modifyPositionMargin = async (positionId, action, amount) => {
         try {
             const token = localStorage.getItem('token');
