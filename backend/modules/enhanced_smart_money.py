@@ -850,7 +850,9 @@ class EnhancedSmartMoneyIndicators:
                     'cluster_strength': cluster_strength,
                     'timeframe_impact': timeframe,
                     'direction': direction,
-                    'proximity_factor': proximity_factor
+                    'proximity_factor': proximity_factor,
+                    'distance_usd': abs(price - current_price),
+                    'price_impact_score': total_liquidation / (distance + 0.001)  # Higher score = more impactful
                 })
             
             # Sort by price and return top levels
