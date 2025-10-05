@@ -771,14 +771,19 @@ class EnhancedSmartMoneyIndicators:
         try:
             import random
             
-            # Timeframe multipliers and configurations
+            # Erweiterte Timeframe-Konfigurationen (Coinglass-Stil)
             timeframe_configs = {
-                '12h': {'volume_multiplier': 0.6, 'max_distance': 0.15, 'cluster_count': 20, 'volatility': 0.8},
-                '1day': {'volume_multiplier': 1.0, 'max_distance': 0.20, 'cluster_count': 25, 'volatility': 1.0},
-                '3day': {'volume_multiplier': 2.2, 'max_distance': 0.25, 'cluster_count': 30, 'volatility': 1.3},
-                '1week': {'volume_multiplier': 4.5, 'max_distance': 0.30, 'cluster_count': 35, 'volatility': 1.6},
-                '2week': {'volume_multiplier': 7.5, 'max_distance': 0.35, 'cluster_count': 40, 'volatility': 2.0},
-                'monthly': {'volume_multiplier': 12.0, 'max_distance': 0.40, 'cluster_count': 45, 'volatility': 2.5}
+                '5m': {'volume_multiplier': 0.2, 'max_distance': 0.05, 'cluster_count': 50, 'volatility': 0.3},
+                '15m': {'volume_multiplier': 0.3, 'max_distance': 0.08, 'cluster_count': 55, 'volatility': 0.4},
+                '1h': {'volume_multiplier': 0.4, 'max_distance': 0.10, 'cluster_count': 60, 'volatility': 0.5},
+                '4h': {'volume_multiplier': 0.5, 'max_distance': 0.12, 'cluster_count': 65, 'volatility': 0.6},
+                '8h': {'volume_multiplier': 0.55, 'max_distance': 0.14, 'cluster_count': 70, 'volatility': 0.7},
+                '12h': {'volume_multiplier': 0.6, 'max_distance': 0.15, 'cluster_count': 75, 'volatility': 0.8},
+                '1day': {'volume_multiplier': 1.0, 'max_distance': 0.20, 'cluster_count': 80, 'volatility': 1.0},
+                '3day': {'volume_multiplier': 2.2, 'max_distance': 0.25, 'cluster_count': 85, 'volatility': 1.3},
+                '1week': {'volume_multiplier': 4.5, 'max_distance': 0.30, 'cluster_count': 90, 'volatility': 1.6},
+                '2week': {'volume_multiplier': 7.5, 'max_distance': 0.35, 'cluster_count': 95, 'volatility': 2.0},
+                'monthly': {'volume_multiplier': 12.0, 'max_distance': 0.40, 'cluster_count': 100, 'volatility': 2.5}
             }
             
             config = timeframe_configs.get(timeframe, timeframe_configs['1day'])
