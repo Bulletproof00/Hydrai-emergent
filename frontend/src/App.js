@@ -218,6 +218,22 @@ function App() {
     setIsAuthenticated(false);
   };
 
+  // Mobile navigation handlers
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+  
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+  
+  const handleViewChange = (view) => {
+    setActiveView(view);
+    if (isMobile) {
+      setIsMobileMenuOpen(false);
+    }
+  };
+
   // If not authenticated, show login page
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />;
