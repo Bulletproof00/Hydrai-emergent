@@ -215,6 +215,10 @@ class AITradingAnalyzeRequest(BaseModel):
 class AITradingCommandRequest(BaseModel):
     command: str
 
+class ClosePositionRequest(BaseModel):
+    position_id: str
+    close_percentage: float = 100.0
+
 class BacktestRequest(BaseModel):
     symbol: str = "BTC/USDT"
     timeframe: str = "1h"
