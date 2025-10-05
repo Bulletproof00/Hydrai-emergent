@@ -1948,7 +1948,7 @@ class TradingSystemTester:
                 self.log_test(test_name, "FAIL", f"Test execution error: {str(e)}")
         
         await self.cleanup()
-        await self.print_summary()
+        self.print_summary()
 
     async def run_all_tests(self):
         """Run all comprehensive tests"""
@@ -2030,7 +2030,7 @@ class TradingSystemTester:
                 self.log_test(test_name, "FAIL", f"Test execution error: {str(e)}")
         
         await self.cleanup()
-        await self.print_summary()
+        self.print_summary()
 
 async def main():
     """Main test runner - Focus on NEW INTEGRATED AI CHAT SYSTEM"""
