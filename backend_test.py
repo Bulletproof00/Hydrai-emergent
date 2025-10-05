@@ -2046,6 +2046,49 @@ class TradingSystemTester:
         # Print summary
         self.print_summary()
     
+    def print_priority_summary(self):
+        """Print PRIORITY TEST summary focusing on Paper Trading repairs"""
+        print("\n" + "=" * 80)
+        print("🎯 PAPER TRADING REPARATUREN NACH KRITISCHEN FIXES - ERGEBNISSE")
+        print("=" * 80)
+        
+        passed = len([r for r in self.test_results if r['status'] == 'PASS'])
+        failed = len([r for r in self.test_results if r['status'] == 'FAIL'])
+        warnings = len([r for r in self.test_results if r['status'] == 'WARN'])
+        errors = len([r for r in self.test_results if r['status'] == 'ERROR'])
+        total = len(self.test_results)
+        
+        print(f"📊 PRIORITY TEST ERGEBNISSE:")
+        print(f"   ✅ ERFOLGREICH: {passed}")
+        print(f"   ❌ FEHLGESCHLAGEN: {failed}")
+        print(f"   ⚠️  WARNUNGEN: {warnings}")
+        print(f"   🔥 FEHLER: {errors}")
+        print(f"   📈 ERFOLGSRATE: {(passed/total*100):.1f}%" if total > 0 else "   📈 ERFOLGSRATE: 0%")
+        
+        # Check for 422 errors specifically
+        has_422_errors = any("422" in result['details'] for result in self.test_results if result['status'] == 'FAIL')
+        
+        print(f"\n🎯 ERWARTETE ERGEBNISSE VERIFIKATION:")
+        print(f"   ✅ Real-time Preise funktionieren (BTC > $100.000): {'✅' if any('PREISANZEIGE-REPARATUR' in r['test'] and r['status'] == 'PASS' for r in self.test_results) else '❌'}")
+        print(f"   ✅ Position schließen funktioniert ohne 422 Errors: {'✅' if any('POSITION SCHLIESSEN' in r['test'] and r['status'] == 'PASS' for r in self.test_results) else '❌'}")
+        print(f"   ✅ Trading Account zeigt korrekte Daten: {'✅' if any('TRADING ACCOUNT STATUS' in r['test'] and r['status'] == 'PASS' for r in self.test_results) else '❌'}")
+        print(f"   ✅ Positionen haben mark_price Fallback-Werte: {'✅' if any('PAPER TRADING INTEGRATION' in r['test'] and r['status'] == 'PASS' for r in self.test_results) else '❌'}")
+        print(f"   422 UNPROCESSABLE ENTITY ERRORS: {'❌ NOCH VORHANDEN' if has_422_errors else '✅ BEHOBEN'}")
+        
+        if failed > 0:
+            print(f"\n❌ FEHLGESCHLAGENE PRIORITY TESTS:")
+            for result in self.test_results:
+                if result['status'] == 'FAIL':
+                    print(f"   - {result['test']}: {result['details']}")
+        
+        if warnings > 0:
+            print(f"\n⚠️ WARNUNGEN IN PRIORITY TESTS:")
+            for result in self.test_results:
+                if result['status'] == 'WARN':
+                    print(f"   - {result['test']}: {result['details']}")
+        
+        print("\n" + "=" * 80)
+
     def print_finale_summary(self):
         """Print FINALE TEST summary focusing on 422 error fixes"""
         print("\n" + "=" * 80)
