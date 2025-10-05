@@ -424,7 +424,7 @@ function App() {
         {activeView === 'chat' && (
           <>
             <div className="chat-header">
-              <h1 data-testid="chat-title">Hydra AI Trading Assistant</h1>
+              <h1 data-testid="chat-title">Lunara Analyze AI Assistant</h1>
               <button className="backtest-btn" onClick={runBacktest} disabled={loading} data-testid="backtest-button">
                 <BarChart3 size={18} />
                 Backtest ausführen
