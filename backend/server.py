@@ -835,7 +835,7 @@ async def analyze_with_ai(user_message: str, market_data: Optional[Dict] = None)
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         
-        system_message = """Du bist Hydra AI, ein hochentwickelter Trading-Analyse-Assistent mit Zugriff auf:
+        system_message = """Du bist Lunara Analyze AI, ein hochentwickelter Trading-Analyse-Assistent mit Zugriff auf:
         
         - Historische OHLCV-Daten (bis zu 1000 Bars)
         - Technische Indikatoren (RSI, MFI, Bollinger Bands, EMAs)
