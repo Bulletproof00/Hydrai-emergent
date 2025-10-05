@@ -757,6 +757,12 @@ const EnhancedSmartMoneyPanel = () => {
                     🔥 2D Liquidation Heatmap
                 </button>
                 <button 
+                    className={`tab-enhanced ${activeTab === 'liveliquidation' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('liveliquidation')}
+                >
+                    🔥 Live Heatmap
+                </button>
+                <button 
                     className={`tab-enhanced ${activeTab === 'open_interest_detailed' ? 'active' : ''}`}
                     onClick={() => setActiveTab('open_interest_detailed')}
                 >
