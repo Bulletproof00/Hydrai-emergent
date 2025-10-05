@@ -1954,6 +1954,32 @@ class TradingSystemTester:
         else:
             self.log_test(test_name, "FAIL", f"KI analysis failed: {response.get('error')}")
 
+    async def run_priority_tests(self):
+        """Run PRIORITY tests for Paper Trading Reparaturen nach den kritischen Fixes"""
+        await self.setup()
+        
+        try:
+            print("🎯 TESTE DIE PAPER TRADING REPARATUREN NACH DEN KRITISCHEN FIXES")
+            print("=" * 80)
+            
+            print("\n🎯 PRIORITÄT 1: PREISANZEIGE-REPARATUR TEST...")
+            await self.test_preisanzeige_reparatur_test()
+            
+            print("\n🎯 PRIORITÄT 2: POSITION SCHLIESSEN REPARATUR TEST...")
+            await self.test_position_schliessen_reparatur_test()
+            
+            print("\n🎯 PRIORITÄT 3: TRADING ACCOUNT STATUS TEST...")
+            await self.test_trading_account_status_test()
+            
+            print("\n🎯 PRIORITÄT 4: PAPER TRADING INTEGRATION TEST...")
+            await self.test_paper_trading_integration_test()
+            
+        finally:
+            await self.cleanup()
+        
+        # Print priority summary
+        self.print_priority_summary()
+
     async def run_all_tests(self):
         """Run all test cases for Trading System with Real-time Data and AI Integration"""
         await self.setup()
