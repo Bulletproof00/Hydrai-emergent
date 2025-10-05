@@ -2378,4 +2378,4 @@ async def shutdown_event():
     if redis_client:
         await redis_client.close()
     client.close()
-    logger.info("Hydra AI shutdown complete")
+    logger.info("Lunara Analyze AI shutdown complete")
