@@ -1744,8 +1744,8 @@ async def get_enhanced_smart_money_data(
                 'message': 'Enhanced Smart Money system not initialized'
             }
         
-        # Validate timeframe
-        valid_timeframes = ["12h", "1day", "3day", "1week", "2week", "monthly"]
+        # Validate timeframe (erweiterte Zeitrahmen)
+        valid_timeframes = ["5m", "15m", "1h", "4h", "8h", "12h", "1day", "3day", "1week", "2week", "monthly"]
         if timeframe not in valid_timeframes:
             timeframe = "1day"
         
@@ -1776,8 +1776,8 @@ async def get_enhanced_liquidation_heatmap(
                 'message': 'Enhanced Smart Money system not initialized'
             }
         
-        # Validate timeframe
-        valid_timeframes = ["12h", "1day", "3day", "1week", "2week", "monthly"]
+        # Validate timeframe (erweiterte Zeitrahmen)
+        valid_timeframes = ["5m", "15m", "1h", "4h", "8h", "12h", "1day", "3day", "1week", "2week", "monthly"]
         if timeframe not in valid_timeframes:
             timeframe = "1day"
         
