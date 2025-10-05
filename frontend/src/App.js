@@ -359,6 +359,14 @@ function App() {
             <DollarSign size={20} />
             <span>Paper Trading</span>
           </button>
+          <button 
+            className={`nav-item ${activeView === 'evolution' ? 'active' : ''}`}
+            onClick={() => handleViewChange('evolution')}
+            data-testid="nav-evolution"
+          >
+            <Brain size={20} />
+            <span>AI Evolution</span>
+          </button>
         </nav>
 
         {/* Live Price Widget */}
