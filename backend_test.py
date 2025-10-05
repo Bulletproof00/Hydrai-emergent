@@ -868,7 +868,35 @@ class TradingSystemTester:
         await self.setup()
         
         try:
-            print("🔄 Running Real-time Integration Tests...")
+            print("🔄 Running Enhanced Timeframe Tests...")
+            await self.test_enhanced_timeframes_5m()
+            await self.test_enhanced_timeframes_15m()
+            await self.test_enhanced_timeframes_1h()
+            await self.test_enhanced_timeframes_4h()
+            await self.test_enhanced_timeframes_8h()
+            await self.test_cumulative_liquidation_data()
+            
+            print("\n💰 Running Paper Trading Position Close Tests...")
+            await self.test_position_close_25_percent()
+            await self.test_position_close_50_percent()
+            await self.test_position_close_100_percent()
+            await self.test_pnl_calculation_accuracy()
+            
+            print("\n🤖 Running Gemini AI Integration Tests...")
+            await self.test_gemini_ai_btc_analysis()
+            await self.test_gemini_ai_chat_command_long()
+            await self.test_gemini_ai_response_parsing()
+            
+            print("\n💬 Running Chat System Tests...")
+            await self.test_chat_without_auth()
+            await self.test_chat_response_quality()
+            
+            print("\n📊 Running Enhanced Liquidation Features Tests...")
+            await self.test_resistance_support_ranks()
+            await self.test_cluster_strength_calculation()
+            await self.test_price_impact_score_sorting()
+            
+            print("\n🔄 Running Real-time Integration Tests...")
             await self.test_realtime_latest_all_assets()
             await self.test_realtime_live_prices_verification()
             await self.test_smart_money_extended_assets()
