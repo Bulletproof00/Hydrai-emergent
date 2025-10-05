@@ -655,8 +655,8 @@ class TradingSystemTester:
         """Test chat response quality and relevance"""
         test_name = "Chat Response Quality"
         
-        data = {"message": "What's the best strategy for Bitcoin trading?"}
-        response = await self.test_api_endpoint("/chat", method="POST", data=data, auth=False)
+        data = {"session_id": "test_session", "content": "What's the best strategy for Bitcoin trading?"}
+        response = await self.test_api_endpoint("/chat", method="POST", data=data, auth=True)
         
         if response['success']:
             data = response['data']
