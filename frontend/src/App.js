@@ -30,6 +30,10 @@ function App() {
   const [correlations, setCorrelations] = useState(null);
   const [marketOverview, setMarketOverview] = useState(null);
   const messagesEndRef = useRef(null);
+  
+  // Mobile navigation state
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Check for existing auth on mount
   useEffect(() => {
