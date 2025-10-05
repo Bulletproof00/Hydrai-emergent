@@ -2110,7 +2110,7 @@ async def ai_learn_from_interaction(
 @api_router.post("/chat")
 async def chat(
     message: ChatMessageCreate,
-    authorization: str = Header(None)
+    authorization: str = Header(...)
 ):
     """Send a chat message and get AI response with full historical context"""
     try:
