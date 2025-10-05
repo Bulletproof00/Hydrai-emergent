@@ -291,6 +291,87 @@ class PaperTradingEngine:
         except Exception as e:
             logger.error(f"Error modifying existing position: {e}")
 
+    async def close_position(self, user_id: str, position_id: str, close_percentage: float = 100.0) -> Dict:
+        """Close position partially or fully"""
+        try:
+            # Get position
+            position = await self.db.paper_trading_positions.find_one({
+                'position_id': position_id,
+                'user_id': user_id,
+                'status': 'open'
+            })
+            
+            if not position:
+                return {'success': False, 'error': 'Position not found'}
+            
+            # Get current price
+            current_price = await self._get_current_price(position['symbol'])
+            if not current_price:
+                return {'success': False, 'error': 'Cannot get current price'}
+            
+            # Calculate close size
+            close_percentage = min(max(close_percentage, 0), 100)  # Ensure 0-100%
+            close_size = abs(position['size']) * (close_percentage / 100)
+            
+            # Calculate PnL
+            if position['side'] == 'long':
+                pnl = (current_price - position['entry_price']) * close_size
+            else:
+                pnl = (position['entry_price'] - current_price) * close_size
+            
+            # Calculate fees
+            fee = close_size * current_price * self.taker_fee
+            net_pnl = pnl - fee
+            
+            if close_percentage >= 100:
+                # Full close
+                await self.db.paper_trading_positions.update_one(
+                    {'position_id': position_id},
+                    {
+                        '$set': {
+                            'status': 'closed',
+                            'realized_pnl': position.get('realized_pnl', 0) + net_pnl,
+                            'total_fees': position.get('total_fees', 0) + fee,
+                            'closed_at': datetime.now(timezone.utc),
+                            'updated_at': datetime.now(timezone.utc)
+                        }
+                    }
+                )
+            else:
+                # Partial close
+                remaining_size = position['size'] * (1 - close_percentage / 100)
+                
+                await self.db.paper_trading_positions.update_one(
+                    {'position_id': position_id},
+                    {
+                        '$set': {
+                            'size': remaining_size,
+                            'realized_pnl': position.get('realized_pnl', 0) + net_pnl,
+                            'total_fees': position.get('total_fees', 0) + fee,
+                            'updated_at': datetime.now(timezone.utc)
+                        }
+                    }
+                )
+            
+            # Update account with realized PnL
+            await self._update_account_pnl(user_id, net_pnl)
+            
+            logger.info(f"Position {position_id} closed {close_percentage}% - PnL: ${net_pnl:.2f}")
+            
+            return {
+                'success': True,
+                'close_percentage': close_percentage,
+                'close_size': close_size,
+                'pnl': pnl,
+                'fee': fee,
+                'net_pnl': net_pnl,
+                'close_price': current_price
+            }
+            
+        except Exception as e:
+            logger.error(f"Error closing position: {e}")
+            return {'success': False, 'error': str(e)}
+
     async def _close_position_partially(self, position: Dict, close_price: float, fee: float, close_size: float):
         """Partially close a position"""
         try:
