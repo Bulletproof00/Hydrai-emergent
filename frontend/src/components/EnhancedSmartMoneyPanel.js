@@ -261,11 +261,16 @@ const EnhancedSmartMoneyPanel = () => {
 
     const renderTimeframeSelector = () => {
         const timeframes = [
-            { value: '12h', label: '12 Stunde' },
+            { value: '5m', label: '5 Min' },
+            { value: '15m', label: '15 Min' },
+            { value: '1h', label: '1 Stunde' },
+            { value: '4h', label: '4 Stunden' },
+            { value: '8h', label: '8 Stunden' },
+            { value: '12h', label: '12 Stunden' },
             { value: '1day', label: '1 Tag' },
-            { value: '3day', label: '3 Tag' },
+            { value: '3day', label: '3 Tage' },
             { value: '1week', label: '1 Woche' },
-            { value: '2week', label: '2 Woche' },
+            { value: '2week', label: '2 Wochen' },
             { value: 'monthly', label: '1 Monat' }
         ];
 
