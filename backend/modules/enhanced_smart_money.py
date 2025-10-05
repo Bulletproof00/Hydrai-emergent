@@ -855,11 +855,50 @@ class EnhancedSmartMoneyIndicators:
                     'price_impact_score': total_liquidation / (distance + 0.001)  # Higher score = more impactful
                 })
             
-            # Sort by price and return top levels
-            enhanced_levels.sort(key=lambda x: x['price'])
+            # Sort by price (resistance above, support below) - Coinglass style
+            enhanced_levels.sort(key=lambda x: x['price'], reverse=False)
             
-            logger.info(f"Generated {len(enhanced_levels)} timeframe liquidation levels for {timeframe}")
-            return enhanced_levels
+            # Calculate cumulative liquidation amounts (Coinglass feature)
+            cumulative_long = 0
+            cumulative_short = 0
+            
+            # Separate levels above and below current price
+            levels_above = [l for l in enhanced_levels if l['above_current']]
+            levels_below = [l for l in enhanced_levels if not l['above_current']]
+            
+            # Sort levels above by price (ascending - nearest resistance first)
+            levels_above.sort(key=lambda x: x['price'])
+            # Sort levels below by price (descending - nearest support first)  
+            levels_below.sort(key=lambda x: x['price'], reverse=True)
+            
+            # Add cumulative data to levels above (resistance)
+            for i, level in enumerate(levels_above):
+                cumulative_long += level['long_liquidation']
+                cumulative_short += level['short_liquidation']
+                level['cumulative_long'] = cumulative_long
+                level['cumulative_short'] = cumulative_short
+                level['cumulative_total'] = cumulative_long + cumulative_short
+                level['resistance_rank'] = i + 1
+            
+            # Reset cumulative for levels below (support)
+            cumulative_long = 0
+            cumulative_short = 0
+            
+            # Add cumulative data to levels below (support)
+            for i, level in enumerate(levels_below):
+                cumulative_long += level['long_liquidation']
+                cumulative_short += level['short_liquidation']
+                level['cumulative_long'] = cumulative_long
+                level['cumulative_short'] = cumulative_short
+                level['cumulative_total'] = cumulative_long + cumulative_short
+                level['support_rank'] = i + 1
+            
+            # Combine and sort by impact score for final output
+            all_levels = levels_above + levels_below
+            all_levels.sort(key=lambda x: x['price_impact_score'], reverse=True)
+            
+            logger.info(f"Generated {len(all_levels)} enhanced liquidation levels for {timeframe}: {len(levels_above)} resistance, {len(levels_below)} support")
+            return all_levels
             
         except Exception as e:
             logger.error(f"Error generating timeframe liquidation levels: {e}")
