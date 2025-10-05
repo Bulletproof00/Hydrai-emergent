@@ -1465,6 +1465,343 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+/* ================================================================================ */
+/* LIVE LIQUIDATION HEATMAP STYLES */
+/* ================================================================================ */
+
+.live-liquidation-heatmap {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.live-price-ticker {
+  background: rgba(30, 41, 59, 0.8);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ticker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.ticker-header h3 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ticker-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.auto-refresh-btn, .manual-refresh-btn {
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.6);
+  color: #94a3b8;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auto-refresh-btn.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #10b981;
+}
+
+.current-price-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.price-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-movement {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.price-movement.positive {
+  color: #10b981;
+}
+
+.price-movement.negative {
+  color: #ef4444;
+}
+
+.timeframe-display {
+  font-size: 14px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.liquidation-section {
+  margin-bottom: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 8px;
+}
+
+.section-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.section-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.resistance-section .section-header {
+  border-left: 4px solid #ef4444;
+}
+
+.support-section .section-header {
+  border-left: 4px solid #10b981;
+}
+
+.levels-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.liquidation-level {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.liquidation-level:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.liquidation-level.resistance {
+  border-left: 3px solid #ef4444;
+}
+
+.liquidation-level.support {
+  border-left: 3px solid #10b981;
+}
+
+.level-main {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.level-price {
+  display: flex;
+  flex-direction: column;
+}
+
+.level-price .price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+}
+
+.level-price .distance {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.level-volumes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.volume-item {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+
+.volume-item span:first-child {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.volume-item span:last-child {
+  color: #f8fafc;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.volume-item.long span:last-child {
+  color: #10b981;
+}
+
+.volume-item.short span:last-child {
+  color: #ef4444;
+}
+
+.level-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.strength-indicator {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.strength-indicator.very_high {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.strength-indicator.high {
+  background: rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+}
+
+.strength-indicator.medium {
+  background: rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+.strength-indicator.low {
+  background: rgba(107, 114, 128, 0.3);
+  color: #6b7280;
+}
+
+.leverage-info {
+  font-size: 11px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.rank {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.cumulative-data {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cumulative-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.cumulative-item span:first-child {
+  color: #94a3b8;
+}
+
+.cumulative-item span:last-child {
+  color: #f8fafc;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.current-price-line {
+  margin: 20px 0;
+  padding: 12px;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.1));
+  border: 2px dashed #3b82f6;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.price-line-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.current-price-value {
+  font-size: 18px;
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+}
+
+.heatmap-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+  padding: 16px;
+  background: rgba(30, 41, 59, 0.4);
+  border-radius: 8px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.summary-item span:first-child {
+  color: #94a3b8;
+}
+
+.summary-item span:last-child {
+  color: #f8fafc;
+  font-weight: 600;
+}
 
 .panel-header {
   display: flex;
