@@ -234,17 +234,22 @@ class TradingSystemTester:
         
         data = response['data']
         
-        # Check for account data structure
+        # Check for account data structure (nested in 'account' object)
+        if 'account' not in data:
+            self.log_test(test_name, "FAIL", f"❌ Trading Account Response missing 'account' object: {data}")
+            return
+        
+        account_data = data['account']
         required_fields = ['balance', 'equity']
-        missing_fields = [field for field in required_fields if field not in data]
+        missing_fields = [field for field in required_fields if field not in account_data]
         
         if missing_fields:
             self.log_test(test_name, "FAIL", f"❌ Trading Account Response unvollständig, fehlende Felder: {missing_fields}")
             return
         
-        balance = data.get('balance', 0)
-        equity = data.get('equity', 0)
-        positions = data.get('positions', [])
+        balance = account_data.get('balance', 0)
+        equity = account_data.get('equity', 0)
+        positions = account_data.get('positions', [])
         
         # Check if positions have mark_price values (fallback for price display)
         positions_with_mark_price = 0
