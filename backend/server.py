@@ -212,6 +212,9 @@ class AITradingAnalyzeRequest(BaseModel):
     symbol: str
     context: str = ""
 
+class AITradingCommandRequest(BaseModel):
+    command: str
+
 class BacktestRequest(BaseModel):
     symbol: str = "BTC/USDT"
     timeframe: str = "1h"
