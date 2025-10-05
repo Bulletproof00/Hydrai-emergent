@@ -772,6 +772,12 @@ const EnhancedSmartMoneyPanel = () => {
 
             <div className="tab-content-enhanced">
                 {activeTab === 'liquidation_heatmap' && renderLiquidationHeatmap2D()}
+                {activeTab === 'liveliquidation' && (
+                    <LiveLiquidationHeatmap 
+                        selectedSymbol={selectedSymbol}
+                        selectedTimeframe={selectedTimeframe}
+                    />
+                )}
                 {activeTab === 'open_interest_detailed' && renderOpenInterestDetailed()}
             </div>
         </div>
