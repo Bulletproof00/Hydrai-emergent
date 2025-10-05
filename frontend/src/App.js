@@ -269,25 +269,50 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* Mobile Header */}
+      {isMobile && (
+        <div className="mobile-header">
+          <button className="mobile-menu-button" onClick={toggleMobileMenu}>
+            ☰
+          </button>
+          <div className="mobile-title">
+            Lunara Analyze AI
+          </div>
+          <button className="logout-btn" onClick={handleLogout} title="Abmelden">
+            <LogOut size={18} />
+          </button>
+        </div>
+      )}
+
+      {/* Mobile Overlay */}
+      {isMobile && (
+        <div 
+          className={`mobile-overlay ${isMobileMenuOpen ? 'active' : ''}`}
+          onClick={closeMobileMenu}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="sidebar">
+      <div className={`sidebar ${isMobile && isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           <div className="logo">
             <Brain className="logo-icon" />
             <span>LUNARA ANALYZE AI</span>
           </div>
-          <div className="user-info">
-            <span className="username">{user?.username}</span>
-            <button className="logout-btn" onClick={handleLogout} title="Abmelden">
-              <LogOut size={18} />
-            </button>
-          </div>
+          {!isMobile && (
+            <div className="user-info">
+              <span className="username">{user?.username}</span>
+              <button className="logout-btn" onClick={handleLogout} title="Abmelden">
+                <LogOut size={18} />
+              </button>
+            </div>
+          )}
         </div>
 
         <nav className="nav-menu">
           <button 
             className={`nav-item ${activeView === 'chat' ? 'active' : ''}`}
-            onClick={() => setActiveView('chat')}
+            onClick={() => handleViewChange('chat')}
             data-testid="nav-chat"
           >
             <Brain size={20} />
@@ -295,7 +320,7 @@ function App() {
           </button>
           <button 
             className={`nav-item ${activeView === 'analysis' ? 'active' : ''}`}
-            onClick={() => setActiveView('analysis')}
+            onClick={() => handleViewChange('analysis')}
             data-testid="nav-analysis"
           >
             <Activity size={20} />
@@ -303,7 +328,7 @@ function App() {
           </button>
           <button 
             className={`nav-item ${activeView === 'chart' ? 'active' : ''}`}
-            onClick={() => setActiveView('chart')}
+            onClick={() => handleViewChange('chart')}
             data-testid="nav-chart"
           >
             <LineChart size={20} />
@@ -311,7 +336,7 @@ function App() {
           </button>
           <button 
             className={`nav-item ${activeView === 'plugins' ? 'active' : ''}`}
-            onClick={() => setActiveView('plugins')}
+            onClick={() => handleViewChange('plugins')}
             data-testid="nav-plugins"
           >
             <Zap size={20} />
@@ -319,7 +344,7 @@ function App() {
           </button>
           <button 
             className={`nav-item ${activeView === 'smartmoney' ? 'active' : ''}`}
-            onClick={() => setActiveView('smartmoney')}
+            onClick={() => handleViewChange('smartmoney')}
             data-testid="nav-smartmoney"
           >
             <TrendingUp size={20} />
@@ -327,7 +352,7 @@ function App() {
           </button>
           <button 
             className={`nav-item ${activeView === 'trading' ? 'active' : ''}`}
-            onClick={() => setActiveView('trading')}
+            onClick={() => handleViewChange('trading')}
             data-testid="nav-trading"
           >
             <DollarSign size={20} />
