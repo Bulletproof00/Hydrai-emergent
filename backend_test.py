@@ -1860,6 +1860,74 @@ class TradingSystemTester:
         # Print summary
         self.print_summary()
     
+    def print_finale_summary(self):
+        """Print FINALE TEST summary focusing on 422 error fixes"""
+        print("\n" + "=" * 80)
+        print("🎯 FINALE TESTS NACH CHAT UND AI-REPARATUREN - ERGEBNISSE")
+        print("=" * 80)
+        
+        passed = len([r for r in self.test_results if r['status'] == 'PASS'])
+        failed = len([r for r in self.test_results if r['status'] == 'FAIL'])
+        warnings = len([r for r in self.test_results if r['status'] == 'WARN'])
+        errors = len([r for r in self.test_results if r['status'] == 'ERROR'])
+        total = len(self.test_results)
+        
+        print(f"📊 FINALE TEST ERGEBNISSE:")
+        print(f"   ✅ ERFOLGREICH: {passed}")
+        print(f"   ❌ FEHLGESCHLAGEN: {failed}")
+        print(f"   ⚠️  WARNUNGEN: {warnings}")
+        print(f"   🔥 FEHLER: {errors}")
+        print(f"   📈 ERFOLGSRATE: {(passed/total*100):.1f}%" if total > 0 else "   📈 ERFOLGSRATE: 0%")
+        
+        # Check for 422 errors specifically
+        has_422_errors = any("422" in result['details'] for result in self.test_results if result['status'] == 'FAIL')
+        
+        print(f"\n🎯 KRITISCHE REPARATUR-VERIFIKATION:")
+        print(f"   422 UNPROCESSABLE ENTITY ERRORS: {'❌ NOCH VORHANDEN' if has_422_errors else '✅ BEHOBEN'}")
+        
+        if failed > 0:
+            print(f"\n❌ FEHLGESCHLAGENE TESTS:")
+            for result in self.test_results:
+                if result['status'] == 'FAIL':
+                    print(f"   • {result['test']}: {result['details']}")
+        
+        if warnings > 0:
+            print(f"\n⚠️  WARNUNGEN:")
+            for result in self.test_results:
+                if result['status'] == 'WARN':
+                    print(f"   • {result['test']}: {result['details']}")
+        
+        print("\n" + "=" * 80)
+        
+        # FINALE TEST specific status
+        print("🔍 FINALE TEST STATUS:")
+        
+        finale_systems = [
+            ("Chat System Reparatur", "CHAT SYSTEM REPARATUR"),
+            ("AI Trading Analyse Reparatur", "AI TRADING ANALYSE REPARATUR"), 
+            ("AI Trading Chat Command Reparatur", "AI TRADING CHAT COMMAND REPARATUR"),
+            ("Vollständige Integration", "VOLLSTÄNDIGE INTEGRATION")
+        ]
+        
+        for system_name, test_key in finale_systems:
+            system_results = [r for r in self.test_results if test_key.lower() in r['test'].lower()]
+            if system_results:
+                system_passed = len([r for r in system_results if r['status'] == 'PASS'])
+                status = "✅ REPARIERT" if system_passed > 0 else "❌ NOCH DEFEKT"
+                print(f"   {system_name}: {status}")
+        
+        print("=" * 80)
+        
+        # Final verdict
+        if passed == total and not has_422_errors:
+            print("🎉 FINALE TESTS ERFOLGREICH! Alle Reparaturen funktionieren!")
+        elif has_422_errors:
+            print("⚠️ KRITISCH: 422 Errors noch nicht vollständig behoben!")
+        else:
+            print("⚠️ Einige Tests benötigen noch Aufmerksamkeit.")
+        
+        print("=" * 80)
+
     def print_summary(self):
         """Print test summary"""
         print("=" * 80)
