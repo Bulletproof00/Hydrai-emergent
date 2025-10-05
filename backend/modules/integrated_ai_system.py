@@ -10,7 +10,8 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any
 import os
 import traceback
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 logger = logging.getLogger(__name__)
 
