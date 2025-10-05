@@ -2038,10 +2038,10 @@ class TradingSystemTester:
             self.test_system_stability_under_load
         ]
         
-        print(f"🚀 Running {len(all_tests)} comprehensive tests...")
+        print(f"🎯 Running {len(finale_tests)} FINALE TESTS...")
         print()
         
-        for test_func in all_tests:
+        for test_func in finale_tests:
             try:
                 await test_func()
             except Exception as e:
@@ -2049,7 +2049,7 @@ class TradingSystemTester:
                 self.log_test(test_name, "FAIL", f"Test execution error: {str(e)}")
         
         await self.cleanup()
-        self.print_summary()
+        self.print_finale_summary()
 
 async def main():
     """Main test runner - Focus on NEW INTEGRATED AI CHAT SYSTEM"""
