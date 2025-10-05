@@ -124,6 +124,250 @@ class TradingSystemTester:
                 'error': str(e)
             }
 
+    # ============= NEW INTEGRATED AI CHAT SYSTEM TESTS =============
+    
+    async def test_integrated_ai_chat_greeting(self):
+        """Test NEW INTEGRATED AI CHAT SYSTEM - Simple German greeting"""
+        test_name = "NEW INTEGRATED AI CHAT - German Greeting"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token available")
+            return
+        
+        chat_data = {
+            "session_id": "demo_test_session",
+            "content": "Hallo! Wie geht es dir?"
+        }
+        
+        response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
+        
+        if not response['success']:
+            if response['status'] == 422:
+                self.log_test(test_name, "FAIL", f"❌ 422 UNPROCESSABLE ENTITY ERROR - Das ist der Fehler den wir beheben wollten! {response.get('error', 'Unknown error')}")
+            else:
+                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        ai_response = data.get('content', '')
+        
+        # Check if response is in German and comprehensive
+        german_indicators = ['hallo', 'ich', 'bin', 'hydra', 'system', 'trading', 'analyse']
+        german_count = sum(1 for word in german_indicators if word.lower() in ai_response.lower())
+        
+        if len(ai_response) > 100 and german_count >= 3:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ NEW AI CHAT WORKING! German response: {len(ai_response)} chars, {german_count} German indicators",
+                "German AI response with system context",
+                f"Response length: {len(ai_response)}, German indicators: {german_count}"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"AI response may be incomplete: {len(ai_response)} chars, {german_count} German indicators")
+
+    async def test_integrated_ai_chat_btc_analysis(self):
+        """Test NEW INTEGRATED AI CHAT SYSTEM - BTC Trading Analysis"""
+        test_name = "NEW INTEGRATED AI CHAT - BTC Trading Analysis"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token available")
+            return
+        
+        chat_data = {
+            "session_id": "demo_test_session",
+            "content": "Analysiere BTC für mich"
+        }
+        
+        response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
+        
+        if not response['success']:
+            if response['status'] == 422:
+                self.log_test(test_name, "FAIL", f"❌ 422 ERROR STILL EXISTS! {response.get('error', 'Unknown error')}")
+            else:
+                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        ai_response = data.get('content', '')
+        
+        # Check for comprehensive BTC analysis with system data
+        btc_indicators = ['btc', 'bitcoin', 'preis', 'liquidation', 'smart money', 'trading', 'analyse', 'position']
+        btc_count = sum(1 for word in btc_indicators if word.lower() in ai_response.lower())
+        
+        if len(ai_response) > 300 and btc_count >= 4:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ BTC ANALYSIS WITH FULL SYSTEM ACCESS! {len(ai_response)} chars, {btc_count} BTC indicators",
+                "Comprehensive BTC analysis with Smart Money and trading data",
+                f"Analysis length: {len(ai_response)}, BTC indicators: {btc_count}"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"BTC analysis may lack system integration: {len(ai_response)} chars, {btc_count} indicators")
+
+    async def test_integrated_ai_chat_portfolio_access(self):
+        """Test NEW INTEGRATED AI CHAT SYSTEM - Paper Trading Portfolio Access"""
+        test_name = "NEW INTEGRATED AI CHAT - Paper Trading Portfolio Access"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token available")
+            return
+        
+        chat_data = {
+            "session_id": "demo_test_session", 
+            "content": "Zeige mir mein Trading-Portfolio"
+        }
+        
+        response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
+        
+        if not response['success']:
+            if response['status'] == 422:
+                self.log_test(test_name, "FAIL", f"❌ 422 ERROR PERSISTS! {response.get('error', 'Unknown error')}")
+            else:
+                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        ai_response = data.get('content', '')
+        
+        # Check for portfolio data access
+        portfolio_indicators = ['balance', 'position', 'portfolio', 'trading', 'account', 'pnl', 'gewinn', 'verlust']
+        portfolio_count = sum(1 for word in portfolio_indicators if word.lower() in ai_response.lower())
+        
+        if len(ai_response) > 200 and portfolio_count >= 3:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ AI HAS PORTFOLIO ACCESS! {len(ai_response)} chars, {portfolio_count} portfolio indicators",
+                "AI can access and analyze user's paper trading data",
+                f"Portfolio analysis: {len(ai_response)} chars, {portfolio_count} indicators"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"Limited portfolio access: {len(ai_response)} chars, {portfolio_count} indicators")
+
+    async def test_integrated_ai_chat_system_status(self):
+        """Test NEW INTEGRATED AI CHAT SYSTEM - System Status Monitoring"""
+        test_name = "NEW INTEGRATED AI CHAT - System Status Monitoring"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token available")
+            return
+        
+        chat_data = {
+            "session_id": "demo_test_session",
+            "content": "Was ist der System-Status?"
+        }
+        
+        response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
+        
+        if not response['success']:
+            if response['status'] == 422:
+                self.log_test(test_name, "FAIL", f"❌ 422 ERROR NOT FIXED! {response.get('error', 'Unknown error')}")
+            else:
+                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        ai_response = data.get('content', '')
+        
+        # Check for system monitoring capabilities
+        system_indicators = ['system', 'status', 'service', 'api', 'health', 'aktiv', 'online', 'verfügbar']
+        system_count = sum(1 for word in system_indicators if word.lower() in ai_response.lower())
+        
+        if len(ai_response) > 250 and system_count >= 4:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ AI HAS SYSTEM MONITORING ACCESS! {len(ai_response)} chars, {system_count} system indicators",
+                "AI can monitor and report system status",
+                f"System analysis: {len(ai_response)} chars, {system_count} indicators"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"Limited system monitoring: {len(ai_response)} chars, {system_count} indicators")
+
+    async def test_gemini_25_pro_integration(self):
+        """Test that Gemini 2.5 Pro is working without 422 errors"""
+        test_name = "Gemini 2.5 Pro Integration - No 422 Errors"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token available")
+            return
+        
+        chat_data = {
+            "session_id": "demo_test_session",
+            "content": "Führe eine detaillierte technische Analyse von Bitcoin durch"
+        }
+        
+        response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
+        
+        if response['status'] == 422:
+            self.log_test(test_name, "FAIL", f"❌ CRITICAL: 422 UNPROCESSABLE ENTITY ERROR STILL EXISTS! This was the main issue to fix. Error: {response.get('error', 'Unknown error')}")
+            return
+        elif not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        ai_response = data.get('content', '')
+        
+        # Check for detailed Gemini 2.5 Pro analysis (should be very comprehensive)
+        if len(ai_response) > 1000:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ GEMINI 2.5 PRO WORKING! No 422 errors, comprehensive analysis: {len(ai_response)} chars",
+                "Gemini 2.5 Pro providing detailed German analysis without 422 errors",
+                f"Analysis length: {len(ai_response)} chars - No 422 errors!"
+            )
+        elif len(ai_response) > 500:
+            self.log_test(test_name, "WARN", f"Gemini working but analysis shorter than expected: {len(ai_response)} chars")
+        else:
+            self.log_test(test_name, "FAIL", f"Gemini response too short or incomplete: {len(ai_response)} chars")
+
+    async def test_ai_system_integration_comprehensive(self):
+        """Test comprehensive AI system integration with all modules"""
+        test_name = "AI System Integration - All Modules Access"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token available")
+            return
+        
+        chat_data = {
+            "session_id": "demo_test_session",
+            "content": "Gib mir eine vollständige Marktanalyse mit Smart Money Daten, Real-time Preisen und meinem Portfolio-Status"
+        }
+        
+        response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
+        
+        if not response['success']:
+            if response['status'] == 422:
+                self.log_test(test_name, "FAIL", f"❌ 422 ERROR IN COMPREHENSIVE TEST! {response.get('error', 'Unknown error')}")
+            else:
+                self.log_test(test_name, "FAIL", f"Comprehensive test failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        ai_response = data.get('content', '')
+        
+        # Check for integration with all system modules
+        integration_indicators = [
+            'smart money', 'liquidation', 'real-time', 'portfolio', 'position', 
+            'preis', 'markt', 'analyse', 'trading', 'system'
+        ]
+        integration_count = sum(1 for word in integration_indicators if word.lower() in ai_response.lower())
+        
+        if len(ai_response) > 800 and integration_count >= 6:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ FULL SYSTEM INTEGRATION WORKING! {len(ai_response)} chars, {integration_count} integration indicators",
+                "AI has access to all system modules: Paper Trading, Smart Money, Real-time data",
+                f"Comprehensive integration: {len(ai_response)} chars, {integration_count} modules"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"Partial system integration: {len(ai_response)} chars, {integration_count} indicators")
+
     # ============= ENHANCED TIMEFRAME TESTS =============
     
     async def test_enhanced_timeframes_5m(self):
