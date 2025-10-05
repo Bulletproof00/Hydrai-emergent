@@ -9,7 +9,7 @@ export const useRealTimeData = (selectedSymbol) => {
 
     const connectWebSocket = () => {
         try {
-            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://liquidation-oracle.preview.emergentagent.com';
+            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://smart-trade-ai-28.preview.emergentagent.com';
             const wsUrl = backendUrl.replace('https://', 'wss://').replace('http://', 'ws://') + '/api/realtime';
             
             console.log('Connecting to WebSocket:', wsUrl);

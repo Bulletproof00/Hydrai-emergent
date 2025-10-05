@@ -1,35 +1,40 @@
 <analysis>
-The previous AI engineer successfully tackled several complex phases. Initially, a critical bug concerning outdated traditional market data was addressed, which evolved into a robust, real-time, WebSocket-based streaming solution for all assets, featuring live price updates and accurate displays on the frontend. Subsequently, the engineer moved to Phase 3: Smart Money Indicators, implementing Coinglass-style Liquidation Heatmaps, Open Interest, and Funding Rates for key cryptocurrencies (BTC, ETH, SOL, XRP). This involved overcoming API limitations with synthetic data and frontend live data transformations. The current, ongoing task focuses on enhancing these Smart Money analytics by introducing timeframe filters and directional bias analysis to identify liquidation clusters and predict market direction, demonstrating an iterative and responsive development approach.
+The previous AI engineer successfully implemented complex features for a trading application, progressing through several key phases. Initially, a robust real-time, WebSocket-based streaming solution for market data was established, followed by the implementation of Smart Money Indicators (Liquidation Heatmaps, Open Interest, Funding Rates) for cryptocurrencies, designed in a Coinglass-style UI. This phase involved addressing API limitations and integrating frontend data transformations.
+
+The focus then shifted to enhancing Smart Money features with timeframe filters and directional bias analysis for liquidation clusters, prioritizing BTC and Coinglass-inspired design. This involved substantial backend (, ) and frontend (, ) modifications. Critical issues like incorrect URL parsing, frontend JSX errors, and persistent scrolling problems across the UI were debugged and fixed.
+
+Subsequently, a comprehensive Paper Trading System was developed, emulating real exchanges with leverage, margin management, and parallel long/short positions for the Top 30 cryptocurrencies. This required new backend modules () and a dedicated frontend interface (, ).
+
+The most recent work has focused on deep AI integration using Gemini Pro for trade analysis and chat-based commands. After initial integration, a critical CoinGecko API rate-limiting issue and persistent AI chat errors (422 Unprocessable Entity) prevented full functionality, leading to UI components (charts, smart money, plugins) failing to load. The engineer is currently re-implementing the chat system with a new  module to resolve these AI issues and ensure comprehensive system data access for the AI.
 </analysis>
 
 <product_requirements>
-The user requested Hydra AI, a modular, self-learning trading system capable of multi-timeframe analysis, order flow, backtesting, automated trading, risk management, and portfolio optimization, with a futuristic, minimalist UI (Lila/Schwarz, universe/stars theme).
+The user requested Hydra AI, a modular, self-learning trading system capable of multi-timeframe analysis, order flow, backtesting, automated trading, risk management, and portfolio optimization, with a futuristic, minimalist UI.
 
-The implemented features include:
+Implemented features include:
 -   **UI:** ChatGPT-like, futuristic (Lila/Schwarz, minimalist).
 -   **Backend:** FastAPI with MongoDB.
--   **Data Sources:** Live crypto (Kraken), traditional markets (NASDAQ, SPX, DXY, Gold), dominance metrics; now with real-time, tick-by-tick streaming across all assets using free APIs.
+-   **Data Sources:** Live crypto (Kraken), traditional markets (NASDAQ, SPX, DXY, Gold), dominance metrics; with real-time, tick-by-tick streaming across all assets.
 -   **Indicators:** RSI, MFI, Bollinger Bands, Stochastic, OBV, VWAP, EMA (50, 200).
 -   **AI:** Emergent LLM Key & Gemini AI for analysis and pattern recognition.
 -   **Charting:** Custom Candlestick charts with OHLCV, volume, 1m-1M timeframes, zoom/scroll for cryptos and traditional markets.
 -   **Authentication:** JWT-based login/registration with user profiles and paper trading balance.
--   **Paper Trading:** Basic trade opening, PnL, portfolio management.
+-   **Paper Trading:** Basic trade opening, PnL, portfolio management, now enhanced to exchange-like functionality (1-100x leverage, margin, parallel positions, partial closing) for Top 30 Cryptos, with a dedicated UI tab and real-time prices.
 -   **Gap Detection:** CME Gap-Erkennung.
--   **Smart Money Indicators:** Liquidation Heatmaps, Open Interest, Funding Rates, Orderflow, Liquidity Heatmaps for BTC, ETH, SOL, XRP, designed in Coinglass-style with aggregated data, above/below price analysis, and updated every 15 minutes.
--   **Current Requirement**: Implement timeframe filters (12h, 1day, 3day, 1 week, 2 week, monthly) and directional bias analysis for liquidation clusters within Smart Money indicators.
+-   **Smart Money Indicators:** Liquidation Heatmaps, Open Interest, Funding Rates, Orderflow, Liquidity Heatmaps for BTC, ETH, SOL, XRP, now extended to all Top 30 cryptos, designed in Coinglass-style with aggregated data, above/below price analysis, timeframe filters (12h, 1d, 3d, 1w, 2w, monthly), and directional bias analysis.
+-   **Current AI Requirement:** Gemini AI must fully access Paper Trading for trade opinions, win chance calculation, TP/SL, trade type suggestions, chat-based commands, and strategy development, learning from all system data and user interactions.
 </product_requirements>
 
 <key_technical_concepts>
 -   **FastAPI:** Python backend framework.
 -   **React:** Frontend library.
 -   **MongoDB:** NoSQL database.
--   **CCXT:** Crypto exchange API.
 -   **Gemini AI:** AI for market analysis.
 -   **JWT:** Authentication tokens.
 -   **Custom Canvas Charting:** For performance.
--   **, , usage: websockets [--version | <uri>]:** For real-time data handling.
+-   **, , usage: websockets [--version | <uri>]:** For real-time data.
 -   **Tailwind CSS/Shadcn UI:** For styling.
--   **Coinglass/Coinalyze APIs:** Smart Money data sources.
+-   **:** Python library for Gemini API.
 </key_technical_concepts>
 
 <code_architecture>
@@ -38,42 +43,36 @@ The application utilizes a full-stack architecture with a React frontend, a Fast
 
 
 **Key Files and Changes:**
--   : Central backend, refactored for real-time market data fetchers, WebSocket endpoints (), Smart Money API routes (, ). Added  and fixed  initialization.
--   : Integrated  for traditional assets.
--   : **New file** for multi-source traditional market data fetching (e.g., Twelve Data QQQ proxy).
--   : **New file** for initial WebSocket streaming implementation.
--   : **New file** implementing a hybrid real-time solution (polling + WebSocket) for live price updates across all assets.
--   : **New file** for initial Smart Money APIs, with synthetic data fallbacks.
--   : **New file** for Coinglass-style Smart Money APIs. Currently being modified to integrate timeframe logic and calculate directional bias for liquidation clusters.
--   : **New file** to integrate real-time API data into the enhanced smart money system.
--   : Updated to include  and usage: websockets [--version | <uri>].
--   : Modified for real-time data and Smart Money integration, including routing and state management.
--   : Updated to use  hook and display real-time prices.
--   : **New file**, initial Smart Money UI.
--   : **New file**, replaced . Implements Coinglass-style Smart Money UI. Currently being updated for timeframe selectors, directional bias display, and enhanced liquidation levels table. Applies frontend transformations for live data.
--   : **New file**, React hook for WebSocket connections to real-time data.
--   : Updated for new real-time price displays and Smart Money panels.
+-   : Central backend, significantly modified. It now handles new Smart Money API routes with timeframe parameters, paper trading endpoints (open/close position, margin management, history, account summary), AI trading APIs, and an extended chat API for AI integration. It also includes URL parsing fixes for symbol parameters and timeframe validation logic.
+-   : Updated to include fallback mechanisms and rate-limiting handling for external data sources like CoinGecko to ensure robust real-time data delivery.
+-   : Extended to support timeframe logic for calculating liquidation clusters and directional bias. It also now accommodates the Top 30 cryptocurrencies and features enhanced liquidation levels generation with cumulative data and improved sorting.
+-   : Expanded to include comprehensive symbol mappings for the Top 30 crypto assets, enabling broader real-time Smart Money analysis across more assets.
+-   : **New file.** Contains the core business logic for the paper trading system, managing virtual positions, trades, leverage, margin, and account summaries.
+-   : **New file.** Implements the integration with Gemini AI, including functionalities for market analysis, trade recommendations, and processing AI-specific requests.
+-   : **New file.** This module is currently being developed to re-implement the chat system and fully integrate AI functionalities, aiming to resolve existing chat errors and enhance AI's access to system data.
+-   : Updated to include the  library for Gemini AI integration.
+-   : Corrected  to point to , resolving a critical frontend-backend communication issue.
+-   : Heavily modified for navigation to include a new Trading tab, integrates  and other new components, and extends the  function to handle AI trading commands from the chat.
+-   : Extensively updated to include styling for the Coinglass-style timeframe dropdowns, directional bias display, an enhanced liquidation levels table, the new Trading Interface, AI analysis panels, and the Live Liquidation Heatmap. Critical CSS fixes for  and  in various containers (, , , , ) were implemented to enable proper scrolling.
+-   : Modified to incorporate timeframe selectors, display directional bias, present an enhanced liquidation levels table, and integrate the new  component via a tab. Obsolete data transformation logic was removed.
+-   : **New file.** Provides the user interface for the paper trading system, including order entry forms, position display, account summary, and integration points for AI analysis. It previously required JSX syntax corrections.
+-   : **New file.** A dedicated component for visualizing the enhanced liquidation heatmap, including a live price ticker.
 </code_architecture>
 
 <pending_tasks>
--   **Phase 4 (Paper Trading System):** Implement Long/Short with leverage, order simulation, and detailed trade history with PnL.
--   **Phase 5 (Extended Backtesting Features):** Chat-based commands, multi-strategy support, visual results.
--   **Phase 6 (New UI Theme):** Full Lila/Schwarz Universum-Design, modern, futuristic, responsive layout.
--   **Phase 7 (KI-Integration):** Multi-Timeframe-Analysis, Smart Money Recognition, stored analyses, learning from user interaction/trades, continuous self-improvement, pattern recognition.
+-   Complete the re-implementation and integration of the  module in the backend to fully resolve the AI chat error (422 Unprocessable Entity) and provide AI with comprehensive system access for debugging, improvements, and data analysis as requested by the user.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was implementing the user's latest refinement for **Smart Money Indicators**:
-1.  **Timeframe Filters**: Introducing options for 12h, 1day, 3day, 1 week, 2 week, and monthly liquidation data.
-2.  **Directional Bias Analysis**: Identifying if more liquidation clusters are positioned above or below the current price to provide directional insights.
+Immediately before this summary request, the AI engineer was in the process of resolving a critical issue: the user reported that the AI chat system was consistently returning an error (Entschuldigung, es gab einen Fehler bei der Verarbeitung deiner Anfrage.) and that the AI lacked full access to the system's data for analysis and improvements.
 
-This work involves:
--   **Backend ()**: Updates to integrate the timeframe logic for calculating liquidation clusters and associated metrics.
--   **Frontend ()**: Adding UI elements for selecting timeframes, displaying the calculated directional bias, enhancing summary cards with new information, and expanding the liquidation levels table to include cluster strength and proximity. The last recorded action was modifying this file to improve the Liquidation Levels table.
+A root cause analysis, including checking backend logs, revealed a 422 Unprocessable Entity error at the  endpoint, indicating a problem with how chat messages or AI interactions were being processed. Despite verifying the existing  schema in , the previous implementation of the chat system with AI integration was deemed insufficient.
 
-Previously, the system achieved accurate, real-time, tick-by-tick data streaming for all assets and implemented Coinglass-style Smart Money visuals for BTC, ETH, SOL, XRP, showing live prices and detailed liquidation/open interest data.
+To address this, the AI engineer initiated a full re-implementation of the chat system with a stronger, more comprehensive AI integration. The current work involves:
+-   **Creation of a new module:** A new Python file, , has been created. This module is intended to encapsulate the robust logic for the updated chat system and its deep integration with the AI.
+-   **Integration into the server:** The next immediate step is to integrate this newly created  module into . This will involve replacing the problematic existing chat handling with the new, more robust implementation. The goal is to ensure the AI can seamlessly access and process all relevant data (inputs, outputs, timeframes, markets, assets, indicators, correlations, smart money data, chat history, user behavior) to provide accurate analysis, recommendations, and learn from interactions, as explicitly requested by the user.
 </current_work>
 
 <optional_next_step>
-Complete the implementation of the directional bias and liquidation cluster visualization within the  component.
+Integrate the  module into  to fix the AI chat error.
 </optional_next_step>

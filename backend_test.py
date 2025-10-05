@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Dict, List, Any
 
 # Test configuration
-BACKEND_URL = "https://liquidation-oracle.preview.emergentagent.com/api"
+BACKEND_URL = "https://smart-trade-ai-28.preview.emergentagent.com/api"
 WEBSOCKET_URL = "wss://liquidation-oracle.preview.emergentagent.com/api/realtime"
 
 class TradingSystemTester:
