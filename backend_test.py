@@ -600,8 +600,7 @@ class TradingSystemTester:
         """Test Gemini API response parsing and JSON structure"""
         test_name = "Gemini AI Response Parsing"
         
-        data = {"symbol": "ETH/USDT", "context": "json_parsing_test"}
-        response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=data, auth=True)
+        response = await self.test_api_endpoint("/ai-trading/analyze?symbol=ETH/USDT&context=json_parsing_test", method="POST", auth=True)
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
