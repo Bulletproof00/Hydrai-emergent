@@ -2094,8 +2094,8 @@ async def analyze_trading_opportunity(
 
 @api_router.post("/ai-trading/chat-command")
 async def execute_chat_trading_command(
-    command: str,
-    authorization: str = Header(None)
+    request: AITradingCommandRequest,
+    authorization: str = Header(...)
 ):
     """Execute trading command from chat"""
     try:
@@ -2107,7 +2107,7 @@ async def execute_chat_trading_command(
         
         user = await get_current_user(authorization)
         
-        result = await ai_trading.execute_chat_command(user['_id'], command)
+        result = await ai_trading.execute_chat_command(user['_id'], request.command)
         
         return {
             'status': 'success' if result.get('success') else 'error',
