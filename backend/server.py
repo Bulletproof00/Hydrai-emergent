@@ -2324,7 +2324,7 @@ async def update_market_data_background():
 
 @app.on_event("startup")
 async def startup_event():
-    global exchange, redis_client, enhanced_streamer, smart_money, enhanced_smart_money
+    global exchange, redis_client, enhanced_streamer, smart_money, enhanced_smart_money, paper_trading, ai_trading, integrated_ai
     logger.info("Starting Hydra AI...")
     
     # Initialize exchange - Try Kraken as it has less restrictions
