@@ -44,7 +44,7 @@ const Login = ({ onLogin }) => {
       <div className="login-box">
         <div className="login-header">
           <Brain className="login-logo-icon" size={48} />
-          <h1>HYDRA AI</h1>
+          <h1>Lunara Analyze AI</h1>
           <p>Professionelle Krypto Trading Plattform</p>
         </div>
 
