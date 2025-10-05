@@ -2422,6 +2422,58 @@ class TradingSystemTester:
         # Print summary
         self.print_summary()
     
+    def print_self_evolving_ai_summary(self):
+        """Print summary of Self-Evolving AI test results"""
+        print("\n" + "=" * 80)
+        print("🧠 SELF-EVOLVING AI SYSTEM TEST SUMMARY")
+        print("=" * 80)
+        
+        pass_count = len([r for r in self.test_results if r['status'] == 'PASS'])
+        warn_count = len([r for r in self.test_results if r['status'] == 'WARN'])
+        fail_count = len([r for r in self.test_results if r['status'] == 'FAIL'])
+        total_count = len(self.test_results)
+        
+        print(f"✅ PASSED: {pass_count}")
+        print(f"⚠️  WARNINGS: {warn_count}")
+        print(f"❌ FAILED: {fail_count}")
+        print(f"📊 TOTAL: {total_count}")
+        
+        success_rate = (pass_count / total_count * 100) if total_count > 0 else 0
+        print(f"🧠 SUCCESS RATE: {success_rate:.1f}%")
+        
+        print("\n🎯 ERWARTETE ERGEBNISSE:")
+        expected_results = [
+            "✅ Alle Evolution-Endpoints funktionieren ohne Fehler",
+            "✅ AI generiert deutsche Berichte über Selbstverbesserung", 
+            "✅ Evolution-Zyklen werden in MongoDB gespeichert",
+            "✅ Background Learning Loop ist aktiv",
+            "✅ Gemini 2.5 Flash Integration funktioniert",
+            "✅ AI kann sich selbst analysieren und verbessern"
+        ]
+        
+        for expected in expected_results:
+            print(f"   {expected}")
+        
+        print("\n📋 DETAILED RESULTS:")
+        for result in self.test_results:
+            status_emoji = "✅" if result['status'] == "PASS" else "❌" if result['status'] == "FAIL" else "⚠️"
+            print(f"{status_emoji} {result['test']}: {result['status']}")
+            if result['details']:
+                print(f"   {result['details']}")
+        
+        print("\n🎯 FAZIT:")
+        if success_rate >= 80:
+            print("🎉 SELF-EVOLVING AI SYSTEM VOLLSTÄNDIG FUNKTIONSFÄHIG!")
+            print("   Lunara Analyze AI kann kontinuierlich lernen und sich verbessern!")
+        elif success_rate >= 60:
+            print("⚠️  SELF-EVOLVING AI SYSTEM TEILWEISE FUNKTIONSFÄHIG")
+            print("   Einige Features benötigen noch Verbesserungen")
+        else:
+            print("❌ SELF-EVOLVING AI SYSTEM BENÖTIGT REPARATUREN")
+            print("   Kritische Probleme müssen behoben werden")
+        
+        print("\n" + "=" * 80)
+
     def print_priority_summary(self):
         """Print PRIORITY TEST summary focusing on Paper Trading repairs"""
         print("\n" + "=" * 80)
