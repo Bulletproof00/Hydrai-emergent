@@ -193,8 +193,7 @@ class TradingSystemTester:
         """Test POST /api/enhanced-smart-money/data with 1h timeframe"""
         test_name = "Enhanced Smart Money - BTC/USDT (1h timeframe)"
         
-        data = {"symbol": "BTC/USDT", "timeframe": "1h"}
-        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        response = await self.test_api_endpoint("/enhanced-smart-money/data?symbol=BTC/USDT&timeframe=1h")
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
