@@ -2144,128 +2144,70 @@ async def chat(
     message: ChatMessageCreate,
     authorization: str = Header(...)
 ):
-    """Send a chat message and get AI response with full historical context"""
+    """Send a chat message and get AI response with COMPLETE system access"""
     try:
         # Get current user
         user = await get_current_user(authorization)
+        user_id = str(user["_id"])
         
-        # Save user message
-        user_msg = ChatMessage(
-            session_id=message.session_id,
-            role="user",
-            content=message.content
+        # Check if Integrated AI System is available
+        if not integrated_ai:
+            raise HTTPException(
+                status_code=503, 
+                detail="Integrated AI System nicht verfügbar. System wird initialisiert..."
+            )
+        
+        # Process message with complete system access
+        ai_response_data = await integrated_ai.process_chat_message(
+            user_id=user_id,
+            message=message.content,
+            session_id=message.session_id
         )
-        await db.chat_messages.insert_one(user_msg.dict())
         
-        # Get comprehensive market context
-        from modules.market_data import MarketDataFetcher
-        from modules.gap_detection import GapDetector
-        
-        fetcher = MarketDataFetcher(exchange, db)
-        
-        try:
-            # Get historical data (last 200 bars)
-            btc_data = await fetcher.get_stored_ohlcv('BTC/USDT', '1h', 200)
+        if ai_response_data['status'] == 'error':
+            logger.error(f"Integrated AI Error: {ai_response_data.get('error')}")
+            # Return error but with helpful content
+            assistant_msg = ChatMessage(
+                session_id=message.session_id,
+                role="assistant",
+                content=ai_response_data['content']
+            )
+        else:
+            # Save user message to database
+            user_msg = ChatMessage(
+                session_id=message.session_id,
+                role="user",
+                content=message.content
+            )
+            await db.chat_messages.insert_one(user_msg.dict())
             
-            # Get current price
-            live_price = await get_live_price()
+            # Create successful response
+            assistant_msg = ChatMessage(
+                session_id=message.session_id,
+                role="assistant",
+                content=ai_response_data['content']
+            )
             
-            # Calculate indicators on historical data
-            if btc_data and len(btc_data) > 50:
-                import pandas as pd
-                df = pd.DataFrame(btc_data)
-                
-                rsi = await plugin_manager.calculate_rsi(df)
-                mfi = await plugin_manager.calculate_mfi(df)
-                bb = await plugin_manager.calculate_bollinger(df)
-                ema50 = await plugin_manager.calculate_ema(df, 50)
-                ema200 = await plugin_manager.calculate_ema(df, 200)
-                
-                indicators = {
-                    'rsi': float(rsi) if rsi and not pd.isna(rsi) else None,
-                    'mfi': float(mfi) if mfi and not pd.isna(mfi) else None,
-                    'bollinger': bb,
-                    'ema50': float(ema50) if ema50 and not pd.isna(ema50) else None,
-                    'ema200': float(ema200) if ema200 and not pd.isna(ema200) else None
-                }
-            else:
-                indicators = {}
-            
-            # Get gaps
-            detector = GapDetector(db)
-            gaps = await detector.get_gaps('BTC/USDT', 10)
-            
-            # Get dominance
-            dominance = await fetcher.fetch_dominance_data()
-            
-            # Get macro data
-            macro_data = await get_macro_data()
-            
-            # Get user's trades for context
-            user_trades = await db.trades.find({"user_id": user["_id"]}).sort("opened_at", -1).limit(10).to_list(10)
-            
-            context_data = {
-                'current_price': live_price,
-                'indicators': indicators,
-                'gaps': gaps[:5],  # Last 5 gaps
-                'dominance': dominance,
-                'macro_data': {
-                    'SPX': macro_data.get('SPX', {}),
-                    'DXY': macro_data.get('DXY', {}),
-                    'Gold': macro_data.get('Gold', {})
-                },
-                'recent_trades': len(user_trades),
-                'historical_bars': len(btc_data)
-            }
-        except Exception as e:
-            logging.warning(f"Could not fetch full market context: {str(e)}")
-            context_data = {'error': 'Limited context available'}
-        
-        # Check if this is a trading command and handle with AI Trading Engine
-        trading_response = None
-        if ai_trading:
-            try:
-                # Check if message contains trading keywords
-                trading_keywords = [
-                    'long', 'short', 'buy', 'sell', 'trade', 'position', 'leverage', 
-                    'stop loss', 'take profit', 'close', 'analyze', 'analysis',
-                    'bollinger', 'rsi', 'strategy', 'entry', 'exit'
-                ]
-                
-                message_lower = message.content.lower()
-                if any(keyword in message_lower for keyword in trading_keywords):
-                    # This looks like a trading command or request
-                    try:
-                        command_result = await ai_trading.execute_chat_command(user['_id'], message.content)
-                        if command_result.get('success'):
-                            trading_response = command_result
-                    except Exception as e:
-                        logging.warning(f"Trading command execution failed: {e}")
-                
-            except Exception as e:
-                logging.warning(f"AI Trading integration error: {e}")
-        
-        # Get AI response with full context including trading response
-        enhanced_context_data = {
-            **context_data,
-            'trading_response': trading_response,
-            'ai_trading_available': ai_trading is not None
-        }
-        
-        ai_response = await analyze_with_ai(message.content, enhanced_context_data)
-        
-        # Save assistant response
-        assistant_msg = ChatMessage(
-            session_id=message.session_id,
-            role="assistant",
-            content=ai_response
-        )
-        await db.chat_messages.insert_one(assistant_msg.dict())
+            # Save assistant response to database
+            await db.chat_messages.insert_one(assistant_msg.dict())
         
         return assistant_msg
+        
+    except HTTPException as he:
+        # Re-raise HTTP exceptions (like 503)
+        raise he
     except Exception as e:
-        logging.error(f"Chat error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Chat endpoint error: {str(e)}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        
+        # Create error response
+        error_msg = ChatMessage(
+            session_id=message.session_id if message else "unknown",
+            role="assistant", 
+            content=f"⚠️ **System-Fehler**\n\nEs gab ein Problem mit der Chat-Verarbeitung:\n```\n{str(e)}\n```\n\nBitte versuchen Sie es erneut oder kontaktieren Sie den Support."
+        )
+        
+        return error_msg
 
 # WebSocket for live price updates
 @app.websocket("/ws/price")
