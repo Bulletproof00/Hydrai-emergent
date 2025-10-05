@@ -2361,6 +2361,23 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Integrated AI System initialization failed: {str(e)}")
     
+    # Initialize Self-Evolving AI System (Continuous improvement)
+    try:
+        global self_evolving_ai
+        self_evolving_ai = await initialize_self_evolving_ai(
+            db=db,
+            paper_trading=paper_trading, 
+            enhanced_smart_money=enhanced_smart_money,
+            real_time_streamer=enhanced_streamer
+        )
+        
+        # Start background evolution cycle
+        asyncio.create_task(continuous_evolution_loop())
+        
+        logger.info("🧠 Self-Evolving AI System initialized - Continuous learning activated")
+    except Exception as e:
+        logger.warning(f"Self-Evolving AI initialization failed: {str(e)}")
+    
     # Start background data update task
     asyncio.create_task(update_market_data_background())
     logger.info("Background data update task started")
