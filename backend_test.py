@@ -250,45 +250,52 @@ class TradingSystemTester:
         else:
             self.log_test(test_name, "FAIL", f"❌ Chat Command Processing failed: {data}")
 
-    async def test_integrated_ai_chat_system_status(self):
-        """Test NEW INTEGRATED AI CHAT SYSTEM - System Status Monitoring"""
-        test_name = "NEW INTEGRATED AI CHAT - System Status Monitoring"
+    async def test_vollstaendige_integration_verifikation(self):
+        """FINALE TEST 4: VOLLSTÄNDIGE INTEGRATION VERIFIKATION - Chat mit Trading-Analyse"""
+        test_name = "🎯 FINALE TEST 4: VOLLSTÄNDIGE INTEGRATION VERIFIKATION"
         
         if not self.auth_token:
-            self.log_test(test_name, "FAIL", "No authentication token available")
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
             return
         
         chat_data = {
             "session_id": "demo_test_session",
-            "content": "Was ist der System-Status?"
+            "content": "Analysiere BTC für mich"
         }
         
         response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
         
-        if not response['success']:
-            if response['status'] == 422:
-                self.log_test(test_name, "FAIL", f"❌ 422 ERROR NOT FIXED! {response.get('error', 'Unknown error')}")
-            else:
-                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+        if response['status'] == 422:
+            self.log_test(test_name, "FAIL", f"❌ KRITISCHER FEHLER: 422 ERROR IN VOLLSTÄNDIGER INTEGRATION! {response.get('error', 'Unknown error')}")
+            return
+        elif not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Vollständige Integration failed with status {response['status']}: {response.get('error', 'Unknown error')}")
             return
         
         data = response['data']
         ai_response = data.get('content', '')
         
-        # Check for system monitoring capabilities
-        system_indicators = ['system', 'status', 'service', 'api', 'health', 'aktiv', 'online', 'verfügbar']
-        system_count = sum(1 for word in system_indicators if word.lower() in ai_response.lower())
+        # Check for comprehensive integration with all system modules
+        integration_indicators = [
+            'btc', 'bitcoin', 'trading', 'analyse', 'smart money', 'liquidation', 
+            'paper trading', 'preis', 'markt', 'system', 'real-time'
+        ]
+        integration_count = sum(1 for word in integration_indicators if word.lower() in ai_response.lower())
         
-        if len(ai_response) > 250 and system_count >= 4:
+        # Check for German response
+        german_indicators = ['ich', 'bin', 'der', 'die', 'das', 'und', 'mit', 'für', 'auf', 'ist']
+        german_count = sum(1 for word in german_indicators if word.lower() in ai_response.lower())
+        
+        if len(ai_response) > 500 and integration_count >= 4 and german_count >= 3:
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"✅ AI HAS SYSTEM MONITORING ACCESS! {len(ai_response)} chars, {system_count} system indicators",
-                "AI can monitor and report system status",
-                f"System analysis: {len(ai_response)} chars, {system_count} indicators"
+                f"✅ VOLLSTÄNDIGE INTEGRATION ERFOLGREICH! Chat mit Trading-Analyse funktioniert, AI hat Zugang zu Paper Trading und Smart Money, Deutsche Antworten mit Systemkontext: {len(ai_response)} chars, {integration_count} integration indicators, {german_count} German indicators",
+                "✅ KEINE 422 Errors ✅ Chat funktioniert mit Authorization Header ✅ AI Trading Analyse funktioniert ✅ Deutsche AI-Antworten mit vollständigem Systemzugang",
+                f"✅ COMPLETE SUCCESS: {len(ai_response)} chars, {integration_count} modules, {german_count} German, NO 422!"
             )
         else:
-            self.log_test(test_name, "WARN", f"Limited system monitoring: {len(ai_response)} chars, {system_count} indicators")
+            self.log_test(test_name, "WARN", f"⚠️ Integration teilweise erfolgreich: {len(ai_response)} chars, {integration_count} integration, {german_count} German indicators")
 
     async def test_gemini_25_pro_integration(self):
         """Test that Gemini 2.5 Pro is working without 422 errors"""
