@@ -2723,12 +2723,12 @@ class TradingSystemTester:
         self.print_finale_summary()
 
 async def main():
-    """Main test runner - FINALE TESTS nach Chat und AI-Reparaturen"""
+    """Main test runner - SELF-EVOLVING AI SYSTEM TESTS"""
     tester = TradingSystemTester()
     
-    # Run PRIORITY TESTS to verify Paper Trading repairs
-    print("🎯 RUNNING PRIORITY TESTS - PAPER TRADING REPARATUREN")
-    await tester.run_priority_tests()
+    # Run SELF-EVOLVING AI TESTS as requested in the review
+    print("🧠 RUNNING SELF-EVOLVING AI SYSTEM TESTS")
+    await tester.run_self_evolving_ai_tests()
 
 if __name__ == "__main__":
     asyncio.run(main())
