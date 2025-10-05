@@ -6,6 +6,7 @@ import AdvancedChart from "./components/AdvancedChart";
 import SmartMoneyPanel from "./components/SmartMoneyPanel";
 import EnhancedSmartMoneyPanel from "./components/EnhancedSmartMoneyPanel";
 import TradingInterface from "./components/TradingInterface";
+import SelfEvolvingAI from "./components/SelfEvolvingAI";
 import Login from "./pages/Login";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
