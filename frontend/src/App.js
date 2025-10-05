@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "@/App.css";
 import axios from "axios";
-import { Send, TrendingUp, Activity, BarChart3, Brain, Zap, Settings, LineChart, LogOut, DollarSign } from "lucide-react";
+import { Send, TrendingUp, Activity, BarChart3, Brain, Zap, Settings, LineChart, LogOut, DollarSign, Menu } from "lucide-react";
 import AdvancedChart from "./components/AdvancedChart";
 import SmartMoneyPanel from "./components/SmartMoneyPanel";
 import EnhancedSmartMoneyPanel from "./components/EnhancedSmartMoneyPanel";
