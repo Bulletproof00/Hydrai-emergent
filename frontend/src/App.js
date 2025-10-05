@@ -273,7 +273,7 @@ function App() {
       {isMobile && (
         <div className="mobile-header">
           <button className="mobile-menu-button" onClick={toggleMobileMenu}>
-            ☰
+            <Menu size={24} />
           </button>
           <div className="mobile-title">
             Lunara Analyze AI
