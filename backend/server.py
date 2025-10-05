@@ -38,6 +38,7 @@ from modules.enhanced_smart_money import EnhancedSmartMoneyIndicators
 from modules.paper_trading import PaperTradingEngine
 from modules.ai_trading_engine import AITradingEngine
 from modules.integrated_ai_system import IntegratedAISystem
+from modules.self_evolving_ai import SelfEvolvingAI, initialize_self_evolving_ai
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
