@@ -208,6 +208,10 @@ class IndicatorRequest(BaseModel):
     limit: int = 100
     indicators: List[str]  # ['rsi', 'mfi', 'bollinger']
 
+class AITradingAnalyzeRequest(BaseModel):
+    symbol: str
+    context: str = ""
+
 class BacktestRequest(BaseModel):
     symbol: str = "BTC/USDT"
     timeframe: str = "1h"
