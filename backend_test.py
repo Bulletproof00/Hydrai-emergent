@@ -124,47 +124,47 @@ class TradingSystemTester:
                 'error': str(e)
             }
 
-    # ============= NEW INTEGRATED AI CHAT SYSTEM TESTS =============
+    # ============= FINALE TESTS - CHAT UND AI-REPARATUREN =============
     
-    async def test_integrated_ai_chat_greeting(self):
-        """Test NEW INTEGRATED AI CHAT SYSTEM - Simple German greeting"""
-        test_name = "NEW INTEGRATED AI CHAT - German Greeting"
+    async def test_chat_system_repair_test(self):
+        """FINALE TEST 1: CHAT SYSTEM REPARATUR TEST - POST /api/chat"""
+        test_name = "🎯 FINALE TEST 1: CHAT SYSTEM REPARATUR"
         
         if not self.auth_token:
-            self.log_test(test_name, "FAIL", "No authentication token available")
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
             return
         
         chat_data = {
             "session_id": "demo_test_session",
-            "content": "Hallo! Wie geht es dir?"
+            "content": "Hallo! Funktioniert der Chat jetzt?"
         }
         
         response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
         
-        if not response['success']:
-            if response['status'] == 422:
-                self.log_test(test_name, "FAIL", f"❌ 422 UNPROCESSABLE ENTITY ERROR - Das ist der Fehler den wir beheben wollten! {response.get('error', 'Unknown error')}")
-            else:
-                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+        if response['status'] == 422:
+            self.log_test(test_name, "FAIL", f"❌ KRITISCHER FEHLER: 422 UNPROCESSABLE ENTITY ERROR NOCH VORHANDEN! Das war der Hauptfehler der behoben werden sollte! Error: {response.get('error', 'Unknown error')}")
+            return
+        elif not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Chat API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
             return
         
         data = response['data']
         ai_response = data.get('content', '')
         
-        # Check if response is in German and comprehensive
-        german_indicators = ['hallo', 'ich', 'bin', 'hydra', 'system', 'trading', 'analyse']
+        # Check for German AI response
+        german_indicators = ['hallo', 'ich', 'bin', 'hydra', 'system', 'trading', 'analyse', 'funktioniert', 'ja']
         german_count = sum(1 for word in german_indicators if word.lower() in ai_response.lower())
         
-        if len(ai_response) > 100 and german_count >= 3:
+        if len(ai_response) > 200 and german_count >= 3:
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"✅ NEW AI CHAT WORKING! German response: {len(ai_response)} chars, {german_count} German indicators",
-                "German AI response with system context",
-                f"Response length: {len(ai_response)}, German indicators: {german_count}"
+                f"✅ CHAT SYSTEM REPARATUR ERFOLGREICH! KEINE 422 Errors, Deutsche AI-Antwort erhalten: {len(ai_response)} chars, {german_count} German indicators",
+                "KEINE 422 Errors, deutsche AI-Antwort mit Authorization Header",
+                f"✅ SUCCESS: {len(ai_response)} chars, {german_count} German indicators, NO 422 ERROR!"
             )
         else:
-            self.log_test(test_name, "WARN", f"AI response may be incomplete: {len(ai_response)} chars, {german_count} German indicators")
+            self.log_test(test_name, "WARN", f"⚠️ Chat funktioniert aber Antwort könnte besser sein: {len(ai_response)} chars, {german_count} German indicators")
 
     async def test_integrated_ai_chat_btc_analysis(self):
         """Test NEW INTEGRATED AI CHAT SYSTEM - BTC Trading Analysis"""
