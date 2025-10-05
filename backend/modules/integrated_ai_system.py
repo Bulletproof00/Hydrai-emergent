@@ -22,12 +22,12 @@ class IntegratedAISystem:
         self.real_time_streamer = real_time_streamer
         
         # Initialize Gemini API
-        self.api_key = "AIzaSyBKFAeDjQbTOczapUVLaj7L0TNi0bwD83Y"
+        self.api_key = os.environ.get('GEMINI_API_KEY', "AIzaSyAd8SqGySsek3Jud4HI6IkMArJtSnBcIUk")
         genai.configure(api_key=self.api_key)
         
         # Initialize Gemini model for comprehensive system analysis
         self.model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash-exp",  # Latest model
+            model_name="gemini-2.5-pro",  # Gemini 2.5 Pro as requested
             generation_config={
                 "temperature": 0.3,
                 "top_p": 0.9,
