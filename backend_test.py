@@ -1962,18 +1962,26 @@ class TradingSystemTester:
         self.print_summary()
 
     async def run_all_tests(self):
-        """Run all comprehensive tests"""
+        """Run FINALE TESTS nach Chat und AI-Reparaturen"""
         await self.setup()
         
-        # All test methods
-        all_tests = [
-            # NEW INTEGRATED AI CHAT SYSTEM TESTS (PRIORITY)
-            self.test_integrated_ai_chat_greeting,
-            self.test_integrated_ai_chat_btc_analysis,
-            self.test_integrated_ai_chat_portfolio_access,
-            self.test_integrated_ai_chat_system_status,
-            self.test_gemini_25_pro_integration,
-            self.test_ai_system_integration_comprehensive,
+        print("🎯 FINALE TESTS NACH CHAT UND AI-REPARATUREN")
+        print("=" * 80)
+        print("KRITISCHE VERIFIKATION:")
+        print("1. CHAT SYSTEM REPARATUR TEST - POST /api/chat")
+        print("2. AI TRADING ANALYSE REPARATUR TEST - POST /api/ai-trading/analyze") 
+        print("3. AI TRADING CHAT COMMAND REPARATUR TEST - POST /api/ai-trading/chat-command")
+        print("4. VOLLSTÄNDIGE INTEGRATION VERIFIKATION")
+        print("ERWARTETE ERGEBNISSE: ✅ KEINE 422 Errors ✅ Deutsche AI-Antworten ✅ Vollständiger Systemzugang")
+        print("=" * 80)
+        
+        # FINALE TEST METHODS - Focus on the specific repair verification
+        finale_tests = [
+            # FINALE TESTS - CHAT UND AI-REPARATUREN (PRIORITY)
+            self.test_chat_system_repair_test,
+            self.test_ai_trading_analyse_repair_test,
+            self.test_ai_trading_chat_command_repair_test,
+            self.test_vollstaendige_integration_verifikation,
             
             # Enhanced timeframe tests
             self.test_enhanced_timeframes_5m,
