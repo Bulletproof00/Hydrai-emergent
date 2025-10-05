@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 import os
+import traceback
 from google import genai
 from google.genai import types
 import pandas as pd
