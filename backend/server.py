@@ -2419,6 +2419,8 @@ async def shutdown_event():
         await smart_money.close_session()
     if enhanced_smart_money:
         await enhanced_smart_money.close_session()
+    if integrated_ai:
+        await integrated_ai.close_session()
     if exchange:
         await exchange.close()
     if redis_client:
