@@ -260,7 +260,19 @@ const TradingInterface = () => {
     };
 
     const getCurrentPrice = (symbol) => {
-        return currentPrices[symbol]?.price || 0;
+        // Try real-time price first, then fallback to position mark price
+        const realTimePrice = currentPrices[symbol]?.price;
+        if (realTimePrice && realTimePrice > 0) {
+            return realTimePrice;
+        }
+        
+        // Fallback to mark price from positions if available
+        const position = positions.find(p => p.symbol === symbol);
+        if (position && position.mark_price && position.mark_price > 0) {
+            return position.mark_price;
+        }
+        
+        return 0;
     };
 
     const calculatePositionValue = (position) => {
