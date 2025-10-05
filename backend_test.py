@@ -124,6 +124,681 @@ class TradingSystemTester:
                 'error': str(e)
             }
 
+    # ============= ENHANCED TIMEFRAME TESTS =============
+    
+    async def test_enhanced_timeframes_5m(self):
+        """Test POST /api/enhanced-smart-money/data with 5m timeframe"""
+        test_name = "Enhanced Smart Money - BTC/USDT (5m timeframe)"
+        
+        data = {"symbol": "BTC/USDT", "timeframe": "5m"}
+        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error: {data}")
+            return
+        
+        enhanced_data = data.get('data', {})
+        
+        # Check for timeframe-specific data
+        if enhanced_data.get('timeframe') == '5m' and 'liquidation_heatmap_2d' in enhanced_data:
+            heatmap_data = enhanced_data['liquidation_heatmap_2d']
+            if 'cumulative_long' in str(heatmap_data) and 'cumulative_short' in str(heatmap_data):
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"5m timeframe data with cumulative liquidation data available",
+                    "Enhanced data with 5m timeframe and cumulative data",
+                    "5m timeframe with cumulative liquidations"
+                )
+            else:
+                self.log_test(test_name, "WARN", "5m timeframe data available but missing cumulative data")
+        else:
+            self.log_test(test_name, "FAIL", f"5m timeframe data not properly structured")
+
+    async def test_enhanced_timeframes_15m(self):
+        """Test POST /api/enhanced-smart-money/data with 15m timeframe"""
+        test_name = "Enhanced Smart Money - ETH/USDT (15m timeframe)"
+        
+        data = {"symbol": "ETH/USDT", "timeframe": "15m"}
+        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error: {data}")
+            return
+        
+        enhanced_data = data.get('data', {})
+        
+        if enhanced_data.get('timeframe') == '15m':
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"15m timeframe data available for ETH/USDT",
+                "Enhanced data with 15m timeframe",
+                "15m timeframe working"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"15m timeframe not working properly")
+
+    async def test_enhanced_timeframes_1h(self):
+        """Test POST /api/enhanced-smart-money/data with 1h timeframe"""
+        test_name = "Enhanced Smart Money - BTC/USDT (1h timeframe)"
+        
+        data = {"symbol": "BTC/USDT", "timeframe": "1h"}
+        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error: {data}")
+            return
+        
+        enhanced_data = data.get('data', {})
+        
+        if enhanced_data.get('timeframe') == '1h':
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"1h timeframe data available for BTC/USDT",
+                "Enhanced data with 1h timeframe",
+                "1h timeframe working"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"1h timeframe not working properly")
+
+    async def test_enhanced_timeframes_4h(self):
+        """Test POST /api/enhanced-smart-money/data with 4h timeframe"""
+        test_name = "Enhanced Smart Money - ETH/USDT (4h timeframe)"
+        
+        data = {"symbol": "ETH/USDT", "timeframe": "4h"}
+        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error: {data}")
+            return
+        
+        enhanced_data = data.get('data', {})
+        
+        if enhanced_data.get('timeframe') == '4h':
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"4h timeframe data available for ETH/USDT",
+                "Enhanced data with 4h timeframe",
+                "4h timeframe working"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"4h timeframe not working properly")
+
+    async def test_enhanced_timeframes_8h(self):
+        """Test POST /api/enhanced-smart-money/data with 8h timeframe"""
+        test_name = "Enhanced Smart Money - BTC/USDT (8h timeframe)"
+        
+        data = {"symbol": "BTC/USDT", "timeframe": "8h"}
+        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"API returned error: {data}")
+            return
+        
+        enhanced_data = data.get('data', {})
+        
+        if enhanced_data.get('timeframe') == '8h':
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"8h timeframe data available for BTC/USDT",
+                "Enhanced data with 8h timeframe",
+                "8h timeframe working"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"8h timeframe not working properly")
+
+    async def test_cumulative_liquidation_data(self):
+        """Test that cumulative_long and cumulative_short exist in liquidation data"""
+        test_name = "Cumulative Liquidation Data Validation"
+        
+        data = {"symbol": "BTC/USDT", "timeframe": "1day"}
+        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        enhanced_data = data.get('data', {})
+        
+        if 'liquidation_heatmap_2d' in enhanced_data:
+            heatmap_data = enhanced_data['liquidation_heatmap_2d']
+            liquidation_levels = heatmap_data.get('liquidation_levels', [])
+            
+            cumulative_fields_found = 0
+            for level in liquidation_levels[:5]:  # Check first 5 levels
+                if 'cumulative_long' in level and 'cumulative_short' in level:
+                    cumulative_fields_found += 1
+            
+            if cumulative_fields_found >= 3:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Cumulative liquidation data found in {cumulative_fields_found}/5 levels",
+                    "cumulative_long and cumulative_short fields in liquidation levels",
+                    f"{cumulative_fields_found} levels with cumulative data"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"Cumulative data missing or incomplete: {cumulative_fields_found}/5 levels")
+        else:
+            self.log_test(test_name, "FAIL", "No liquidation heatmap data available")
+
+    # ============= PAPER TRADING POSITION CLOSE TESTS =============
+    
+    async def test_position_close_25_percent(self):
+        """Test POST /api/trading/position/close with 25% close"""
+        test_name = "Paper Trading - Position Close 25%"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token available")
+            return
+        
+        # First create a position
+        order_data = {
+            "symbol": "BTC/USDT",
+            "side": "buy",
+            "order_type": "market",
+            "quantity": 0.01,
+            "leverage": 10
+        }
+        
+        order_response = await self.test_api_endpoint("/trading/order", method="POST", data=order_data, auth=True)
+        
+        if not order_response['success']:
+            self.log_test(test_name, "FAIL", f"Could not create position for test: {order_response.get('error')}")
+            return
+        
+        # Get positions to find position_id
+        positions_response = await self.test_api_endpoint("/trading/positions", auth=True)
+        
+        if not positions_response['success'] or not positions_response['data']:
+            self.log_test(test_name, "FAIL", "No positions found after creating order")
+            return
+        
+        positions = positions_response['data']
+        if not positions:
+            self.log_test(test_name, "FAIL", "No positions in response")
+            return
+        
+        position_id = positions[0].get('position_id')
+        if not position_id:
+            self.log_test(test_name, "FAIL", "No position_id found in position data")
+            return
+        
+        # Close 25% of position
+        close_data = {
+            "position_id": position_id,
+            "close_percentage": 25.0
+        }
+        
+        close_response = await self.test_api_endpoint("/trading/position/close", method="POST", data=close_data, auth=True)
+        
+        if close_response['success']:
+            close_result = close_response['data']
+            if close_result.get('close_percentage') == 25.0 and 'pnl' in close_result:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"25% position close successful - PnL: ${close_result.get('net_pnl', 0):.2f}",
+                    "Partial position close with PnL calculation",
+                    f"25% closed, PnL calculated"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"Position close response incomplete: {close_result}")
+        else:
+            self.log_test(test_name, "FAIL", f"Position close failed: {close_response.get('error')}")
+
+    async def test_position_close_50_percent(self):
+        """Test POST /api/trading/position/close with 50% close"""
+        test_name = "Paper Trading - Position Close 50%"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token available")
+            return
+        
+        # Get existing positions
+        positions_response = await self.test_api_endpoint("/trading/positions", auth=True)
+        
+        if not positions_response['success'] or not positions_response['data']:
+            self.log_test(test_name, "FAIL", "No positions available for 50% close test")
+            return
+        
+        positions = positions_response['data']
+        if not positions:
+            self.log_test(test_name, "FAIL", "No positions found")
+            return
+        
+        position_id = positions[0].get('position_id')
+        
+        # Close 50% of position
+        close_data = {
+            "position_id": position_id,
+            "close_percentage": 50.0
+        }
+        
+        close_response = await self.test_api_endpoint("/trading/position/close", method="POST", data=close_data, auth=True)
+        
+        if close_response['success']:
+            close_result = close_response['data']
+            if close_result.get('close_percentage') == 50.0:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"50% position close successful - PnL: ${close_result.get('net_pnl', 0):.2f}",
+                    "50% partial position close",
+                    "50% closed successfully"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"50% close percentage not correct: {close_result}")
+        else:
+            self.log_test(test_name, "FAIL", f"50% position close failed: {close_response.get('error')}")
+
+    async def test_position_close_100_percent(self):
+        """Test POST /api/trading/position/close with 100% close (full close)"""
+        test_name = "Paper Trading - Position Close 100% (Full Close)"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token available")
+            return
+        
+        # Get existing positions
+        positions_response = await self.test_api_endpoint("/trading/positions", auth=True)
+        
+        if not positions_response['success'] or not positions_response['data']:
+            self.log_test(test_name, "FAIL", "No positions available for 100% close test")
+            return
+        
+        positions = positions_response['data']
+        if not positions:
+            self.log_test(test_name, "FAIL", "No positions found")
+            return
+        
+        position_id = positions[0].get('position_id')
+        
+        # Close 100% of position
+        close_data = {
+            "position_id": position_id,
+            "close_percentage": 100.0
+        }
+        
+        close_response = await self.test_api_endpoint("/trading/position/close", method="POST", data=close_data, auth=True)
+        
+        if close_response['success']:
+            close_result = close_response['data']
+            if close_result.get('close_percentage') == 100.0:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"100% position close successful - Final PnL: ${close_result.get('net_pnl', 0):.2f}",
+                    "Full position close",
+                    "100% closed successfully"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"100% close percentage not correct: {close_result}")
+        else:
+            self.log_test(test_name, "FAIL", f"100% position close failed: {close_response.get('error')}")
+
+    async def test_pnl_calculation_accuracy(self):
+        """Test PnL calculation accuracy and balance updates"""
+        test_name = "PnL Calculation and Balance Updates"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "No authentication token available")
+            return
+        
+        # Get account balance before
+        account_before = await self.test_api_endpoint("/trading/account", auth=True)
+        
+        if not account_before['success']:
+            self.log_test(test_name, "FAIL", "Could not get account balance before test")
+            return
+        
+        balance_before = account_before['data'].get('balance', 0)
+        
+        # Create a small position
+        order_data = {
+            "symbol": "ETH/USDT",
+            "side": "buy",
+            "order_type": "market",
+            "quantity": 0.1,
+            "leverage": 5
+        }
+        
+        order_response = await self.test_api_endpoint("/trading/order", method="POST", data=order_data, auth=True)
+        
+        if not order_response['success']:
+            self.log_test(test_name, "FAIL", f"Could not create test position: {order_response.get('error')}")
+            return
+        
+        # Wait a moment for processing
+        await asyncio.sleep(1)
+        
+        # Get account balance after
+        account_after = await self.test_api_endpoint("/trading/account", auth=True)
+        
+        if account_after['success']:
+            balance_after = account_after['data'].get('balance', 0)
+            balance_change = balance_after - balance_before
+            
+            # Check if balance changed (should be negative due to fees)
+            if abs(balance_change) > 0.01:  # At least 1 cent change
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Balance updated correctly: ${balance_before:.2f} → ${balance_after:.2f} (${balance_change:.2f})",
+                    "Accurate balance updates after trading",
+                    f"Balance change: ${balance_change:.2f}"
+                )
+            else:
+                self.log_test(test_name, "WARN", f"Balance change too small: ${balance_change:.4f}")
+        else:
+            self.log_test(test_name, "FAIL", "Could not get account balance after trade")
+
+    # ============= GEMINI AI INTEGRATION TESTS =============
+    
+    async def test_gemini_ai_btc_analysis(self):
+        """Test POST /api/ai-trading/analyze with Gemini AI for BTC/USDT"""
+        test_name = "Gemini AI Integration - BTC/USDT Analysis"
+        
+        data = {"symbol": "BTC/USDT", "context": "comprehensive_gemini_analysis"}
+        response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check for Gemini AI response structure
+        if 'recommendation' in data:
+            recommendation = data['recommendation']
+            reasoning = recommendation.get('reasoning', '') if isinstance(recommendation, dict) else ''
+            
+            # Check for comprehensive analysis (Gemini should provide detailed reasoning)
+            if len(reasoning) > 500:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Gemini AI analysis successful: {len(reasoning)} chars reasoning",
+                    "Comprehensive AI analysis with detailed reasoning",
+                    f"Analysis length: {len(reasoning)} chars"
+                )
+            else:
+                self.log_test(test_name, "WARN", f"Gemini analysis shorter than expected: {len(reasoning)} chars")
+        else:
+            self.log_test(test_name, "FAIL", "No recommendation in Gemini AI response")
+
+    async def test_gemini_ai_chat_command_long(self):
+        """Test POST /api/ai-trading/chat-command with 'Long BTC 0.1' command"""
+        test_name = "Gemini AI Chat Command - Long BTC 0.1"
+        
+        data = {"command": "Long BTC 0.1"}
+        response = await self.test_api_endpoint("/ai-trading/chat-command", method="POST", data=data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check if command was processed
+        if 'result' in data and data.get('status') == 'success':
+            result = data['result']
+            if 'BTC' in str(result) and ('long' in str(result).lower() or 'buy' in str(result).lower()):
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Chat command processed successfully: {str(result)[:100]}...",
+                    "AI processing of 'Long BTC 0.1' command",
+                    "Command processed correctly"
+                )
+            else:
+                self.log_test(test_name, "WARN", f"Command processed but result unclear: {result}")
+        else:
+            self.log_test(test_name, "FAIL", f"Chat command processing failed: {data}")
+
+    async def test_gemini_ai_response_parsing(self):
+        """Test Gemini API response parsing and JSON structure"""
+        test_name = "Gemini AI Response Parsing"
+        
+        data = {"symbol": "ETH/USDT", "context": "json_parsing_test"}
+        response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check for proper JSON structure
+        required_fields = ['symbol', 'recommendation']
+        missing_fields = [field for field in required_fields if field not in data]
+        
+        if not missing_fields:
+            recommendation = data['recommendation']
+            if isinstance(recommendation, dict) and 'action' in recommendation:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Gemini response properly parsed with action: {recommendation.get('action')}",
+                    "Proper JSON parsing of Gemini AI response",
+                    "JSON structure valid"
+                )
+            else:
+                self.log_test(test_name, "WARN", "Response parsed but recommendation structure incomplete")
+        else:
+            self.log_test(test_name, "FAIL", f"Missing fields in parsed response: {missing_fields}")
+
+    # ============= CHAT SYSTEM TESTS =============
+    
+    async def test_chat_without_auth(self):
+        """Test POST /api/chat without Auth-Header"""
+        test_name = "Chat System - No Auth Required"
+        
+        data = {"message": "Hello, can you help me with trading analysis?"}
+        response = await self.test_api_endpoint("/chat", method="POST", data=data, auth=False)
+        
+        if response['success']:
+            data = response['data']
+            if 'response' in data and len(data['response']) > 10:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Chat working without auth: {data['response'][:50]}...",
+                    "Chat system accessible without authentication",
+                    "Chat response received"
+                )
+            else:
+                self.log_test(test_name, "WARN", f"Chat response too short: {data}")
+        else:
+            self.log_test(test_name, "FAIL", f"Chat without auth failed: {response.get('error')}")
+
+    async def test_chat_response_quality(self):
+        """Test chat response quality and relevance"""
+        test_name = "Chat Response Quality"
+        
+        data = {"message": "What's the best strategy for Bitcoin trading?"}
+        response = await self.test_api_endpoint("/chat", method="POST", data=data, auth=False)
+        
+        if response['success']:
+            data = response['data']
+            chat_response = data.get('response', '')
+            
+            # Check for trading-related keywords in response
+            trading_keywords = ['bitcoin', 'btc', 'trading', 'strategy', 'market', 'analysis']
+            keyword_count = sum(1 for keyword in trading_keywords if keyword.lower() in chat_response.lower())
+            
+            if keyword_count >= 3 and len(chat_response) > 100:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Quality chat response: {keyword_count} trading keywords, {len(chat_response)} chars",
+                    "Relevant and comprehensive chat responses",
+                    f"Keywords: {keyword_count}, Length: {len(chat_response)}"
+                )
+            else:
+                self.log_test(test_name, "WARN", f"Chat response quality could be better: {keyword_count} keywords")
+        else:
+            self.log_test(test_name, "FAIL", f"Chat response quality test failed: {response.get('error')}")
+
+    # ============= ENHANCED LIQUIDATION FEATURES TESTS =============
+    
+    async def test_resistance_support_ranks(self):
+        """Test resistance_rank and support_rank in liquidation_levels"""
+        test_name = "Enhanced Liquidation - Resistance & Support Ranks"
+        
+        data = {"symbol": "BTC/USDT", "timeframe": "1day"}
+        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        enhanced_data = data.get('data', {})
+        
+        if 'liquidation_heatmap_2d' in enhanced_data:
+            heatmap_data = enhanced_data['liquidation_heatmap_2d']
+            liquidation_levels = heatmap_data.get('liquidation_levels', [])
+            
+            resistance_ranks_found = 0
+            support_ranks_found = 0
+            
+            for level in liquidation_levels[:10]:  # Check first 10 levels
+                if 'resistance_rank' in level:
+                    resistance_ranks_found += 1
+                if 'support_rank' in level:
+                    support_ranks_found += 1
+            
+            if resistance_ranks_found >= 3 or support_ranks_found >= 3:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Resistance/Support ranks found: {resistance_ranks_found} resistance, {support_ranks_found} support",
+                    "resistance_rank and support_rank fields in liquidation levels",
+                    f"Ranks found in liquidation data"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"Insufficient rank data: {resistance_ranks_found} resistance, {support_ranks_found} support")
+        else:
+            self.log_test(test_name, "FAIL", "No liquidation heatmap data available")
+
+    async def test_cluster_strength_calculation(self):
+        """Test cluster_strength calculation in liquidation levels"""
+        test_name = "Enhanced Liquidation - Cluster Strength Calculation"
+        
+        data = {"symbol": "ETH/USDT", "timeframe": "1day"}
+        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        enhanced_data = data.get('data', {})
+        
+        if 'liquidation_heatmap_2d' in enhanced_data:
+            heatmap_data = enhanced_data['liquidation_heatmap_2d']
+            liquidation_levels = heatmap_data.get('liquidation_levels', [])
+            
+            cluster_strengths_found = 0
+            strength_values = []
+            
+            for level in liquidation_levels[:10]:  # Check first 10 levels
+                if 'cluster_strength' in level:
+                    cluster_strengths_found += 1
+                    strength_values.append(level['cluster_strength'])
+            
+            if cluster_strengths_found >= 5:
+                unique_strengths = set(strength_values)
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"Cluster strength calculation working: {cluster_strengths_found} levels, {len(unique_strengths)} unique strengths",
+                    "cluster_strength field with varied values",
+                    f"Strengths: {list(unique_strengths)[:3]}"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"Insufficient cluster strength data: {cluster_strengths_found}/10 levels")
+        else:
+            self.log_test(test_name, "FAIL", "No liquidation heatmap data available")
+
+    async def test_price_impact_score_sorting(self):
+        """Test price_impact_score sorting in liquidation levels"""
+        test_name = "Enhanced Liquidation - Price Impact Score Sorting"
+        
+        data = {"symbol": "BTC/USDT", "timeframe": "1day"}
+        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        enhanced_data = data.get('data', {})
+        
+        if 'liquidation_heatmap_2d' in enhanced_data:
+            heatmap_data = enhanced_data['liquidation_heatmap_2d']
+            liquidation_levels = heatmap_data.get('liquidation_levels', [])
+            
+            impact_scores = []
+            for level in liquidation_levels[:10]:  # Check first 10 levels
+                if 'price_impact_score' in level:
+                    impact_scores.append(level['price_impact_score'])
+            
+            if len(impact_scores) >= 5:
+                # Check if scores are sorted (descending order expected)
+                is_sorted = all(impact_scores[i] >= impact_scores[i+1] for i in range(len(impact_scores)-1))
+                
+                if is_sorted:
+                    self.log_test(
+                        test_name, 
+                        "PASS", 
+                        f"Price impact scores properly sorted: {impact_scores[:3]} (descending)",
+                        "price_impact_score sorting in descending order",
+                        "Scores sorted correctly"
+                    )
+                else:
+                    self.log_test(test_name, "WARN", f"Price impact scores may not be sorted: {impact_scores[:5]}")
+            else:
+                self.log_test(test_name, "FAIL", f"Insufficient price impact score data: {len(impact_scores)}/10 levels")
+        else:
+            self.log_test(test_name, "FAIL", "No liquidation heatmap data available")
+
     # ============= REAL-TIME INTEGRATION TESTS =============
     
     async def test_realtime_latest_all_assets(self):
