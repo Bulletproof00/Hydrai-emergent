@@ -280,8 +280,7 @@ class TradingSystemTester:
         """Test that cumulative_long and cumulative_short exist in liquidation data"""
         test_name = "Cumulative Liquidation Data Validation"
         
-        data = {"symbol": "BTC/USDT", "timeframe": "1day"}
-        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        response = await self.test_api_endpoint("/enhanced-smart-money/data?symbol=BTC/USDT&timeframe=1day")
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
@@ -689,8 +688,7 @@ class TradingSystemTester:
         """Test resistance_rank and support_rank in liquidation_levels"""
         test_name = "Enhanced Liquidation - Resistance & Support Ranks"
         
-        data = {"symbol": "BTC/USDT", "timeframe": "1day"}
-        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        response = await self.test_api_endpoint("/enhanced-smart-money/data?symbol=BTC/USDT&timeframe=1day")
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
@@ -769,8 +767,7 @@ class TradingSystemTester:
         """Test price_impact_score sorting in liquidation levels"""
         test_name = "Enhanced Liquidation - Price Impact Score Sorting"
         
-        data = {"symbol": "BTC/USDT", "timeframe": "1day"}
-        response = await self.test_api_endpoint("/enhanced-smart-money/data", method="POST", data=data)
+        response = await self.test_api_endpoint("/enhanced-smart-money/data?symbol=BTC/USDT&timeframe=1day")
         
         if not response['success']:
             self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
