@@ -75,6 +75,9 @@ ai_trading = None
 # Integrated AI System
 integrated_ai = None
 
+# Self-Evolving AI System  
+self_evolving_ai = None
+
 # Create the main app without a prefix
 app = FastAPI()
 
