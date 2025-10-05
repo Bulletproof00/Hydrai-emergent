@@ -2392,6 +2392,19 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"AI Trading initialization failed: {str(e)}")
     
+    # Initialize Integrated AI System (Complete system access)
+    try:
+        global integrated_ai
+        integrated_ai = IntegratedAISystem(
+            db=db, 
+            paper_trading=paper_trading, 
+            enhanced_smart_money=enhanced_smart_money,
+            real_time_streamer=enhanced_streamer
+        )
+        logger.info("Integrated AI System initialized with full system access")
+    except Exception as e:
+        logger.warning(f"Integrated AI System initialization failed: {str(e)}")
+    
     # Start background data update task
     asyncio.create_task(update_market_data_background())
     logger.info("Background data update task started")
