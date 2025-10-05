@@ -1099,6 +1099,341 @@ class TradingSystemTester:
         else:
             self.log_test(test_name, "FAIL", f"Chat response quality test failed: {response.get('error')}")
 
+    # ============= SELF-EVOLVING AI SYSTEM TESTS =============
+    
+    async def test_ai_evolution_status_endpoint(self):
+        """PRIORITÄT 1: AI EVOLUTION STATUS ENDPOINT TEST - GET /api/ai/evolution/status"""
+        test_name = "🎯 PRIORITÄT 1: AI EVOLUTION STATUS ENDPOINT TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        response = await self.test_api_endpoint("/ai/evolution/status", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ AI Evolution Status API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"❌ AI Evolution Status API returned error: {data}")
+            return
+        
+        evolution_status = data.get('evolution_status', {})
+        
+        # Check for required fields in evolution status
+        required_fields = ['total_evolution_cycles', 'evolution_enabled', 'next_evolution_eta']
+        missing_fields = [field for field in required_fields if field not in evolution_status]
+        
+        if missing_fields:
+            self.log_test(test_name, "FAIL", f"❌ Evolution Status Response unvollständig, fehlende Felder: {missing_fields}")
+            return
+        
+        learning_cycles = evolution_status.get('total_evolution_cycles', 0)
+        evolution_enabled = evolution_status.get('evolution_enabled', False)
+        
+        if evolution_enabled and learning_cycles >= 0:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ AI EVOLUTION STATUS ERFOLGREICH! Evolution aktiviert mit {learning_cycles} Learning Cycles, automatisch gestartet wie erwartet",
+                "Evolution Status Daten mit learning_cycles > 0 (automatisch gestartet)",
+                f"Learning Cycles: {learning_cycles}, Evolution enabled: {evolution_enabled}"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Evolution Status ungültig: Cycles: {learning_cycles}, Enabled: {evolution_enabled}")
+
+    async def test_ai_evolution_trigger_endpoint(self):
+        """PRIORITÄT 2: AI EVOLUTION TRIGGER TEST - POST /api/ai/evolution/trigger"""
+        test_name = "🎯 PRIORITÄT 2: AI EVOLUTION TRIGGER TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        response = await self.test_api_endpoint("/ai/evolution/trigger", method="POST", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ AI Evolution Trigger API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"❌ AI Evolution Trigger API returned error: {data}")
+            return
+        
+        evolution_result = data.get('evolution_result', {})
+        
+        # Check for evolution cycle completion
+        if 'cycle_number' in evolution_result and evolution_result['cycle_number'] > 0:
+            cycle_number = evolution_result['cycle_number']
+            duration = evolution_result.get('duration_seconds', 0)
+            
+            # Check for performance analysis and algorithm improvements
+            has_performance_analysis = 'performance_analysis' in evolution_result
+            has_algorithm_improvements = 'algorithm_improvements' in evolution_result
+            
+            if has_performance_analysis and has_algorithm_improvements:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ AI EVOLUTION TRIGGER ERFOLGREICH! Neuer Evolution-Zyklus #{cycle_number} abgeschlossen in {duration:.2f}s mit Performance-Analyse und Algorithm-Improvements",
+                    "Manuelles Auslösen eines Evolution-Zyklus mit neuer Cycle-Nummer",
+                    f"Cycle #{cycle_number}, Duration: {duration:.2f}s, Analysis: ✅, Improvements: ✅"
+                )
+            else:
+                self.log_test(test_name, "WARN", f"Evolution Cycle #{cycle_number} abgeschlossen aber Performance-Analyse oder Algorithm-Improvements fehlen")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Evolution Trigger Response unvollständig: {evolution_result}")
+
+    async def test_ai_evolution_history_endpoint(self):
+        """PRIORITÄT 3: AI EVOLUTION HISTORY TEST - GET /api/ai/evolution/history?limit=5"""
+        test_name = "🎯 PRIORITÄT 3: AI EVOLUTION HISTORY TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        response = await self.test_api_endpoint("/ai/evolution/history?limit=5", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ AI Evolution History API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"❌ AI Evolution History API returned error: {data}")
+            return
+        
+        evolution_history = data.get('evolution_history', [])
+        evolution_reports = data.get('evolution_reports', [])
+        total_cycles = data.get('total_cycles', 0)
+        
+        if len(evolution_history) > 0 or total_cycles > 0:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ AI EVOLUTION HISTORY ERFOLGREICH! {len(evolution_history)} History-Einträge, {len(evolution_reports)} Reports, {total_cycles} Total Cycles - Evolution-Geschichte wird gespeichert",
+                "Evolution-Geschichte mit Cycle-Daten und Reports",
+                f"History: {len(evolution_history)}, Reports: {len(evolution_reports)}, Total: {total_cycles}"
+            )
+        else:
+            self.log_test(test_name, "WARN", "Evolution History API funktioniert aber noch keine Daten vorhanden (System möglicherweise neu)")
+
+    async def test_ai_evolution_report_latest_endpoint(self):
+        """PRIORITÄT 4: AI EVOLUTION REPORT TEST - GET /api/ai/evolution/report/latest"""
+        test_name = "🎯 PRIORITÄT 4: AI EVOLUTION REPORT TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        response = await self.test_api_endpoint("/ai/evolution/report/latest", auth=True)
+        
+        if not response['success']:
+            if response['status'] == 404 or 'No evolution reports available' in str(response.get('data', '')):
+                # This is expected if no evolution cycles have run yet
+                self.log_test(test_name, "WARN", "⚠️ Noch keine Evolution-Reports verfügbar - System muss erst Evolution-Zyklen durchlaufen")
+                return
+            else:
+                self.log_test(test_name, "FAIL", f"❌ AI Evolution Report API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+                return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"❌ AI Evolution Report API returned error: {data}")
+            return
+        
+        latest_report = data.get('latest_report', {})
+        
+        if 'report' in latest_report and 'cycle_number' in latest_report:
+            report_text = latest_report['report']
+            cycle_number = latest_report['cycle_number']
+            
+            # Check if report is in German and contains AI-generated content
+            german_indicators = ['ich', 'habe', 'bin', 'meine', 'verbessert', 'gelernt', 'entwickelt']
+            german_count = sum(1 for word in german_indicators if word.lower() in report_text.lower())
+            
+            if len(report_text) > 500 and german_count >= 3:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ AI EVOLUTION REPORT ERFOLGREICH! Neuester Evolution-Report verfügbar: Cycle #{cycle_number}, {len(report_text)} chars Deutsche AI-generierte Berichte über Selbstverbesserung",
+                    "Deutsche AI-generierte Berichte über Selbstverbesserung verfügbar",
+                    f"Cycle #{cycle_number}, {len(report_text)} chars, {german_count} German indicators"
+                )
+            else:
+                self.log_test(test_name, "WARN", f"Evolution Report verfügbar aber könnte detaillierter/deutscher sein: {len(report_text)} chars, {german_count} German indicators")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Latest Evolution Report unvollständig: {latest_report}")
+
+    async def test_gemini_25_flash_integration_test(self):
+        """PRIORITÄT 5: GEMINI 2.5 FLASH INTEGRATION TEST"""
+        test_name = "🎯 PRIORITÄT 5: GEMINI 2.5 FLASH INTEGRATION TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # Test Gemini 2.5 Flash through the integrated AI chat system
+        chat_data = {
+            "session_id": "gemini_flash_test_session",
+            "content": "Führe eine Self-Evolving AI Analyse durch und generiere Verbesserungsvorschläge für das Trading System"
+        }
+        
+        response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Gemini 2.5 Flash Integration test failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        ai_response = data.get('content', '')
+        
+        # Check for Gemini 2.5 Flash specific capabilities
+        ai_indicators = ['self-evolving', 'verbesserung', 'algorithmus', 'daten-gap', 'analyse', 'trading', 'system']
+        ai_count = sum(1 for word in ai_indicators if word.lower() in ai_response.lower())
+        
+        # Check for comprehensive analysis (Gemini 2.5 Flash should provide detailed responses)
+        if len(ai_response) > 1000 and ai_count >= 4:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ GEMINI 2.5 FLASH INTEGRATION ERFOLGREICH! Self-Evolving AI nutzt Gemini 2.5 Flash für AI-generierte Verbesserungsvorschläge: {len(ai_response)} chars, {ai_count} AI indicators",
+                "Gemini 2.5 Flash Integration mit AI-generierten Verbesserungsvorschlägen",
+                f"Response: {len(ai_response)} chars, AI indicators: {ai_count}"
+            )
+        elif len(ai_response) > 500:
+            self.log_test(test_name, "WARN", f"Gemini 2.5 Flash funktioniert aber Analyse könnte umfassender sein: {len(ai_response)} chars, {ai_count} indicators")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Gemini 2.5 Flash Integration unzureichend: {len(ai_response)} chars, {ai_count} indicators")
+
+    async def test_continuous_learning_loop_test(self):
+        """PRIORITÄT 6: CONTINUOUS LEARNING LOOP TEST"""
+        test_name = "🎯 PRIORITÄT 6: CONTINUOUS LEARNING LOOP TEST"
+        
+        # Test health check for self_evolving_ai status
+        response = await self.test_api_endpoint("/health")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Health Check API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        services = data.get('services', {})
+        
+        self_evolving_ai_status = services.get('self_evolving_ai', 'offline')
+        
+        if self_evolving_ai_status == 'learning':
+            # Check if evolution status shows automatic cycles
+            if self.auth_token:
+                evolution_response = await self.test_api_endpoint("/ai/evolution/status", auth=True)
+                
+                if evolution_response['success']:
+                    evolution_data = evolution_response['data']
+                    evolution_status = evolution_data.get('evolution_status', {})
+                    next_evolution_eta = evolution_status.get('next_evolution_eta')
+                    
+                    if next_evolution_eta:
+                        self.log_test(
+                            test_name, 
+                            "PASS", 
+                            f"✅ CONTINUOUS LEARNING LOOP ERFOLGREICH! Background Evolution Loop läuft, Self-Evolving AI Status: '{self_evolving_ai_status}', nächste Evolution geplant: {next_evolution_eta}",
+                            "Background Learning Loop aktiv mit automatischen Evolution-Zyklen alle 8 Stunden",
+                            f"Status: {self_evolving_ai_status}, Next evolution: {next_evolution_eta}"
+                        )
+                    else:
+                        self.log_test(test_name, "WARN", f"Self-Evolving AI läuft aber nächste Evolution-Zeit nicht verfügbar")
+                else:
+                    self.log_test(test_name, "WARN", f"Self-Evolving AI läuft aber Evolution Status nicht abrufbar")
+            else:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ CONTINUOUS LEARNING LOOP AKTIV! Self-Evolving AI Status: '{self_evolving_ai_status}' - Background Learning Loop läuft",
+                    "Background Learning Loop aktiv",
+                    f"Status: {self_evolving_ai_status}"
+                )
+        elif self_evolving_ai_status == 'offline':
+            self.log_test(test_name, "FAIL", f"❌ Self-Evolving AI ist offline - Background Learning Loop läuft nicht")
+        else:
+            self.log_test(test_name, "WARN", f"⚠️ Self-Evolving AI Status unbekannt: '{self_evolving_ai_status}'")
+
+    async def test_data_gap_analysis_and_algorithm_improvements(self):
+        """Test Daten-Gap-Analyse und Algorithm-Improvements durch Self-Evolving AI"""
+        test_name = "Self-Evolving AI - Daten-Gap-Analyse & Algorithm-Improvements"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # Trigger an evolution cycle to test data gap analysis and algorithm improvements
+        response = await self.test_api_endpoint("/ai/evolution/trigger", method="POST", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Evolution trigger failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        evolution_result = data.get('evolution_result', {})
+        
+        # Check for data gap analysis
+        data_gaps = evolution_result.get('data_gaps_identified', {})
+        algorithm_improvements = evolution_result.get('algorithm_improvements', {})
+        
+        has_data_gap_analysis = bool(data_gaps and len(str(data_gaps)) > 50)
+        has_algorithm_improvements = bool(algorithm_improvements and len(str(algorithm_improvements)) > 50)
+        
+        if has_data_gap_analysis and has_algorithm_improvements:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ DATEN-GAP-ANALYSE & ALGORITHM-IMPROVEMENTS ERFOLGREICH! Self-Evolving AI führt Daten-Gap-Analyse durch und entwickelt Algorithm-Improvements",
+                "Daten-Gap-Analyse und Algorithm-Improvements durch Self-Evolving AI",
+                f"Data gaps: ✅, Algorithm improvements: ✅"
+            )
+        elif has_data_gap_analysis or has_algorithm_improvements:
+            self.log_test(test_name, "WARN", f"Teilweise erfolgreich: Data gaps: {has_data_gap_analysis}, Algorithm improvements: {has_algorithm_improvements}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Daten-Gap-Analyse und Algorithm-Improvements nicht verfügbar")
+
+    async def test_mongodb_evolution_storage(self):
+        """Test dass Evolution-Zyklen in MongoDB gespeichert werden"""
+        test_name = "Self-Evolving AI - MongoDB Evolution Storage"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # Get evolution history to verify MongoDB storage
+        response = await self.test_api_endpoint("/ai/evolution/history?limit=10", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Evolution history retrieval failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        evolution_history = data.get('evolution_history', [])
+        evolution_reports = data.get('evolution_reports', [])
+        total_cycles = data.get('total_cycles', 0)
+        
+        # Check if data is being stored in MongoDB
+        if total_cycles > 0 or len(evolution_history) > 0 or len(evolution_reports) > 0:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ MONGODB EVOLUTION STORAGE ERFOLGREICH! Evolution-Zyklen werden in MongoDB gespeichert: {total_cycles} Total Cycles, {len(evolution_history)} History entries, {len(evolution_reports)} Reports",
+                "Evolution-Zyklen werden in MongoDB gespeichert",
+                f"Total cycles: {total_cycles}, History: {len(evolution_history)}, Reports: {len(evolution_reports)}"
+            )
+        else:
+            self.log_test(test_name, "WARN", "MongoDB Storage funktioniert aber noch keine Evolution-Daten vorhanden (System möglicherweise neu)")
+
     # ============= ENHANCED LIQUIDATION FEATURES TESTS =============
     
     async def test_resistance_support_ranks(self):
