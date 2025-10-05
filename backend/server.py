@@ -2126,6 +2126,128 @@ async def execute_chat_trading_command(
         logging.error(f"AI chat command error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# ================================
+# SELF-EVOLVING AI ENDPOINTS
+# ================================
+
+@api_router.get("/ai/evolution/status")
+async def get_evolution_status(authorization: str = Header(...)):
+    """Get current AI evolution status and progress"""
+    try:
+        user = await get_current_user(authorization)
+        
+        if not self_evolving_ai:
+            return {
+                'status': 'error',
+                'message': 'Self-Evolving AI system not initialized'
+            }
+        
+        evolution_status = await self_evolving_ai.get_evolution_status()
+        
+        return {
+            'status': 'success',
+            'evolution_status': evolution_status,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Evolution status error: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+
+@api_router.post("/ai/evolution/trigger")
+async def trigger_evolution_cycle(authorization: str = Header(...)):
+    """Manually trigger an AI evolution cycle"""
+    try:
+        user = await get_current_user(authorization)
+        
+        if not self_evolving_ai:
+            return {
+                'status': 'error',
+                'message': 'Self-Evolving AI system not initialized'
+            }
+        
+        # Trigger evolution cycle
+        evolution_result = await self_evolving_ai.start_evolution_cycle()
+        
+        return {
+            'status': 'success',
+            'evolution_result': evolution_result,
+            'message': f'Evolution cycle #{evolution_result.get("cycle_number")} completed',
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Manual evolution trigger error: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+
+@api_router.get("/ai/evolution/history")
+async def get_evolution_history(
+    limit: int = 10,
+    authorization: str = Header(...)
+):
+    """Get AI evolution history and reports"""
+    try:
+        user = await get_current_user(authorization)
+        
+        # Get evolution history
+        evolution_history = await db.ai_evolution_history.find().sort("timestamp", -1).limit(limit).to_list(limit)
+        
+        # Get evolution reports
+        evolution_reports = await db.ai_evolution_reports.find().sort("timestamp", -1).limit(limit).to_list(limit)
+        
+        return {
+            'status': 'success',
+            'evolution_history': evolution_history,
+            'evolution_reports': evolution_reports,
+            'total_cycles': await db.ai_evolution_history.count_documents({}),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Evolution history error: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+
+@api_router.get("/ai/evolution/report/latest")
+async def get_latest_evolution_report(authorization: str = Header(...)):
+    """Get the latest AI evolution report"""
+    try:
+        user = await get_current_user(authorization)
+        
+        # Get latest evolution report
+        latest_report = await db.ai_evolution_reports.find().sort("timestamp", -1).limit(1).to_list(1)
+        
+        if not latest_report:
+            return {
+                'status': 'error',
+                'message': 'No evolution reports available yet'
+            }
+        
+        return {
+            'status': 'success',
+            'latest_report': latest_report[0],
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Latest evolution report error: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+
 @api_router.post("/ai-trading/learn")
 async def ai_learn_from_interaction(
     interaction_data: dict,
