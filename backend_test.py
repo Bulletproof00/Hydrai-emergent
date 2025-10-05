@@ -1916,10 +1916,129 @@ class TradingSystemTester:
         
         print("=" * 80)
 
+    async def run_integrated_ai_chat_tests(self):
+        """Run focused tests on the NEW INTEGRATED AI CHAT SYSTEM"""
+        await self.setup()
+        
+        print("🚀 TESTING NEW INTEGRATED AI CHAT SYSTEM")
+        print("=" * 80)
+        print("🎯 PRIORITY TESTS: Integrated AI Chat with Gemini 2.5 Pro")
+        print("🎯 FOCUS: Fix 422 Unprocessable Entity errors")
+        print("🎯 DEMO USER: demo@example.com/demo123")
+        print("=" * 80)
+        
+        # Priority tests for the new integrated AI chat system
+        priority_tests = [
+            self.test_integrated_ai_chat_greeting,
+            self.test_integrated_ai_chat_btc_analysis,
+            self.test_integrated_ai_chat_portfolio_access,
+            self.test_integrated_ai_chat_system_status,
+            self.test_gemini_25_pro_integration,
+            self.test_ai_system_integration_comprehensive
+        ]
+        
+        print("🔥 RUNNING PRIORITY TESTS FOR NEW INTEGRATED AI CHAT SYSTEM:")
+        print()
+        
+        for test_func in priority_tests:
+            try:
+                await test_func()
+            except Exception as e:
+                test_name = test_func.__name__.replace('test_', '').replace('_', ' ').title()
+                self.log_test(test_name, "FAIL", f"Test execution error: {str(e)}")
+        
+        await self.cleanup()
+        await self.print_summary()
+
+    async def run_all_tests(self):
+        """Run all comprehensive tests"""
+        await self.setup()
+        
+        # All test methods
+        all_tests = [
+            # NEW INTEGRATED AI CHAT SYSTEM TESTS (PRIORITY)
+            self.test_integrated_ai_chat_greeting,
+            self.test_integrated_ai_chat_btc_analysis,
+            self.test_integrated_ai_chat_portfolio_access,
+            self.test_integrated_ai_chat_system_status,
+            self.test_gemini_25_pro_integration,
+            self.test_ai_system_integration_comprehensive,
+            
+            # Enhanced timeframe tests
+            self.test_enhanced_timeframes_5m,
+            self.test_enhanced_timeframes_15m,
+            self.test_enhanced_timeframes_1h,
+            self.test_enhanced_timeframes_4h,
+            self.test_enhanced_timeframes_8h,
+            self.test_cumulative_liquidation_data,
+            
+            # Paper trading tests
+            self.test_position_close_25_percent,
+            self.test_position_close_50_percent,
+            self.test_position_close_100_percent,
+            self.test_pnl_calculation_accuracy,
+            
+            # Gemini AI tests
+            self.test_gemini_ai_btc_analysis,
+            self.test_gemini_ai_chat_command_long,
+            self.test_gemini_ai_response_parsing,
+            
+            # Chat system tests
+            self.test_chat_without_auth,
+            self.test_chat_response_quality,
+            
+            # Enhanced liquidation tests
+            self.test_resistance_support_ranks,
+            self.test_cluster_strength_calculation,
+            self.test_price_impact_score_sorting,
+            
+            # Real-time integration tests
+            self.test_realtime_latest_all_assets,
+            self.test_realtime_live_prices_verification,
+            self.test_smart_money_extended_assets,
+            
+            # AI trading engine tests
+            self.test_ai_trading_analyze_btc,
+            self.test_ai_trading_analyze_eth_with_context,
+            self.test_ai_trading_chat_commands,
+            
+            # Enhanced smart money tests
+            self.test_enhanced_smart_money_avax_1day,
+            self.test_enhanced_smart_money_link_3day,
+            self.test_enhanced_smart_money_dot_1week,
+            self.test_enhanced_smart_money_top30_support,
+            
+            # Integration tests
+            self.test_paper_trading_with_live_prices,
+            self.test_ai_trading_with_realtime_data,
+            self.test_cross_module_communication,
+            
+            # Performance tests
+            self.test_gemini_api_integration,
+            self.test_all_30_crypto_assets_availability,
+            self.test_system_stability_under_load
+        ]
+        
+        print(f"🚀 Running {len(all_tests)} comprehensive tests...")
+        print()
+        
+        for test_func in all_tests:
+            try:
+                await test_func()
+            except Exception as e:
+                test_name = test_func.__name__.replace('test_', '').replace('_', ' ').title()
+                self.log_test(test_name, "FAIL", f"Test execution error: {str(e)}")
+        
+        await self.cleanup()
+        await self.print_summary()
+
 async def main():
-    """Main test runner"""
+    """Main test runner - Focus on NEW INTEGRATED AI CHAT SYSTEM"""
     tester = TradingSystemTester()
-    await tester.run_all_tests()
+    
+    # Run focused tests on the new integrated AI chat system
+    print("🎯 RUNNING FOCUSED TESTS ON NEW INTEGRATED AI CHAT SYSTEM")
+    await tester.run_integrated_ai_chat_tests()
 
 if __name__ == "__main__":
     asyncio.run(main())
