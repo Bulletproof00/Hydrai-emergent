@@ -18,6 +18,7 @@ import json
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import pandas as pd
 import numpy as np
+import traceback
 from ta.momentum import RSIIndicator, StochasticOscillator, StochRSIIndicator
 from ta.volume import MFIIndicator, OnBalanceVolumeIndicator, VolumeWeightedAveragePrice
 from ta.volatility import BollingerBands
