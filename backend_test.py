@@ -2120,12 +2120,12 @@ class TradingSystemTester:
         self.print_finale_summary()
 
 async def main():
-    """Main test runner - Focus on NEW INTEGRATED AI CHAT SYSTEM"""
+    """Main test runner - FINALE TESTS nach Chat und AI-Reparaturen"""
     tester = TradingSystemTester()
     
-    # Run focused tests on the new integrated AI chat system
-    print("🎯 RUNNING FOCUSED TESTS ON NEW INTEGRATED AI CHAT SYSTEM")
-    await tester.run_integrated_ai_chat_tests()
+    # Run FINALE TESTS to verify 422 error fixes
+    print("🎯 RUNNING FINALE TESTS NACH CHAT UND AI-REPARATUREN")
+    await tester.run_all_tests()
 
 if __name__ == "__main__":
     asyncio.run(main())
