@@ -633,8 +633,8 @@ class TradingSystemTester:
         """Test POST /api/chat without Auth-Header"""
         test_name = "Chat System - No Auth Required"
         
-        data = {"message": "Hello, can you help me with trading analysis?"}
-        response = await self.test_api_endpoint("/chat", method="POST", data=data, auth=False)
+        data = {"session_id": "test_session", "content": "Hello, can you help me with trading analysis?"}
+        response = await self.test_api_endpoint("/chat", method="POST", data=data, auth=True)
         
         if response['success']:
             data = response['data']
