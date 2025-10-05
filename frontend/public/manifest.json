@@ -1,0 +1,51 @@
+{
+  "short_name": "Lunara AI",
+  "name": "Lunara Analyze AI - Advanced Trading Platform",
+  "description": "Professional cryptocurrency trading platform with AI-powered analysis, real-time data, and smart money insights",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#10b981",
+  "background_color": "#0a0e1a",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Chat with AI",
+      "short_name": "Chat",
+      "description": "Start AI-powered trading analysis",
+      "url": "/?view=chat",
+      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Paper Trading",
+      "short_name": "Trading",
+      "description": "Access paper trading interface",
+      "url": "/?view=trading",
+      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Smart Money",
+      "short_name": "Smart Money",
+      "description": "View smart money indicators",
+      "url": "/?view=smartmoney",
+      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+    }
+  ]
+}
