@@ -26,21 +26,21 @@
       "short_name": "Chat",
       "description": "Start AI-powered trading analysis",
       "url": "/?view=chat",
-      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
     },
     {
       "name": "Paper Trading",
       "short_name": "Trading",
       "description": "Access paper trading interface",
       "url": "/?view=trading",
-      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
     },
     {
       "name": "Smart Money",
       "short_name": "Smart Money",
       "description": "View smart money indicators",
       "url": "/?view=smartmoney",
-      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
     }
   ]
 }
