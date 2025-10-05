@@ -2066,7 +2066,7 @@ async def analyze_trading_opportunity(
         
         return {
             'status': 'success',
-            'symbol': symbol,
+            'symbol': request.symbol,
             'recommendation': {
                 'action': recommendation.action,
                 'confidence': recommendation.confidence,
