@@ -90,6 +90,7 @@ const TradingInterface = () => {
             if (symbolList) {
                 const response = await axios.get(`${BACKEND_URL}/api/realtime/latest?symbols=${symbolList}`);
                 if (response.data.status === 'success') {
+                    console.log('Real-time prices received:', response.data.data);
                     setCurrentPrices(response.data.data);
                     
                     // Update positions with current prices for real-time PnL
@@ -99,6 +100,13 @@ const TradingInterface = () => {
                             current_price: response.data.data[position.symbol]?.price || position.mark_price
                         }))
                     );
+                }
+            } else {
+                // If no symbols loaded, try to get BTC price directly
+                const response = await axios.get(`${BACKEND_URL}/api/realtime/latest`);
+                if (response.data.status === 'success') {
+                    console.log('All real-time prices received:', response.data.data);
+                    setCurrentPrices(response.data.data);
                 }
             }
         } catch (err) {
