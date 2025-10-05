@@ -238,7 +238,7 @@ function App() {
         <div className="sidebar-header">
           <div className="logo">
             <Brain className="logo-icon" />
-            <span>HYDRA AI</span>
+            <span>LUNARA ANALYZE AI</span>
           </div>
           <div className="user-info">
             <span className="username">{user?.username}</span>
