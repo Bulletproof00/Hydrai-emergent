@@ -72,29 +72,22 @@ class AITradingEngine:
         self.paper_trading = paper_trading_engine
         self.smart_money = enhanced_smart_money
         
-        # Initialize Gemini API
-        self.api_key = "AIzaSyBKFAeDjQbTOczapUVLaj7L0TNi0bwD83Y"
-        genai.configure(api_key=self.api_key)
+        # Initialize Gemini API with new SDK
+        self.api_key = os.environ.get('GEMINI_API_KEY', "AIzaSyAd8SqGySsek3Jud4HI6IkMArJtSnBcIUk")
+        os.environ['GEMINI_API_KEY'] = self.api_key  # Set environment variable for client
         
-        # Initialize Gemini model with custom settings for trading
-        self.model = genai.GenerativeModel(
-            model_name="gemini-2.5-pro",
-            generation_config={
-                "temperature": 0.2,  # Lower temperature for more consistent trading decisions
-                "top_p": 0.8,
-                "top_k": 40,
-                "max_output_tokens": 4000,
-            },
-            safety_settings=[
-                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-            ]
+        # Initialize Gemini client with new API
+        self.client = genai.Client()
+        self.model_name = "gemini-2.5-flash"  # Using new recommended model
+        
+        # Generation config for new API
+        self.generation_config = types.GenerateContentConfig(
+            temperature=0.2,  # Lower temperature for more consistent trading decisions
+            top_p=0.8,
+            top_k=40,
+            max_output_tokens=4000,
+            thinking_config=types.ThinkingConfig(thinking_budget=0)  # Disable thinking for speed
         )
-        
-        # Chat session for continuous learning
-        self.chat_session = self.model.start_chat(history=[])
         
         # Trading strategies database
         self.strategies = {}
