@@ -209,45 +209,46 @@ class TradingSystemTester:
         else:
             self.log_test(test_name, "FAIL", f"❌ AI Analyse Response unvollständig: {data}")
 
-    async def test_integrated_ai_chat_portfolio_access(self):
-        """Test NEW INTEGRATED AI CHAT SYSTEM - Paper Trading Portfolio Access"""
-        test_name = "NEW INTEGRATED AI CHAT - Paper Trading Portfolio Access"
+    async def test_ai_trading_chat_command_repair_test(self):
+        """FINALE TEST 3: AI TRADING CHAT COMMAND REPARATUR TEST - POST /api/ai-trading/chat-command"""
+        test_name = "🎯 FINALE TEST 3: AI TRADING CHAT COMMAND REPARATUR"
         
         if not self.auth_token:
-            self.log_test(test_name, "FAIL", "No authentication token available")
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
             return
         
-        chat_data = {
-            "session_id": "demo_test_session", 
-            "content": "Zeige mir mein Trading-Portfolio"
+        command_data = {
+            "command": "analyze BTC"
         }
         
-        response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
+        response = await self.test_api_endpoint("/ai-trading/chat-command", method="POST", data=command_data, auth=True)
         
-        if not response['success']:
-            if response['status'] == 422:
-                self.log_test(test_name, "FAIL", f"❌ 422 ERROR PERSISTS! {response.get('error', 'Unknown error')}")
-            else:
-                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+        if response['status'] == 422:
+            self.log_test(test_name, "FAIL", f"❌ KRITISCHER FEHLER: 422 UNPROCESSABLE ENTITY ERROR BEI AI TRADING CHAT COMMAND! Das war der Hauptfehler der behoben werden sollte! Error: {response.get('error', 'Unknown error')}")
+            return
+        elif not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ AI Trading Chat Command API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
             return
         
         data = response['data']
-        ai_response = data.get('content', '')
         
-        # Check for portfolio data access
-        portfolio_indicators = ['balance', 'position', 'portfolio', 'trading', 'account', 'pnl', 'gewinn', 'verlust']
-        portfolio_count = sum(1 for word in portfolio_indicators if word.lower() in ai_response.lower())
-        
-        if len(ai_response) > 200 and portfolio_count >= 3:
-            self.log_test(
-                test_name, 
-                "PASS", 
-                f"✅ AI HAS PORTFOLIO ACCESS! {len(ai_response)} chars, {portfolio_count} portfolio indicators",
-                "AI can access and analyze user's paper trading data",
-                f"Portfolio analysis: {len(ai_response)} chars, {portfolio_count} indicators"
-            )
+        # Check for successful command processing
+        if 'result' in data and data.get('status') == 'success':
+            result = data.get('result', '')
+            command_processed = 'btc' in str(result).lower() or 'bitcoin' in str(result).lower()
+            
+            if command_processed:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ AI TRADING CHAT COMMAND REPARATUR ERFOLGREICH! KEINE 422 Errors, erfolgreiche Command-Verarbeitung: {str(result)[:100]}...",
+                    "KEINE 422 Errors, erfolgreiche Command-Verarbeitung",
+                    f"✅ SUCCESS: Command processed, NO 422 ERROR!"
+                )
+            else:
+                self.log_test(test_name, "WARN", f"⚠️ Command verarbeitet aber Ergebnis unklar: {result}")
         else:
-            self.log_test(test_name, "WARN", f"Limited portfolio access: {len(ai_response)} chars, {portfolio_count} indicators")
+            self.log_test(test_name, "FAIL", f"❌ Chat Command Processing failed: {data}")
 
     async def test_integrated_ai_chat_system_status(self):
         """Test NEW INTEGRATED AI CHAT SYSTEM - System Status Monitoring"""
