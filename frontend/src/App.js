@@ -158,10 +158,14 @@ function App() {
     setLoading(true);
 
     try {
+      // Get authentication token
+      const token = localStorage.getItem('token');
+      const headers = { 'Authorization': `Bearer ${token}` };
+      
       const response = await axios.post(`${API}/chat`, {
         session_id: sessionId,
         content: input
-      });
+      }, { headers });
 
       setMessages(prev => [...prev, {
         role: "assistant",
