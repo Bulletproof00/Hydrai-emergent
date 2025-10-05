@@ -281,13 +281,29 @@ Provide professional, actionable insights based on all available data.
         return prompt
 
     async def _query_gemini_async(self, prompt: str) -> str:
-        """Query Gemini API asynchronously"""
+        """Query Gemini API asynchronously with new SDK"""
         try:
             loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(None, self.chat_session.send_message, prompt)
-            return response.text
+            
+            # Use new Gemini API structure
+            def make_gemini_request():
+                return self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt,
+                    config=self.generation_config
+                )
+            
+            response = await loop.run_in_executor(None, make_gemini_request)
+            
+            if response and hasattr(response, 'text') and response.text:
+                return response.text
+            else:
+                logger.warning("Empty response from Gemini API")
+                return "Error: Empty response from AI"
+                
         except Exception as e:
             logger.error(f"Error querying Gemini API: {e}")
+            logger.error(f"Gemini API traceback: {traceback.format_exc()}")
             return "Error: Could not get AI analysis"
 
     async def _parse_ai_recommendation(self, ai_response: str, symbol: str, market_context: MarketContext) -> TradingRecommendation:
