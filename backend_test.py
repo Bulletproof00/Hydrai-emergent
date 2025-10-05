@@ -34,38 +34,38 @@ class TradingSystemTester:
         await self.setup_test_user()
     
     async def setup_test_user(self):
-        """Setup test user for authenticated endpoints"""
+        """Setup test user for authenticated endpoints - using demo user as requested"""
         try:
-            # Try to login with existing test user
+            # Try to login with demo user as requested in the test requirements
             login_data = {
-                "email": "trader@example.com",
-                "password": "password123"
+                "email": "demo@example.com",
+                "password": "demo123"
             }
             
             async with self.session.post(f"{BACKEND_URL}/auth/login", json=login_data) as response:
                 if response.status == 200:
                     data = await response.json()
                     self.auth_token = data.get('access_token')
-                    print("✅ Logged in with existing test user")
+                    print("✅ Logged in with demo user (demo@example.com)")
                     return
                     
-            # If login fails, register new user
+            # If demo user doesn't exist, register it
             register_data = {
-                "email": "trader@example.com",
-                "username": "testtrader",
-                "password": "password123"
+                "email": "demo@example.com",
+                "username": "demouser",
+                "password": "demo123"
             }
             
             async with self.session.post(f"{BACKEND_URL}/auth/register", json=register_data) as response:
                 if response.status == 200:
                     data = await response.json()
                     self.auth_token = data.get('access_token')
-                    print("✅ Registered new test user")
+                    print("✅ Registered demo user (demo@example.com)")
                 else:
-                    print("⚠️ Could not setup test user - some tests may fail")
+                    print("⚠️ Could not setup demo user - some tests may fail")
                     
         except Exception as e:
-            print(f"⚠️ Error setting up test user: {e}")
+            print(f"⚠️ Error setting up demo user: {e}")
     
     async def cleanup(self):
         """Clean up test session"""
