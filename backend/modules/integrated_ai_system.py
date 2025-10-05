@@ -22,25 +22,21 @@ class IntegratedAISystem:
         self.smart_money = enhanced_smart_money
         self.real_time_streamer = real_time_streamer
         
-        # Initialize Gemini API
+        # Initialize Gemini API with new SDK
         self.api_key = os.environ.get('GEMINI_API_KEY', "AIzaSyAd8SqGySsek3Jud4HI6IkMArJtSnBcIUk")
-        genai.configure(api_key=self.api_key)
+        os.environ['GEMINI_API_KEY'] = self.api_key  # Set environment variable for client
         
-        # Initialize Gemini model for comprehensive system analysis
-        self.model = genai.GenerativeModel(
-            model_name="gemini-2.5-pro",  # Gemini 2.5 Pro as requested
-            generation_config={
-                "temperature": 0.3,
-                "top_p": 0.9,
-                "top_k": 40,
-                "max_output_tokens": 8000,  # Increased for detailed analysis
-            },
-            safety_settings=[
-                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"}, 
-                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-            ]
+        # Initialize Gemini client with new API
+        self.client = genai.Client()
+        self.model_name = "gemini-2.5-flash"  # Using new recommended model
+        
+        # Generation config for new API
+        self.generation_config = types.GenerateContentConfig(
+            temperature=0.3,
+            top_p=0.9,
+            top_k=40,
+            max_output_tokens=8000,
+            thinking_config=types.ThinkingConfig(thinking_budget=0)  # Disable thinking for speed
         )
         
         # System monitoring and analysis cache
