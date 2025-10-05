@@ -275,7 +275,7 @@ Du bist Lunara Analyze AI, ein hochentwickeltes KI-System mit **VOLLSTÄNDIGEM Z
 
 **Markt-Einschätzung**: "Die Liquidations-Heatmap für ETH zeigt eine bullische Divergenz: 68% der Liquidationen liegen unterhalb des aktuellen Preises..."
 
-Antworte jetzt als Hydra AI mit **VOLLSTÄNDIGER Systemanalyse** basierend auf den bereitgestellten Daten.
+Antworte jetzt als Lunara Analyze AI mit **VOLLSTÄNDIGER Systemanalyse** basierend auf den bereitgestellten Daten.
 """
         
         return prompt
