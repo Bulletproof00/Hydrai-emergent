@@ -166,45 +166,48 @@ class TradingSystemTester:
         else:
             self.log_test(test_name, "WARN", f"⚠️ Chat funktioniert aber Antwort könnte besser sein: {len(ai_response)} chars, {german_count} German indicators")
 
-    async def test_integrated_ai_chat_btc_analysis(self):
-        """Test NEW INTEGRATED AI CHAT SYSTEM - BTC Trading Analysis"""
-        test_name = "NEW INTEGRATED AI CHAT - BTC Trading Analysis"
+    async def test_ai_trading_analyse_repair_test(self):
+        """FINALE TEST 2: AI TRADING ANALYSE REPARATUR TEST - POST /api/ai-trading/analyze"""
+        test_name = "🎯 FINALE TEST 2: AI TRADING ANALYSE REPARATUR"
         
         if not self.auth_token:
-            self.log_test(test_name, "FAIL", "No authentication token available")
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
             return
         
-        chat_data = {
-            "session_id": "demo_test_session",
-            "content": "Analysiere BTC für mich"
+        analyze_data = {
+            "symbol": "BTC/USDT",
+            "context": "Test analysis"
         }
         
-        response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
+        response = await self.test_api_endpoint("/ai-trading/analyze", method="POST", data=analyze_data, auth=True)
         
-        if not response['success']:
-            if response['status'] == 422:
-                self.log_test(test_name, "FAIL", f"❌ 422 ERROR STILL EXISTS! {response.get('error', 'Unknown error')}")
-            else:
-                self.log_test(test_name, "FAIL", f"API call failed: {response.get('error', 'Unknown error')}")
+        if response['status'] == 422:
+            self.log_test(test_name, "FAIL", f"❌ KRITISCHER FEHLER: 422 UNPROCESSABLE ENTITY ERROR BEI AI TRADING ANALYSE! Das war der Hauptfehler der behoben werden sollte! Error: {response.get('error', 'Unknown error')}")
+            return
+        elif not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ AI Trading Analyze API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
             return
         
         data = response['data']
-        ai_response = data.get('content', '')
         
-        # Check for comprehensive BTC analysis with system data
-        btc_indicators = ['btc', 'bitcoin', 'preis', 'liquidation', 'smart money', 'trading', 'analyse', 'position']
-        btc_count = sum(1 for word in btc_indicators if word.lower() in ai_response.lower())
-        
-        if len(ai_response) > 300 and btc_count >= 4:
-            self.log_test(
-                test_name, 
-                "PASS", 
-                f"✅ BTC ANALYSIS WITH FULL SYSTEM ACCESS! {len(ai_response)} chars, {btc_count} BTC indicators",
-                "Comprehensive BTC analysis with Smart Money and trading data",
-                f"Analysis length: {len(ai_response)}, BTC indicators: {btc_count}"
-            )
+        # Check for successful AI analysis
+        if 'recommendation' in data and 'symbol' in data:
+            recommendation = data.get('recommendation', {})
+            reasoning = recommendation.get('reasoning', '') if isinstance(recommendation, dict) else ''
+            action = recommendation.get('action', '') if isinstance(recommendation, dict) else ''
+            
+            if len(reasoning) > 100 and action:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ AI TRADING ANALYSE REPARATUR ERFOLGREICH! KEINE 422 Errors, erfolgreiche AI-Analyse: {len(reasoning)} chars reasoning, action: {action}",
+                    "KEINE 422 Errors, erfolgreiche AI-Analyse mit korrekter Authorization Header",
+                    f"✅ SUCCESS: {len(reasoning)} chars reasoning, action: {action}, NO 422 ERROR!"
+                )
+            else:
+                self.log_test(test_name, "WARN", f"⚠️ AI Analyse funktioniert aber könnte detaillierter sein: {len(reasoning)} chars, action: {action}")
         else:
-            self.log_test(test_name, "WARN", f"BTC analysis may lack system integration: {len(ai_response)} chars, {btc_count} indicators")
+            self.log_test(test_name, "FAIL", f"❌ AI Analyse Response unvollständig: {data}")
 
     async def test_integrated_ai_chat_portfolio_access(self):
         """Test NEW INTEGRATED AI CHAT SYSTEM - Paper Trading Portfolio Access"""
