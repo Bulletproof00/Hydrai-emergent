@@ -402,7 +402,11 @@ class TradingSystemTester:
             self.log_test(test_name, "FAIL", "No positions available for 50% close test")
             return
         
-        positions = positions_response['data']
+        positions_data = positions_response['data']
+        if isinstance(positions_data, dict):
+            positions = positions_data.get('positions', [])
+        else:
+            positions = positions_data if isinstance(positions_data, list) else []
         if not positions:
             self.log_test(test_name, "FAIL", "No positions found")
             return
@@ -447,7 +451,11 @@ class TradingSystemTester:
             self.log_test(test_name, "FAIL", "No positions available for 100% close test")
             return
         
-        positions = positions_response['data']
+        positions_data = positions_response['data']
+        if isinstance(positions_data, dict):
+            positions = positions_data.get('positions', [])
+        else:
+            positions = positions_data if isinstance(positions_data, list) else []
         if not positions:
             self.log_test(test_name, "FAIL", "No positions found")
             return
