@@ -634,12 +634,14 @@ const TradingInterface = () => {
                                         </button>
                                         <button 
                                             onClick={() => {
-                                                // TODO: Implement partial close
-                                                alert('Teilschließung wird in der nächsten Version implementiert');
+                                                const percentage = prompt('Position schließen (% von 1-100):', '50');
+                                                if (percentage && parseFloat(percentage) > 0) {
+                                                    closePosition(position.position_id, parseFloat(percentage));
+                                                }
                                             }}
                                             className="close-btn partial"
                                         >
-                                            Teil schließen
+                                            Position schließen
                                         </button>
                                     </div>
                                 </div>
