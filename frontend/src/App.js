@@ -711,6 +711,12 @@ function App() {
             <TradingInterface />
           </div>
         )}
+
+        {activeView === 'evolution' && (
+          <div className="evolution-view">
+            <SelfEvolvingAI />
+          </div>
+        )}
       </div>
     </div>
   );
