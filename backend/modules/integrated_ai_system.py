@@ -281,18 +281,29 @@ Antworte jetzt als Hydra AI mit **VOLLSTÄNDIGER Systemanalyse** basierend auf d
         return prompt
 
     async def _query_gemini_with_context(self, prompt: str) -> str:
-        """Query Gemini with error handling and fallbacks"""
+        """Query Gemini with new API and error handling"""
         try:
             loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(None, self.model.generate_content, prompt)
             
-            if response and response.text:
+            # Use new Gemini API structure
+            def make_gemini_request():
+                return self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt,
+                    config=self.generation_config
+                )
+            
+            response = await loop.run_in_executor(None, make_gemini_request)
+            
+            if response and hasattr(response, 'text') and response.text:
                 return response.text
             else:
+                logger.warning("Empty response from Gemini API")
                 return "Es tut mir leid, ich konnte keine Antwort generieren. Bitte versuchen Sie es erneut."
                 
         except Exception as e:
             logger.error(f"Gemini API error: {e}")
+            logger.error(f"Gemini API traceback: {traceback.format_exc()}")
             return f"⚠️ **System-Analyse-Fehler**\n\nEs gab ein Problem mit der KI-Engine:\n```\n{str(e)}\n```\n\nIch kann trotzdem versuchen zu helfen - was genau möchten Sie wissen?"
 
     async def _execute_system_command(self, message: str, user_id: str) -> str:
