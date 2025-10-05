@@ -2361,7 +2361,7 @@ async def startup_event():
     asyncio.create_task(update_market_data_background())
     logger.info("Background data update task started")
     
-    logger.info("Hydra AI started successfully!")
+    logger.info("Lunara Analyze AI started successfully!")
 
 @app.on_event("shutdown")
 async def shutdown_event():
