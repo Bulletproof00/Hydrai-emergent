@@ -9,7 +9,8 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 import os
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import pandas as pd
 import numpy as np
 from dataclasses import dataclass
