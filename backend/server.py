@@ -2108,7 +2108,10 @@ async def ai_learn_from_interaction(
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/chat")
-async def chat(message: ChatMessageCreate, authorization: str = Header(None)):
+async def chat(
+    message: ChatMessage,
+    authorization: str = Header(None)
+):
     """Send a chat message and get AI response with full historical context"""
     try:
         # Get current user
