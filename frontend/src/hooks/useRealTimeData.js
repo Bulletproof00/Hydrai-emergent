@@ -21,13 +21,24 @@ export const useRealTimeData = (selectedSymbol) => {
                 setConnectionStatus('connected');
                 reconnectAttempts.current = 0;
                 
-                // Subscribe to symbols
-                if (selectedSymbol) {
-                    wsRef.current.send(JSON.stringify({
-                        type: 'subscribe',
-                        symbols: [selectedSymbol]
-                    }));
-                }
+                // Small delay to ensure WebSocket is fully ready
+                setTimeout(() => {
+                    // Double-check connection state before sending
+                    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+                        // Subscribe to symbols
+                        if (selectedSymbol) {
+                            try {
+                                wsRef.current.send(JSON.stringify({
+                                    type: 'subscribe',
+                                    symbols: [selectedSymbol]
+                                }));
+                                console.log('📡 Subscribed to:', selectedSymbol);
+                            } catch (error) {
+                                console.error('Failed to send subscription:', error);
+                            }
+                        }
+                    }
+                }, 100); // 100ms delay
             };
             
             wsRef.current.onmessage = (event) => {
