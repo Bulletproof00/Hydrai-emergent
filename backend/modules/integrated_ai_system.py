@@ -126,10 +126,29 @@ class IntegratedAISystem:
                         if sm_data and sm_data.get('status') == 'success':
                             context['smart_money'][symbol] = {
                                 'liquidation_summary': sm_data.get('liquidation_heatmap_2d', {}).get('summary', {}),
-                                'oi_summary': sm_data.get('open_interest_detailed', {}).get('market_metrics', {})
+                                'oi_summary': sm_data.get('open_interest_detailed', {}).get('market_metrics', {}),
+                                'funding_rate': sm_data.get('funding_rate', {})
                             }
                     except Exception as e:
                         logger.warning(f"Could not fetch smart money data for {symbol}: {e}")
+            
+            # Technical Indicators context
+            try:
+                import aiohttp
+                async with aiohttp.ClientSession() as session:
+                    # Get indicators for BTC
+                    async with session.post('http://localhost:8001/api/indicators', json={
+                        'symbol': 'BTC/USDT',
+                        'timeframe': '1h',
+                        'limit': 200,
+                        'indicators': ['rsi', 'mfi', 'bollinger', 'stochastic', 'obv', 'vwap', 'ema50', 'ema200']
+                    }) as response:
+                        if response.status == 200:
+                            ind_data = await response.json()
+                            context['indicators'] = ind_data.get('indicators', {})
+                            context['current_price'] = ind_data.get('current_price')
+            except Exception as e:
+                logger.warning(f"Could not fetch indicators: {e}")
             
             # Real-time market context
             try:
@@ -140,6 +159,19 @@ class IntegratedAISystem:
                             context['market'] = await response.json()
             except Exception as e:
                 logger.warning(f"Could not fetch market overview: {e}")
+            
+            # Macro data and correlations
+            try:
+                import aiohttp
+                async with aiohttp.ClientSession() as session:
+                    async with session.get('http://localhost:8001/api/macro-data') as response:
+                        if response.status == 200:
+                            context['macro_data'] = await response.json()
+                    async with session.get('http://localhost:8001/api/correlations') as response:
+                        if response.status == 200:
+                            context['correlations'] = await response.json()
+            except Exception as e:
+                logger.warning(f"Could not fetch macro data: {e}")
             
             # System health context
             context['system_health'] = await self._check_system_health()
