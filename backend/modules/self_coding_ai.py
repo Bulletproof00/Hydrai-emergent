@@ -59,22 +59,51 @@ class SelfCodingAI:
         
         logger.info("🤖 Self-Coding AI System initialized with code generation capabilities")
 
-    async def generate_and_implement_code(self, improvement_request: str) -> Dict[str, Any]:
-        """Generate and safely implement new code improvements"""
+    async def generate_and_implement_code(self, improvement_request: str, max_retries: int = 3) -> Dict[str, Any]:
+        """Generate and safely implement new code improvements with retry logic"""
         try:
             logger.info(f"🧠 Generating code for improvement: {improvement_request}")
             
-            # Phase 1: Generate code
-            generated_code = await self._generate_improvement_code(improvement_request)
+            generated_code = None
+            safety_check = None
+            retry_count = 0
             
-            # Phase 2: Safety validation
-            safety_check = await self._validate_code_safety(generated_code)
+            # Phase 1: Generate code with retries for syntax errors
+            while retry_count < max_retries:
+                try:
+                    generated_code = await self._generate_improvement_code(improvement_request, retry_count)
+                    
+                    # Phase 2: Safety validation
+                    safety_check = await self._validate_code_safety(generated_code)
+                    
+                    if safety_check['is_safe']:
+                        logger.info(f"✅ Code generation successful on attempt {retry_count + 1}")
+                        break
+                    elif safety_check.get('retry_recommended', False):
+                        retry_count += 1
+                        logger.warning(f"⚠️ Code generation attempt {retry_count} failed, retrying...")
+                        logger.warning(f"Issues: {safety_check['issues']}")
+                        
+                        if retry_count < max_retries:
+                            continue
+                    else:
+                        # Not retryable (e.g., dangerous code)
+                        break
+                        
+                except Exception as e:
+                    retry_count += 1
+                    logger.error(f"Code generation attempt {retry_count} failed: {e}")
+                    if retry_count >= max_retries:
+                        break
             
-            if not safety_check['is_safe']:
+            # Check final result
+            if not safety_check or not safety_check['is_safe']:
                 return {
                     'status': 'rejected',
-                    'reason': 'Code safety validation failed',
-                    'safety_issues': safety_check['issues']
+                    'reason': 'Code safety validation failed after all retries',
+                    'safety_issues': safety_check['issues'] if safety_check else ['Code generation failed'],
+                    'attempts': retry_count + 1,
+                    'max_retries': max_retries
                 }
             
             # Phase 3: Create plugin
@@ -85,7 +114,7 @@ class SelfCodingAI:
             
             # Phase 5: Backtest if trading-related
             backtest_result = None
-            if 'trading' in improvement_request.lower() or 'strategy' in improvement_request.lower():
+            if 'trading' in improvement_request.lower() or 'strategy' in improvement_request.lower() or 'scalping' in improvement_request.lower():
                 backtest_result = await self._run_automated_backtest(plugin_result['plugin_name'])
             
             # Phase 6: Deploy if successful
@@ -102,6 +131,7 @@ class SelfCodingAI:
                 'test_result': test_result,
                 'backtest_result': backtest_result,
                 'deployment_result': deployment_result,
+                'attempts': retry_count + 1,
                 'timestamp': datetime.now(timezone.utc).isoformat()
             }
             
