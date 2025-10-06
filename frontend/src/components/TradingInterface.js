@@ -280,8 +280,8 @@ const TradingInterface = () => {
     };
 
     const getCurrentPrice = (symbol) => {
-        // Try real-time price first, then fallback to position mark price
-        const realTimePrice = currentPrices[symbol]?.price;
+        // Try real-time price from WebSocket first
+        const realTimePrice = getRealTimePrice(symbol);
         if (realTimePrice && realTimePrice > 0) {
             return realTimePrice;
         }
