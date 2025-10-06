@@ -306,6 +306,28 @@ function App() {
     }
   };
 
+  const fetchNews = async () => {
+    try {
+      const response = await axios.get(`${API}/news`);
+      if (response.data.status === 'success') {
+        setNews(response.data.news || []);
+      }
+    } catch (error) {
+      console.error("Error fetching news:", error);
+    }
+  };
+
+  const fetchSentiment = async () => {
+    try {
+      const response = await axios.get(`${API}/sentiment`);
+      if (response.data.status === 'success') {
+        setSentiment(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching sentiment:", error);
+    }
+  };
+
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
