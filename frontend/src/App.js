@@ -188,14 +188,32 @@ function App() {
   const initializeSession = async () => {
     try {
       const response = await axios.post(`${API}/sessions`);
-      setSessionId(response.data.id);
+      const newSessionId = response.data.id;
+      setSessionId(newSessionId);
       
-      // Add welcome message
-      setMessages([{
-        role: "assistant",
-        content: "Willkommen bei Lunara Analyze AI! 🧠\n\nIch bin deine selbst-evolvierende KI für Trading-Analysen. Meine Fähigkeiten:\n\n• 🔄 **Self-Evolution**: Kontinuierliche Selbstoptimierung und Lernen\n• 📊 Live-Marktdaten & Smart Money Analyse\n• 🧮 Technische Indikatoren (RSI, MFI, Bollinger Bands)\n• 💹 Paper Trading mit AI-gestützten Empfehlungen\n• 🎯 Backtesting & Strategieentwicklung\n• 🚀 Neue Algorithmen-Entwicklung\n\n**NEU:** Besuche den 'AI Evolution' Tab um meine Selbstverbesserung zu verfolgen!\n\nWie kann ich dir heute helfen?",
-        timestamp: new Date().toISOString()
-      }]);
+      // Try to load existing messages for this session
+      try {
+        const messagesResponse = await axios.get(`${API}/messages/${newSessionId}`);
+        if (messagesResponse.data && messagesResponse.data.length > 0) {
+          // Session has existing messages, load them
+          setMessages(messagesResponse.data);
+        } else {
+          // New session, add welcome message
+          setMessages([{
+            role: "assistant",
+            content: "Willkommen bei Lunara Analyze AI! 🧠\n\nIch bin deine selbst-evolvierende KI für Trading-Analysen. Meine Fähigkeiten:\n\n• 🔄 **Self-Evolution**: Kontinuierliche Selbstoptimierung und Lernen\n• 📊 Live-Marktdaten & Smart Money Analyse\n• 🧮 Technische Indikatoren (RSI, MFI, Bollinger Bands)\n• 💹 Paper Trading mit AI-gestützten Empfehlungen\n• 🎯 Backtesting & Strategieentwicklung\n• 🚀 Neue Algorithmen-Entwicklung\n\n**NEU:** Besuche den 'AI Evolution' Tab um meine Selbstverbesserung zu verfolgen!\n\nWie kann ich dir heute helfen?",
+            timestamp: new Date().toISOString()
+          }]);
+        }
+      } catch (msgError) {
+        console.error("Error loading messages:", msgError);
+        // If loading fails, show welcome message
+        setMessages([{
+          role: "assistant",
+          content: "Willkommen bei Lunara Analyze AI! 🧠\n\nIch bin deine selbst-evolvierende KI für Trading-Analysen. Meine Fähigkeiten:\n\n• 🔄 **Self-Evolution**: Kontinuierliche Selbstoptimierung und Lernen\n• 📊 Live-Marktdaten & Smart Money Analyse\n• 🧮 Technische Indikatoren (RSI, MFI, Bollinger Bands)\n• 💹 Paper Trading mit AI-gestützten Empfehlungen\n• 🎯 Backtesting & Strategieentwicklung\n• 🚀 Neue Algorithmen-Entwicklung\n\n**NEU:** Besuche den 'AI Evolution' Tab um meine Selbstverbesserung zu verfolgen!\n\nWie kann ich dir heute helfen?",
+          timestamp: new Date().toISOString()
+        }]);
+      }
     } catch (error) {
       console.error("Error creating session:", error);
     }
