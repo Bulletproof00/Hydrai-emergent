@@ -112,6 +112,8 @@ function App() {
   const [macroData, setMacroData] = useState(null);
   const [correlations, setCorrelations] = useState(null);
   const [marketOverview, setMarketOverview] = useState(null);
+  const [news, setNews] = useState([]);
+  const [sentiment, setSentiment] = useState(null);
   const messagesEndRef = useRef(null);
   
   // Mobile navigation state
