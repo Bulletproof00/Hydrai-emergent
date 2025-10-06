@@ -3026,24 +3026,46 @@ class TradingSystemTester:
         self.print_self_evolving_ai_summary()
 
     async def run_priority_tests(self):
-        """Run PRIORITY tests for Paper Trading Reparaturen nach den kritischen Fixes"""
+        """Run PRIORITY tests for VERBESSERTE SELF-CODING AI SYSTEM mit Retry-Logic"""
         await self.setup()
         
         try:
-            print("🎯 TESTE DIE PAPER TRADING REPARATUREN NACH DEN KRITISCHEN FIXES")
+            print("🎯 TESTE DAS VERBESSERTE SELF-CODING AI SYSTEM MIT RETRY-LOGIC")
             print("=" * 80)
             
-            print("\n🎯 PRIORITÄT 1: PREISANZEIGE-REPARATUR TEST...")
-            await self.test_preisanzeige_reparatur_test()
+            print("\n🎯 PRIORITÄT 1: VERBESSERTE CODE-GENERIERUNG TESTS...")
+            print("Testing Scalping-Strategie Code Generation with Retry Logic...")
+            await self.test_scalping_strategy_code_generation_with_retry()
             
-            print("\n🎯 PRIORITÄT 2: POSITION SCHLIESSEN REPARATUR TEST...")
-            await self.test_position_schliessen_reparatur_test()
+            print("Testing Code Safety Validation with Detailed Errors...")
+            await self.test_code_safety_validation_detailed_errors()
             
-            print("\n🎯 PRIORITÄT 3: TRADING ACCOUNT STATUS TEST...")
-            await self.test_trading_account_status_test()
+            print("Testing Plugin Creation & Testing Pipeline...")
+            await self.test_plugin_creation_and_testing_pipeline()
             
-            print("\n🎯 PRIORITÄT 4: PAPER TRADING INTEGRATION TEST...")
-            await self.test_paper_trading_integration_test()
+            print("\n🎯 PRIORITÄT 2: TRADING-SPEZIFISCHE FEATURES...")
+            print("Testing Scalping Algorithm Generation with Complex Parameters...")
+            await self.test_scalping_algorithm_generation_complex()
+            
+            print("Testing Backtest Integration with Automatic Testing...")
+            await self.test_backtest_integration_automatic()
+            
+            print("\n🎯 PRIORITÄT 3: END-TO-END PIPELINE TEST...")
+            print("Testing Complete Self-Improvement Workflow...")
+            await self.test_end_to_end_self_improvement_workflow()
+            
+            print("\n🎯 LEGACY TESTS: EXISTING SELF-CODING AI TESTS...")
+            print("Testing Legacy Self-Coding AI Code Generation...")
+            await self.test_self_coding_ai_code_generation()
+            
+            print("Testing Evolution Chat...")
+            await self.test_self_coding_ai_evolution_chat()
+            
+            print("Testing Plugin Status...")
+            await self.test_self_coding_ai_plugin_status()
+            
+            print("Testing Database Integration...")
+            await self.test_database_integration_plugins()
             
         finally:
             await self.cleanup()
