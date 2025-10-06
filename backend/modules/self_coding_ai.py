@@ -139,11 +139,24 @@ class SelfCodingAI:
             logger.error(f"Self-coding error: {e}")
             return {'status': 'error', 'error': str(e)}
 
-    async def _generate_improvement_code(self, improvement_request: str) -> Dict[str, Any]:
+    async def _generate_improvement_code(self, improvement_request: str, retry_count: int = 0) -> Dict[str, Any]:
         """Generate Python code for specific improvements"""
         
         # Get current system context
         system_context = await self._get_system_context()
+        
+        # Adjust prompt based on retry count
+        retry_instruction = ""
+        if retry_count > 0:
+            retry_instruction = f"""
+            WICHTIG: Dies ist Versuch #{retry_count + 1}. Die vorherigen Versuche hatten Syntax-Fehler.
+            Überprüfe EXTRA SORGFÄLTIG:
+            - Alle Klammern sind geschlossen: (), [], {{}}
+            - Alle Strings haben schließende Anführungszeichen
+            - Korrekte Einrückung mit 4 Spaces
+            - Keine unvollständigen Zeilen
+            - Alle if/for/while Statements sind korrekt geschlossen
+            """
         
         coding_prompt = f"""
         Du bist eine Expert-Level Python-Entwicklerin für Trading-Systeme. Generiere PERFEKTEN, syntaktisch korrekten Python-Code.
