@@ -2818,6 +2818,51 @@ class TradingSystemTester:
         
         print("\n" + "=" * 80)
 
+    def print_self_coding_summary(self):
+        """Print SELF-CODING AI test summary"""
+        print("\n" + "=" * 80)
+        print("🤖 SELF-CODING AI SYSTEM TESTS - SUMMARY")
+        print("=" * 80)
+        
+        passed = len([r for r in self.test_results if r['status'] == 'PASS'])
+        failed = len([r for r in self.test_results if r['status'] == 'FAIL'])
+        warned = len([r for r in self.test_results if r['status'] == 'WARN'])
+        total = len(self.test_results)
+        
+        print(f"📊 SELF-CODING AI RESULTS: {passed} PASS, {warned} WARN, {failed} FAIL ({total} total)")
+        print()
+        
+        # Group results by status
+        for status in ['PASS', 'WARN', 'FAIL']:
+            status_results = [r for r in self.test_results if r['status'] == status]
+            if status_results:
+                status_emoji = "✅" if status == "PASS" else "⚠️" if status == "WARN" else "❌"
+                print(f"{status_emoji} {status} ({len(status_results)}):")
+                for result in status_results:
+                    print(f"   • {result['test']}")
+                print()
+        
+        # Critical issues summary
+        critical_issues = [r for r in self.test_results if r['status'] == 'FAIL']
+        if critical_issues:
+            print("🚨 KRITISCHE PROBLEME:")
+            for issue in critical_issues:
+                print(f"   ❌ {issue['test']}: {issue['details']}")
+            print()
+        
+        # Success rate
+        success_rate = (passed / total * 100) if total > 0 else 0
+        print(f"📈 ERFOLGSRATE: {success_rate:.1f}%")
+        
+        if success_rate >= 75:
+            print("🎉 SELF-CODING AI SYSTEM ERFOLGREICH! Lunara kann sich selbst weiterentwickeln!")
+        elif success_rate >= 50:
+            print("⚠️ SELF-CODING AI TEILWEISE ERFOLGREICH - Weitere Entwicklung erforderlich")
+        else:
+            print("❌ SELF-CODING AI SYSTEM FEHLGESCHLAGEN - Kritische Fixes erforderlich")
+        
+        print("=" * 80)
+
     def print_finale_summary(self):
         """Print FINALE TEST summary focusing on 422 error fixes"""
         print("\n" + "=" * 80)
