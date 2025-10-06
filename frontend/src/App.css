@@ -5300,6 +5300,21 @@ body {
   }
   
   .analysis-tab {
+    white-space: nowrap;
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+  
+  .global-timeframe-selector {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .global-timeframe-selector select {
+    width: 100%;
+  }
+}
 
 /* Trading Positions Widget */
 .trading-widget {
