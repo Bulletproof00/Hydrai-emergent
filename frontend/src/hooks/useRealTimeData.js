@@ -38,6 +38,7 @@ export const useRealTimeData = (selectedSymbol) => {
             wsRef.current.onopen = () => {
                 console.log('✅ Real-time WebSocket connected');
                 setConnectionStatus('connected');
+                setIsConnectionReady(true);
                 reconnectAttempts.current = 0;
                 
                 // Small delay to ensure WebSocket is fully ready
