@@ -728,7 +728,11 @@ const EnhancedSmartMoneyPanel = ({ globalTimeframe }) => {
                 </div>
                 <div className="header-right">
                     <div className="controls-container">
-                        {renderTimeframeSelector()}
+                        <div className="timeframe-info">
+                            <span style={{fontSize: '14px', color: '#94a3b8'}}>
+                                Timeframe: <strong style={{color: '#10b981'}}>{selectedTimeframe}</strong>
+                            </span>
+                        </div>
                         {renderSymbolSelector()}
                     </div>
                 </div>
