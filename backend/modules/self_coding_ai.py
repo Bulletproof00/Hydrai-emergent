@@ -161,6 +161,8 @@ class SelfCodingAI:
         coding_prompt = f"""
         Du bist eine Expert-Level Python-Entwicklerin für Trading-Systeme. Generiere PERFEKTEN, syntaktisch korrekten Python-Code.
         
+        {retry_instruction}
+        
         AUFGABE: {improvement_request}
         
         VERFÜGBARE SYSTEME:
