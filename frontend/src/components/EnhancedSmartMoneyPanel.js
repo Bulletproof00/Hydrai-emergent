@@ -4,14 +4,31 @@ import LiveLiquidationHeatmap from './LiveLiquidationHeatmap';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const EnhancedSmartMoneyPanel = () => {
+const EnhancedSmartMoneyPanel = ({ globalTimeframe }) => {
     const [selectedSymbol, setSelectedSymbol] = useState('BTC/USDT');
     const [supportedSymbols, setSupportedSymbols] = useState([]);
     const [smartMoneyData, setSmartMoneyData] = useState(null);
     const [activeTab, setActiveTab] = useState('liquidation_heatmap');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedTimeframe, setSelectedTimeframe] = useState('1day');
+    
+    // Use globalTimeframe from props instead of local state
+    // Map global timeframe format to backend format
+    const mapTimeframe = (tf) => {
+        const mapping = {
+            '1m': '1min',
+            '5m': '5min',
+            '15m': '15min',
+            '30m': '30min',
+            '1h': '1hour',
+            '4h': '4hour',
+            '1d': '1day',
+            '1w': '1week'
+        };
+        return mapping[tf] || '1day';
+    };
+    
+    const selectedTimeframe = mapTimeframe(globalTimeframe || '15m');
 
     useEffect(() => {
         fetchSupportedSymbols();
