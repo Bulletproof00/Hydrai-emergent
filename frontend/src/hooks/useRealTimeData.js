@@ -137,10 +137,15 @@ export const useRealTimeData = (selectedSymbol) => {
     // Subscribe to new symbol when selection changes
     useEffect(() => {
         if (wsRef.current?.readyState === WebSocket.OPEN && selectedSymbol) {
-            wsRef.current.send(JSON.stringify({
-                type: 'subscribe',
-                symbols: [selectedSymbol]
-            }));
+            try {
+                wsRef.current.send(JSON.stringify({
+                    type: 'subscribe',
+                    symbols: [selectedSymbol]
+                }));
+                console.log('📡 Symbol subscription updated:', selectedSymbol);
+            } catch (error) {
+                console.error('Failed to subscribe to symbol:', error);
+            }
         }
     }, [selectedSymbol]);
 
