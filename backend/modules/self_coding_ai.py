@@ -241,22 +241,41 @@ class SelfCodingAI:
             return text.strip()
 
     async def _validate_code_safety(self, generated_code: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate code safety before execution"""
+        """Validate code safety before execution with detailed error reporting"""
         try:
             code_text = generated_code['extracted_code']
+            
+            # Clean up the code text
+            code_text = code_text.strip()
             
             # Parse AST for safety analysis
             try:
                 tree = ast.parse(code_text)
             except SyntaxError as e:
+                # Provide more detailed syntax error information
+                error_details = {
+                    'line': getattr(e, 'lineno', 'unknown'),
+                    'offset': getattr(e, 'offset', 'unknown'),
+                    'text': getattr(e, 'text', '').strip() if getattr(e, 'text', None) else 'unknown',
+                    'message': str(e)
+                }
+                
                 return {
                     'is_safe': False,
-                    'issues': [f'Syntax error: {e}']
+                    'issues': [
+                        f'Syntax error at line {error_details["line"]}: {error_details["message"]}',
+                        f'Problematic code: "{error_details["text"]}"',
+                        'Code generation needs to be retried with better syntax'
+                    ],
+                    'syntax_error_details': error_details,
+                    'retry_recommended': True
                 }
             
             safety_issues = []
+            class_found = False
+            execute_method_found = False
             
-            # Check for dangerous operations
+            # Enhanced safety and structure checking
             class SafetyChecker(ast.NodeVisitor):
                 def visit_Import(self, node):
                     for alias in node.names:
@@ -266,6 +285,24 @@ class SelfCodingAI:
                 def visit_ImportFrom(self, node):
                     if node.module and node.module not in self.allowed_imports:
                         safety_issues.append(f'Disallowed import from: {node.module}')
+                
+                def visit_ClassDef(self, node):
+                    nonlocal class_found
+                    if node.name == 'DynamicPlugin':
+                        class_found = True
+                    self.generic_visit(node)
+                
+                def visit_FunctionDef(self, node):
+                    nonlocal execute_method_found
+                    if node.name == 'execute':
+                        execute_method_found = True
+                    self.generic_visit(node)
+                    
+                def visit_AsyncFunctionDef(self, node):
+                    nonlocal execute_method_found
+                    if node.name == 'execute':
+                        execute_method_found = True
+                    self.generic_visit(node)
                 
                 def visit_Call(self, node):
                     # Check for dangerous function calls
@@ -277,7 +314,13 @@ class SelfCodingAI:
             checker = SafetyChecker()
             checker.visit(tree)
             
-            # Additional checks
+            # Structure validation
+            if not class_found:
+                safety_issues.append('Missing DynamicPlugin class definition')
+            if not execute_method_found:
+                safety_issues.append('Missing execute method in DynamicPlugin class')
+            
+            # Additional keyword checks
             dangerous_keywords = ['subprocess', 'os.system', 'file', 'delete', 'remove']
             for keyword in dangerous_keywords:
                 if keyword in code_text:
@@ -286,14 +329,17 @@ class SelfCodingAI:
             return {
                 'is_safe': len(safety_issues) == 0,
                 'issues': safety_issues,
-                'ast_valid': True
+                'ast_valid': True,
+                'structure_valid': class_found and execute_method_found,
+                'retry_recommended': False
             }
             
         except Exception as e:
             return {
                 'is_safe': False,
                 'issues': [f'Safety validation failed: {e}'],
-                'ast_valid': False
+                'ast_valid': False,
+                'retry_recommended': True
             }
 
     async def _create_dynamic_plugin(self, generated_code: Dict[str, Any], description: str) -> Dict[str, Any]:
