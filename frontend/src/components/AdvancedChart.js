@@ -19,11 +19,13 @@ const TIMEFRAMES = [
   { label: '1M', value: '1M' }
 ];
 
-const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange }) => {
-  const [timeframe, setTimeframe] = useState('1h');
+const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange, globalTimeframe, setGlobalTimeframe }) => {
   const [markets, setMarkets] = useState({ crypto: [], traditional: {} });
   const [assetType, setAssetType] = useState('crypto');
   const [selectedSymbol, setSelectedSymbol] = useState(symbol);
+  
+  // Use global timeframe if provided, otherwise default to '1h'
+  const timeframe = globalTimeframe || '1h';
   
   // Real-time data hook
   const { 
