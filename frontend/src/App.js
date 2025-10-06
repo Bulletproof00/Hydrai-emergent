@@ -567,17 +567,11 @@ function App() {
             {/* Tab Content */}
             {analysisTab === 'indicators' && (
               <div className="indicators-content">
-                <h2 className="section-title">Plugin System & Indikatoren</h2>
-                
-                {/* Self-Coding AI Integration */}
-                <div className="self-coding-section">
-                  <SelfEvolvingAI />
-                </div>
+                <h2 className="section-title">Technische Indikatoren</h2>
 
                 {/* Technical Indicators */}
                 {indicators && (
                   <>
-                    <h3 className="subsection-title">Technische Indikatoren</h3>
                     <div className="analysis-grid">
                       {indicators.indicators?.rsi && (
                         <div className="analysis-card">
