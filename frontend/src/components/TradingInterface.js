@@ -37,17 +37,24 @@ const TradingInterface = () => {
     const [showAiPanel, setShowAiPanel] = useState(false);
     
     // Current prices (from real-time data)
-    const [currentPrices, setCurrentPrices] = useState({});
-
     const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
 
     useEffect(() => {
         fetchTradingData();
         fetchSymbols();
-        // Set up real-time price updates
-        const priceInterval = setInterval(fetchCurrentPrices, 2000);
-        return () => clearInterval(priceInterval);
     }, []);
+
+    // Update positions with real-time prices
+    useEffect(() => {
+        if (realTimeData && Object.keys(realTimeData).length > 0) {
+            setPositions(prevPositions => 
+                prevPositions.map(position => ({
+                    ...position,
+                    current_price: getCurrentPrice(position.symbol) || position.mark_price
+                }))
+            );
+        }
+    }, [realTimeData]);
 
     const fetchTradingData = async () => {
         try {
