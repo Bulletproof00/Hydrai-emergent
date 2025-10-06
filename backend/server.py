@@ -2494,7 +2494,8 @@ async def health_check():
             "smart_money": "active" if enhanced_smart_money is not None else "inactive",
             "paper_trading": "available" if paper_trading is not None else "unavailable",
             "ai_trading": "ready" if ai_trading is not None else "not_ready",
-            "self_evolving_ai": "learning" if self_evolving_ai is not None else "offline"
+            "self_evolving_ai": "learning" if self_evolving_ai is not None else "offline",
+            "self_coding_ai": "coding" if self_coding_ai is not None else "offline"
         }
     }
 
