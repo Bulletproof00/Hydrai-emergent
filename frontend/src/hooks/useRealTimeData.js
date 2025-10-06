@@ -224,6 +224,7 @@ export const useRealTimeData = (selectedSymbol) => {
     return {
         realTimeData,
         connectionStatus,
+        isConnectionReady,
         getCurrentPrice,
         getPriceChange,
         getLastUpdate,
