@@ -338,15 +338,18 @@ backend:
 
   - task: "SELF-CODING AI Database Integration"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/backend/modules/self_coding_ai.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "testing"
           comment: "⚠️ Database Integration teilweise: 1 Komponente (Evolution-Integration) gefunden. Plugin-Metadaten, Test-Results und Backtest-Results in MongoDB noch nicht vollständig implementiert. Evolution-Integration zwischen Self-Coding und Self-Evolving AI funktioniert, aber vollständige Plugin-Speicherung in MongoDB benötigt weitere Entwicklung."
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL ERROR: Plugin Status API returning error: 'NoneType' object has no attribute 'get'. Database Integration nicht vollständig implementiert. Plugin-Speicherung in MongoDB fehlerhaft. Benötigt Reparatur der Plugin-Status-Endpoint und vollständige MongoDB-Integration für Plugin-Metadaten, Test-Results und Backtest-Results."
 
   - task: "SELF-CODING AI Gemini 2.5 Flash Advanced Code Generation"
     implemented: true
