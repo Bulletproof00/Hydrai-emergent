@@ -5162,4 +5162,161 @@ body {
 
 .summary-item .warning {
   color: #f59e0b;
+
+}
+
+/* Analysis Sub-Tabs */
+.analysis-tabs {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 2px;
+  flex-wrap: wrap;
+}
+
+.analysis-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(30, 41, 59, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px 10px 0 0;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+}
+
+.analysis-tab:hover {
+  background: rgba(30, 41, 59, 0.5);
+  color: #e4e4e7;
+  border-bottom-color: rgba(16, 185, 129, 0.3);
+}
+
+.analysis-tab.active {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
+  border-bottom: 2px solid #10b981;
+}
+
+/* Global Timeframe Selector */
+.global-timeframe-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 24px 0;
+  padding: 16px;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.global-timeframe-selector label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e4e4e7;
+}
+
+.global-timeframe-selector select {
+  padding: 10px 16px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #e4e4e7;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.global-timeframe-selector select:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.global-timeframe-selector select:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Analysis Content Sections */
+.indicators-content,
+.heatmaps-content,
+.news-content,
+.sentiment-content {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.subsection-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e4e4e7;
+  margin: 32px 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.self-coding-section {
+  margin-bottom: 40px;
+}
+
+.coming-soon {
+  padding: 40px;
+  text-align: center;
+  font-size: 16px;
+  color: #94a3b8;
+  background: rgba(30, 41, 59, 0.3);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  font-style: italic;
+}
+
+/* Mobile Responsive Adjustments for Analysis Tabs */
+@media (max-width: 768px) {
+  .analysis-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .analysis-tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+  
+  .analysis-tab {
+    white-space: nowrap;
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+  
+  .analysis-tab span {
+    display: none; /* Hide text on mobile, keep icons */
+  }
+  
+  .global-timeframe-selector {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .global-timeframe-selector select {
+    width: 100%;
+  }
+
 }
