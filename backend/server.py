@@ -2708,6 +2708,14 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Self-Coding AI initialization failed: {str(e)}")
     
+    # Initialize News and Sentiment Engine
+    try:
+        global news_sentiment
+        news_sentiment = NewsAndSentimentEngine()
+        logger.info("📰 News and Sentiment Engine initialized")
+    except Exception as e:
+        logger.warning(f"News and Sentiment Engine initialization failed: {str(e)}")
+    
     # Start background data update task
     asyncio.create_task(update_market_data_background())
     logger.info("Background data update task started")
