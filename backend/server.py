@@ -40,6 +40,7 @@ from modules.ai_trading_engine import AITradingEngine
 from modules.integrated_ai_system import IntegratedAISystem
 from modules.self_evolving_ai import SelfEvolvingAI, initialize_self_evolving_ai
 from modules.self_coding_ai import SelfCodingAI, initialize_self_coding_ai
+from modules.news_sentiment import NewsAndSentimentEngine
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
