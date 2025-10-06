@@ -339,23 +339,7 @@ function App() {
             data-testid="nav-chart"
           >
             <LineChart size={20} />
-            <span>Chart</span>
-          </button>
-          <button 
-            className={`nav-item ${activeView === 'plugins' ? 'active' : ''}`}
-            onClick={() => handleViewChange('plugins')}
-            data-testid="nav-plugins"
-          >
-            <Zap size={20} />
-            <span>Plugins</span>
-          </button>
-          <button 
-            className={`nav-item ${activeView === 'smartmoney' ? 'active' : ''}`}
-            onClick={() => handleViewChange('smartmoney')}
-            data-testid="nav-smartmoney"
-          >
-            <TrendingUp size={20} />
-            <span>Smart Money</span>
+            <span>Charts</span>
           </button>
           <button 
             className={`nav-item ${activeView === 'trading' ? 'active' : ''}`}
@@ -363,7 +347,7 @@ function App() {
             data-testid="nav-trading"
           >
             <DollarSign size={20} />
-            <span>Paper Trading</span>
+            <span>Trading</span>
           </button>
           <button 
             className={`nav-item ${activeView === 'evolution' ? 'active' : ''}`}
