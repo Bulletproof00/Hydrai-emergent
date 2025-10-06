@@ -116,51 +116,83 @@ class SelfCodingAI:
         system_context = await self._get_system_context()
         
         coding_prompt = f"""
-        Als fortgeschrittene Self-Coding AI für Trading-Systeme, generiere funktionsfähigen Python-Code für:
+        Du bist eine Expert-Level Python-Entwicklerin für Trading-Systeme. Generiere PERFEKTEN, syntaktisch korrekten Python-Code.
         
-        IMPROVEMENT REQUEST: {improvement_request}
+        AUFGABE: {improvement_request}
         
-        SYSTEM CONTEXT:
+        VERFÜGBARE SYSTEME:
         {json.dumps(system_context, indent=2)}
         
-        REQUIREMENTS:
-        1. Generiere vollständigen, ausführbaren Python-Code
-        2. Verwende nur sichere Imports: {', '.join(self.allowed_imports)}
-        3. Implementiere das als Plugin-Klasse mit StandardAPI
-        4. Inkludiere Docstrings und Kommentare
-        5. Implementiere Error Handling
-        6. Für Trading-Strategien: Inkludiere Entry/Exit Logic
-        7. Für Indikatoren: Implementiere Berechnung und Signale
-        8. Für Datenanalyse: Implementiere Processing und Insights
+        STRIKTE ANFORDERUNGEN:
+        1. PERFEKTE Python-Syntax - ALLE Klammern müssen geschlossen sein
+        2. NUR diese Imports erlaubt: {', '.join(self.allowed_imports)}
+        3. Implementiere als Plugin-Klasse namens 'DynamicPlugin'
+        4. Vollständige Funktionalität in execute() Methode
+        5. Alle Strings in Anführungszeichen
+        6. Korrekte Einrückung (4 Spaces)
+        7. Keine unvollständigen Zeilen oder Syntax-Fehler
         
-        CODE TEMPLATE:
-        ```python
+        EXAKT DIESES TEMPLATE VERWENDEN:
+        
         class DynamicPlugin:
             def __init__(self):
-                self.name = "PluginName"
+                self.name = "Trading_Strategy_Plugin"
                 self.version = "1.0.0"
-                self.description = "Description"
+                self.description = "Advanced trading strategy implementation"
                 
-            async def execute(self, data: dict) -> dict:
-                '''Main execution function'''
-                # Implementation here
-                return result
+            async def execute(self, data):
+                try:
+                    # HIER: Implementierung der Trading-Logik
+                    
+                    # Beispiel für Scalping-Strategie:
+                    current_price = data.get('price', 0)
+                    rsi = data.get('rsi', 50)
+                    volume = data.get('volume', 0)
+                    
+                    # Entry-Bedingungen prüfen
+                    should_enter = False
+                    if rsi < 30 and volume > 1000:  # Überverkauft + hohe Liquidität
+                        should_enter = True
+                        
+                    # Exit-Bedingungen
+                    should_exit = False
+                    if rsi > 70:  # Überkauft
+                        should_exit = True
+                    
+                    # Trading-Signal generieren
+                    signal = None
+                    if should_enter:
+                        signal = {{"action": "buy", "size": 1.0, "price": current_price}}
+                    elif should_exit:
+                        signal = {{"action": "sell", "size": 1.0, "price": current_price}}
+                    
+                    return {{
+                        "signal": signal,
+                        "analysis": "Strategy executed successfully",
+                        "confidence": 0.8,
+                        "success": True
+                    }}
+                    
+                except Exception as e:
+                    return {{
+                        "signal": None,
+                        "analysis": f"Error: {{str(e)}}",
+                        "confidence": 0.0,
+                        "success": False
+                    }}
+                    
+            def validate_input(self, data):
+                return isinstance(data, dict) and 'price' in data
                 
-            def validate_input(self, data: dict) -> bool:
-                '''Validate input data'''
-                return True
-                
-            def get_metadata(self) -> dict:
-                '''Plugin metadata'''
+            def get_metadata(self):
                 return {{
-                    'name': self.name,
-                    'version': self.version,
-                    'description': self.description
+                    "name": self.name,
+                    "version": self.version,
+                    "description": self.description
                 }}
-        ```
         
-        Generiere innovativen, funktionalen Code der das Trading-System erweitert.
-        ANTWORTE NUR MIT PYTHON CODE - KEINE ERKLÄRUNGEN!
+        ERSETZE NUR die Kommentar-Sektion "# HIER: Implementierung der Trading-Logik" mit der spezifischen Logik für die Anfrage.
+        ANTWORTE NUR MIT SYNTAKTISCH PERFEKTEM PYTHON-CODE!
         """
         
         try:
