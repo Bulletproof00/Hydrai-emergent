@@ -1891,7 +1891,7 @@ async def reset_trading_account(authorization: str = Header(None)):
         user_id = user['_id']
         
         # Close all open positions first
-        positions = await paper_trading.get_user_positions(user_id)
+        positions = await paper_trading.get_positions(user_id)
         for position in positions:
             if position.get('status') == 'open':
                 await paper_trading.close_position(user_id, position['position_id'], 100.0)
