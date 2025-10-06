@@ -157,6 +157,7 @@ function App() {
       fetchIndicators();
       fetchMacroData();
       fetchMarketOverview();
+      fetchChatSessions(); // Load chat history
       
       const priceInterval = setInterval(fetchLivePrice, 10000);
       const indicatorInterval = setInterval(fetchIndicators, 30000);
