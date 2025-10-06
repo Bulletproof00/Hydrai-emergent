@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Brain, Zap, TrendingUp, Clock, Target, Database, Cpu, BarChart3, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+import { Brain, Zap, TrendingUp, Clock, Target, Database, Cpu, BarChart3, AlertCircle, CheckCircle, Loader, MessageSquare, Code, Send, Terminal, Settings } from 'lucide-react';
 
 const SelfEvolvingAI = () => {
     const [evolutionStatus, setEvolutionStatus] = useState(null);
