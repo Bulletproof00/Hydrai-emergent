@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useRealTimeData } from '../hooks/useRealTimeData';
 
 const TradingInterface = () => {
     const [account, setAccount] = useState(null);
@@ -9,6 +10,15 @@ const TradingInterface = () => {
     const [selectedSymbol, setSelectedSymbol] = useState('BTC/USDT');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    
+    // Real-time price data
+    const { 
+        realTimeData, 
+        connectionStatus, 
+        getCurrentPrice, 
+        getPriceChange, 
+        isLive 
+    } = useRealTimeData(selectedSymbol);
     
     // Order form state
     const [orderForm, setOrderForm] = useState({
