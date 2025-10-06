@@ -760,33 +760,9 @@ function App() {
             <AdvancedChart 
               symbol={selectedSymbol} 
               onSymbolChange={setSelectedSymbol}
+              globalTimeframe={globalTimeframe}
+              setGlobalTimeframe={setGlobalTimeframe}
             />
-          </div>
-        )}
-
-        {activeView === 'plugins' && (
-          <div className="plugins-view">
-            <h1>Plugin System</h1>
-            <div className="plugins-grid">
-              {plugins.map((plugin, idx) => (
-                <div key={idx} className="plugin-card" data-testid={`plugin-${plugin.id}`}>
-                  <div className="plugin-header">
-                    <Zap size={24} className="plugin-icon" />
-                    <span className={`plugin-status ${plugin.status}`}>{plugin.status}</span>
-                  </div>
-                  <h3>{plugin.name}</h3>
-                  <p className="plugin-type">{plugin.type}</p>
-                  <p className="plugin-description">{plugin.description}</p>
-                  <p className="plugin-version">v{plugin.version}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeView === 'smartmoney' && (
-          <div className="smartmoney-view">
-            <EnhancedSmartMoneyPanel />
           </div>
         )}
 
