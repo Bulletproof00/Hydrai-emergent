@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { useRealTimeData } from '../hooks/useRealTimeData';
 
 const TradingInterface = () => {
+    const { t } = useTranslation();
     const [account, setAccount] = useState(null);
     const [positions, setPositions] = useState([]);
     const [tradeHistory, setTradeHistory] = useState([]);
