@@ -3124,12 +3124,12 @@ class TradingSystemTester:
         self.print_finale_summary()
 
 async def main():
-    """Main test runner - SELF-EVOLVING AI SYSTEM TESTS"""
+    """Main test runner - SELF-CODING AI SYSTEM TESTS"""
     tester = TradingSystemTester()
     
-    # Run SELF-EVOLVING AI TESTS as requested in the review
-    print("🧠 RUNNING SELF-EVOLVING AI SYSTEM TESTS")
-    await tester.run_self_evolving_ai_tests()
+    # Run SELF-CODING AI TESTS as requested in the review
+    print("🤖 RUNNING SELF-CODING AI SYSTEM TESTS")
+    await tester.run_self_coding_ai_tests()
 
 if __name__ == "__main__":
     asyncio.run(main())
