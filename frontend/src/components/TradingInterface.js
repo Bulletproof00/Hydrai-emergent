@@ -280,13 +280,6 @@ const TradingInterface = () => {
         } finally {
             setLoading(false);
         }
-    };;
-            }
-            
-        } catch (err) {
-            console.error('Margin modification error:', err);
-            setError(err.response?.data?.message || 'Failed to modify margin');
-        }
     };
 
     const formatNumber = (num, precision = 2) => {
