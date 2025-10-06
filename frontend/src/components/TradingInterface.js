@@ -15,7 +15,7 @@ const TradingInterface = () => {
     const { 
         realTimeData, 
         connectionStatus, 
-        getCurrentPrice, 
+        getCurrentPrice: getRealTimePrice, 
         getPriceChange, 
         isLive 
     } = useRealTimeData(selectedSymbol);
