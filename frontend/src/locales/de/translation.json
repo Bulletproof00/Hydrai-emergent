@@ -146,6 +146,7 @@
     "loadingFailed": "Laden fehlgeschlagen",
     "networkError": "Netzwerkfehler aufgetreten",
     "unauthorized": "Unbefugter Zugriff",
-    "sessionExpired": "Sitzung abgelaufen, bitte erneut anmelden"
+    "sessionExpired": "Sitzung abgelaufen, bitte erneut anmelden",
+    "resetError": "Fehler beim Zurücksetzen des Accounts"
   }
 }
