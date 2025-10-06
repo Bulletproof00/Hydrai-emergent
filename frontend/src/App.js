@@ -375,47 +375,8 @@ function App() {
           </div>
         )}
 
-        {/* Indicators Widget */}
-        {indicators && (
-          <div className="indicators-widget">
-            <div className="widget-title">Indikatoren</div>
-            {indicators.indicators?.rsi && (
-              <div className="indicator-item">
-                <span>RSI</span>
-                <span className={`indicator-value ${indicators.indicators.rsi < 30 ? 'oversold' : indicators.indicators.rsi > 70 ? 'overbought' : ''}`}>
-                  {indicators.indicators.rsi.toFixed(2)}
-                </span>
-              </div>
-            )}
-            {indicators.indicators?.mfi && (
-              <div className="indicator-item">
-                <span>MFI</span>
-                <span className="indicator-value">{indicators.indicators.mfi.toFixed(2)}</span>
-              </div>
-            )}
-            {indicators.indicators?.bollinger && (
-              <div className="indicator-item">
-                <span>BB Upper</span>
-                <span className="indicator-value">${indicators.indicators.bollinger.upper.toFixed(2)}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Correlations Widget */}
-        {correlations && Object.keys(correlations).length > 0 && (
-          <div className="indicators-widget" style={{marginTop: '16px'}}>
-            <div className="widget-title">Korrelationen</div>
-            {Object.entries(correlations).slice(0, 3).map(([key, value]) => (
-              <div key={key} className="indicator-item">
-                <span className="correlation-mini-label">{key.replace('BTC_vs_', '')}</span>
-                <span className={`indicator-value ${value > 0.5 ? 'positive' : value < -0.5 ? 'negative' : ''}`}>
-                  {value?.toFixed(2)}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Trading Positions Widget */}
+        <TradingPositionsWidget />
       </div>
 
       {/* Main Content */}
