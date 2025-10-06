@@ -200,6 +200,38 @@ const SelfEvolvingAI = () => {
                         <span>{error}</span>
                     </div>
                 )}
+
+                {/* Tab Navigation */}
+                <div className="tab-navigation">
+                    <button 
+                        className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('overview')}
+                    >
+                        <BarChart3 size={16} />
+                        Übersicht
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'chat' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('chat')}
+                    >
+                        <MessageSquare size={16} />
+                        AI Chat
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'coding' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('coding')}
+                    >
+                        <Code size={16} />
+                        Code Generator
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'plugins' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('plugins')}
+                    >
+                        <Terminal size={16} />
+                        Plugins
+                    </button>
+                </div>
             </div>
 
             {/* Evolution Status Overview */}
