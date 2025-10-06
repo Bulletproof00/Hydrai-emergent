@@ -2590,6 +2590,76 @@ async def update_market_data_background():
                 except Exception as e:
                     logger.error(f"Background update error for {symbol}: {str(e)}")
             
+
+
+# ============================
+# NEWS & SENTIMENT API ENDPOINTS  
+# ============================
+
+@api_router.get("/news")
+async def get_news():
+    """Get latest crypto news"""
+    try:
+        if not news_sentiment:
+            return {
+                'status': 'error',
+                'message': 'News service not initialized'
+            }
+        
+        news = await news_sentiment.get_crypto_news(limit=15)
+        
+        return {
+            'status': 'success',
+            'news': news,
+            'count': len(news),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"News endpoint error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/sentiment")
+async def get_sentiment():
+    """Get market sentiment analysis"""
+    try:
+        if not news_sentiment:
+            return {
+                'status': 'error',
+                'message': 'Sentiment service not initialized'
+            }
+        
+        data = await news_sentiment.get_complete_news_and_sentiment()
+        
+        return data
+        
+    except Exception as e:
+        logger.error(f"Sentiment endpoint error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/economic-calendar")
+async def get_economic_calendar():
+    """Get economic calendar events"""
+    try:
+        if not news_sentiment:
+            return {
+                'status': 'error',
+                'message': 'Economic calendar service not initialized'
+            }
+        
+        events = await news_sentiment.get_economic_calendar()
+        
+        return {
+            'status': 'success',
+            'events': events,
+            'count': len(events),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Economic calendar endpoint error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
             logger.info("Background market data update completed")
         except Exception as e:
             logger.error(f"Background update task error: {str(e)}")
