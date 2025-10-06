@@ -51,6 +51,12 @@ const SelfEvolvingAI = () => {
                 setLatestReport(reportResponse.data.latest_report);
             }
 
+            // Fetch plugin status
+            const pluginsResponse = await axios.get(`${BACKEND_URL}/api/ai/coding/plugins`, { headers });
+            if (pluginsResponse.data.status === 'success') {
+                setPluginStatus(pluginsResponse.data.plugin_status);
+            }
+
             setError(null);
         } catch (err) {
             console.error('Evolution data fetch error:', err);
