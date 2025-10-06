@@ -2266,6 +2266,109 @@ async def get_latest_evolution_report(authorization: str = Header(...)):
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
 
+# ================================
+# SELF-CODING AI ENDPOINTS  
+# ================================
+
+class SelfCodingRequest(BaseModel):
+    improvement_request: str
+
+class EvolutionChatRequest(BaseModel):
+    message: str
+
+@api_router.post("/ai/coding/generate")
+async def generate_and_implement_code(
+    request: SelfCodingRequest,
+    authorization: str = Header(...)
+):
+    """Generate and implement new code improvements"""
+    try:
+        user = await get_current_user(authorization)
+        
+        if not self_coding_ai:
+            return {
+                'status': 'error',
+                'message': 'Self-Coding AI system not initialized'
+            }
+        
+        # Generate and implement code
+        result = await self_coding_ai.generate_and_implement_code(request.improvement_request)
+        
+        return {
+            'status': 'success',
+            'coding_result': result,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Self-coding generation error: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+
+@api_router.post("/ai/evolution/chat")
+async def chat_with_evolution_ai(
+    request: EvolutionChatRequest,
+    authorization: str = Header(...)
+):
+    """Chat with the evolution AI"""
+    try:
+        user = await get_current_user(authorization)
+        
+        if not self_coding_ai:
+            return {
+                'status': 'error',
+                'message': 'Self-Coding AI system not initialized'
+            }
+        
+        # Chat with evolution AI
+        response = await self_coding_ai.chat_with_evolution_ai(request.message)
+        
+        return {
+            'status': 'success',
+            'ai_response': response,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Evolution chat error: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+
+@api_router.get("/ai/coding/plugins")
+async def get_plugin_status(authorization: str = Header(...)):
+    """Get status of all dynamic plugins"""
+    try:
+        user = await get_current_user(authorization)
+        
+        if not self_coding_ai:
+            return {
+                'status': 'error',
+                'message': 'Self-Coding AI system not initialized'
+            }
+        
+        # Get plugin status
+        plugin_status = await self_coding_ai.get_plugin_status()
+        
+        return {
+            'status': 'success',
+            'plugin_status': plugin_status,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Plugin status error: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+
 @api_router.post("/ai-trading/learn")
 async def ai_learn_from_interaction(
     interaction_data: dict,
