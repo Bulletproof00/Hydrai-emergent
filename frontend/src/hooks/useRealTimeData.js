@@ -11,7 +11,7 @@ export const useRealTimeData = (selectedSymbol) => {
 
     // Helper function to safely send WebSocket messages
     const safeSendMessage = (message, description = 'message') => {
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && isConnectionReady) {
             try {
                 wsRef.current.send(JSON.stringify(message));
                 console.log(`📡 Sent ${description}:`, message);
@@ -21,7 +21,14 @@ export const useRealTimeData = (selectedSymbol) => {
                 return false;
             }
         } else {
-            console.warn(`Cannot send ${description}: WebSocket not ready (state: ${wsRef.current?.readyState})`);
+            const state = wsRef.current?.readyState;
+            const stateNames = {
+                [WebSocket.CONNECTING]: 'CONNECTING',
+                [WebSocket.OPEN]: 'OPEN', 
+                [WebSocket.CLOSING]: 'CLOSING',
+                [WebSocket.CLOSED]: 'CLOSED'
+            };
+            console.warn(`Cannot send ${description}: WebSocket not ready (state: ${stateNames[state] || 'UNKNOWN'}, ready: ${isConnectionReady})`);
             return false;
         }
     };
