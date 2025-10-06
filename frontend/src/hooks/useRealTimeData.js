@@ -98,7 +98,7 @@ export const useRealTimeData = (selectedSymbol) => {
                 setConnectionStatus('disconnected');
                 
                 // Attempt to reconnect with exponential backoff
-                if (reconnectAttempts.current < 5) {
+                if (reconnectAttempts.current < maxReconnectAttempts) {
                     const delay = Math.pow(2, reconnectAttempts.current) * 1000; // 1s, 2s, 4s, 8s, 16s
                     console.log(`Reconnecting in ${delay}ms... (attempt ${reconnectAttempts.current + 1})`);
                     
