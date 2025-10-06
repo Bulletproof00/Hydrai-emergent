@@ -5401,13 +5401,10 @@ body {
   color: #ef4444;
 }
 
+  .analysis-tab {
     white-space: nowrap;
     font-size: 13px;
     padding: 10px 16px;
-  }
-  
-  .analysis-tab span {
-    display: none; /* Hide text on mobile, keep icons */
   }
   
   .global-timeframe-selector {
