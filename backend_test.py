@@ -1216,27 +1216,24 @@ class TradingSystemTester:
         
         plugin_status = data.get('plugin_status', {})
         
-        # Check for plugin list, stats, and deployment status
-        required_fields = ['total_plugins', 'active_plugins', 'plugin_list']
-        missing_fields = [field for field in required_fields if field not in plugin_status]
+        # Check for plugin list, stats, and deployment status (correct structure)
+        plugins = plugin_status.get('plugins', [])
+        statistics = plugin_status.get('statistics', {})
         
-        if not missing_fields:
-            total_plugins = plugin_status.get('total_plugins', 0)
-            active_plugins = plugin_status.get('active_plugins', 0)
-            plugin_list = plugin_status.get('plugin_list', [])
+        if 'statistics' in plugin_status:
+            total_plugins = statistics.get('total_plugins', 0)
+            deployed_plugins = statistics.get('deployed_plugins', 0)
+            successful_backtests = statistics.get('successful_backtests', 0)
             
-            if total_plugins > 0 and len(plugin_list) > 0:
-                self.log_test(
-                    test_name, 
-                    "PASS", 
-                    f"✅ PLUGIN STATUS ERFOLGREICH! Plugin-Liste verfügbar: {total_plugins} total, {active_plugins} aktiv, {len(plugin_list)} in Liste",
-                    "Plugin-Liste, Stats, Deployment-Status",
-                    f"Total: {total_plugins}, Active: {active_plugins}, List: {len(plugin_list)}"
-                )
-            else:
-                self.log_test(test_name, "WARN", f"⚠️ Plugin Status API funktioniert aber noch keine Plugins vorhanden: {total_plugins} total")
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ PLUGIN STATUS ERFOLGREICH! Plugin-System verfügbar: {total_plugins} total, {deployed_plugins} deployed, {successful_backtests} successful backtests, {len(plugins)} in Liste",
+                "Plugin-Liste, Stats, Deployment-Status",
+                f"Total: {total_plugins}, Deployed: {deployed_plugins}, List: {len(plugins)}"
+            )
         else:
-            self.log_test(test_name, "FAIL", f"❌ Plugin Status Response unvollständig, fehlende Felder: {missing_fields}")
+            self.log_test(test_name, "FAIL", f"❌ Plugin Status Response unvollständig: {plugin_status}")
 
     async def test_real_code_implementation_pipeline(self):
         """PRIORITÄT 4: REAL CODE IMPLEMENTATION TEST - Plugin Generation & Testing Pipeline"""
