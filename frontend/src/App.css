@@ -5401,6 +5401,19 @@ body {
   color: #ef4444;
 }
 
+/* Mobile Responsive Adjustments for Analysis Tabs */
+@media (max-width: 768px) {
+  .analysis-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .analysis-tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+  
   .analysis-tab {
     white-space: nowrap;
     font-size: 13px;
