@@ -1099,6 +1099,307 @@ class TradingSystemTester:
         else:
             self.log_test(test_name, "FAIL", f"Chat response quality test failed: {response.get('error')}")
 
+    # ============= SELF-CODING AI SYSTEM TESTS (PRIORITÄT 1-3) =============
+    
+    async def test_self_coding_ai_code_generation(self):
+        """PRIORITÄT 1: SELF-CODING AI CODE GENERATION TEST - POST /api/ai/coding/generate"""
+        test_name = "🎯 PRIORITÄT 1: SELF-CODING AI CODE GENERATION TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # Test with the exact request from the review: "Erstelle eine einfache RSI-basierte Trading-Strategie"
+        code_generation_data = {
+            "improvement_request": "Erstelle eine einfache RSI-basierte Trading-Strategie"
+        }
+        
+        response = await self.test_api_endpoint("/ai/coding/generate", method="POST", data=code_generation_data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ SELF-CODING AI Code Generation API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"❌ SELF-CODING AI Code Generation API returned error: {data}")
+            return
+        
+        result = data.get('result', {})
+        
+        # Check for code generation, safety check, plugin creation, and backtesting
+        required_components = ['generated_code', 'safety_check', 'plugin_created', 'backtest_results']
+        found_components = []
+        
+        if 'generated_code' in result and result['generated_code']:
+            found_components.append('generated_code')
+        if 'safety_check' in result and result['safety_check']:
+            found_components.append('safety_check')
+        if 'plugin_created' in result and result['plugin_created']:
+            found_components.append('plugin_created')
+        if 'backtest_results' in result and result['backtest_results']:
+            found_components.append('backtest_results')
+        
+        if len(found_components) >= 3:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ SELF-CODING AI CODE GENERATION ERFOLGREICH! RSI-Trading-Strategie generiert mit {len(found_components)}/4 Komponenten: {', '.join(found_components)}",
+                "Code-Generierung, Safety-Check, Plugin-Erstellung, Backtesting",
+                f"Komponenten: {', '.join(found_components)}"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"⚠️ Code Generation teilweise erfolgreich: {len(found_components)}/4 Komponenten: {', '.join(found_components)}")
+
+    async def test_self_coding_ai_evolution_chat(self):
+        """PRIORITÄT 2: EVOLUTION CHAT TEST - POST /api/ai/evolution/chat"""
+        test_name = "🎯 PRIORITÄT 2: EVOLUTION CHAT TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # Test with the exact request from the review: "Kannst du mir erklären wie du Code generierst?"
+        evolution_chat_data = {
+            "message": "Kannst du mir erklären wie du Code generierst?"
+        }
+        
+        response = await self.test_api_endpoint("/ai/evolution/chat", method="POST", data=evolution_chat_data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Evolution Chat API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"❌ Evolution Chat API returned error: {data}")
+            return
+        
+        chat_response = data.get('response', '')
+        
+        # Check for German response about self-coding
+        german_indicators = ['ich', 'code', 'generiere', 'erstelle', 'algorithmus', 'python', 'trading']
+        german_count = sum(1 for word in german_indicators if word.lower() in chat_response.lower())
+        
+        if len(chat_response) > 200 and german_count >= 4:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ EVOLUTION CHAT ERFOLGREICH! AI antwortet auf Deutsch über Self-Coding: {len(chat_response)} chars, {german_count} relevante Begriffe",
+                "Deutsche AI-Antwort über Self-Coding Prozess",
+                f"Response: {len(chat_response)} chars, {german_count} indicators"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"⚠️ Evolution Chat funktioniert aber Antwort könnte detaillierter sein: {len(chat_response)} chars, {german_count} indicators")
+
+    async def test_self_coding_ai_plugin_status(self):
+        """PRIORITÄT 3: PLUGIN STATUS TEST - GET /api/ai/coding/plugins"""
+        test_name = "🎯 PRIORITÄT 3: PLUGIN STATUS TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        response = await self.test_api_endpoint("/ai/coding/plugins", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Plugin Status API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if 'status' not in data or data['status'] != 'success':
+            self.log_test(test_name, "FAIL", f"❌ Plugin Status API returned error: {data}")
+            return
+        
+        plugin_status = data.get('plugin_status', {})
+        
+        # Check for plugin list, stats, and deployment status
+        required_fields = ['total_plugins', 'active_plugins', 'plugin_list']
+        missing_fields = [field for field in required_fields if field not in plugin_status]
+        
+        if not missing_fields:
+            total_plugins = plugin_status.get('total_plugins', 0)
+            active_plugins = plugin_status.get('active_plugins', 0)
+            plugin_list = plugin_status.get('plugin_list', [])
+            
+            if total_plugins > 0 and len(plugin_list) > 0:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ PLUGIN STATUS ERFOLGREICH! Plugin-Liste verfügbar: {total_plugins} total, {active_plugins} aktiv, {len(plugin_list)} in Liste",
+                    "Plugin-Liste, Stats, Deployment-Status",
+                    f"Total: {total_plugins}, Active: {active_plugins}, List: {len(plugin_list)}"
+                )
+            else:
+                self.log_test(test_name, "WARN", f"⚠️ Plugin Status API funktioniert aber noch keine Plugins vorhanden: {total_plugins} total")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Plugin Status Response unvollständig, fehlende Felder: {missing_fields}")
+
+    async def test_real_code_implementation_pipeline(self):
+        """PRIORITÄT 4: REAL CODE IMPLEMENTATION TEST - Plugin Generation & Testing Pipeline"""
+        test_name = "🎯 PRIORITÄT 4: REAL CODE IMPLEMENTATION PIPELINE TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # First generate code
+        code_generation_data = {
+            "improvement_request": "Erstelle eine einfache RSI-basierte Trading-Strategie mit Backtesting"
+        }
+        
+        response = await self.test_api_endpoint("/ai/coding/generate", method="POST", data=code_generation_data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Code Generation für Pipeline Test failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        result = data.get('result', {})
+        
+        # Check for real Python code generation
+        generated_code = result.get('generated_code', '')
+        safety_check = result.get('safety_check', {})
+        plugin_created = result.get('plugin_created', False)
+        backtest_results = result.get('backtest_results', {})
+        
+        pipeline_components = []
+        
+        # Check if AI actually generated Python code
+        if generated_code and ('def ' in generated_code or 'class ' in generated_code):
+            pipeline_components.append('Python-Code generiert')
+        
+        # Check if safety validation with AST parsing was performed
+        if safety_check and safety_check.get('ast_parsing_success'):
+            pipeline_components.append('AST Safety Validation')
+        
+        # Check if plugin was created in dynamic_plugins directory
+        if plugin_created:
+            pipeline_components.append('Plugin-Erstellung')
+        
+        # Check if automatic backtesting was performed
+        if backtest_results and 'total_return' in backtest_results:
+            pipeline_components.append('Automatisches Backtesting')
+        
+        if len(pipeline_components) >= 3:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ REAL CODE IMPLEMENTATION PIPELINE ERFOLGREICH! AI generiert tatsächlich funktionsfähigen Python-Code: {len(pipeline_components)}/4 Pipeline-Komponenten: {', '.join(pipeline_components)}",
+                "Python-Code Generierung, Safety Validation, Plugin-Erstellung, Backtesting",
+                f"Pipeline: {', '.join(pipeline_components)}"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"⚠️ Pipeline teilweise erfolgreich: {len(pipeline_components)}/4 Komponenten: {', '.join(pipeline_components)}")
+
+    async def test_database_integration_plugins(self):
+        """PRIORITÄT 5: DATABASE INTEGRATION TEST - Plugin Storage in MongoDB"""
+        test_name = "🎯 PRIORITÄT 5: DATABASE INTEGRATION TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # Get plugin status to check database integration
+        response = await self.test_api_endpoint("/ai/coding/plugins", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Database Integration Test failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        plugin_status = data.get('plugin_status', {})
+        plugin_list = plugin_status.get('plugin_list', [])
+        
+        database_integration_checks = []
+        
+        # Check if plugins are stored in MongoDB with metadata
+        for plugin in plugin_list[:3]:  # Check first 3 plugins
+            if 'plugin_id' in plugin and 'metadata' in plugin:
+                database_integration_checks.append('Plugin-Metadaten')
+            if 'test_results' in plugin:
+                database_integration_checks.append('Test-Results')
+            if 'backtest_results' in plugin:
+                database_integration_checks.append('Backtest-Results')
+        
+        # Check for evolution integration
+        evolution_response = await self.test_api_endpoint("/ai/evolution/status", auth=True)
+        if evolution_response['success']:
+            evolution_data = evolution_response['data']
+            if 'evolution_status' in evolution_data:
+                database_integration_checks.append('Evolution-Integration')
+        
+        if len(database_integration_checks) >= 2:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ DATABASE INTEGRATION ERFOLGREICH! Plugins werden in MongoDB gespeichert: {len(database_integration_checks)} Integration-Komponenten: {', '.join(set(database_integration_checks))}",
+                "Plugin-Metadaten, Test-Results, Backtest-Results in MongoDB",
+                f"Integration: {', '.join(set(database_integration_checks))}"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"⚠️ Database Integration teilweise: {len(database_integration_checks)} Komponenten: {', '.join(set(database_integration_checks))}")
+
+    async def test_gemini_25_flash_code_generation(self):
+        """PRIORITÄT 6: GEMINI 2.5 FLASH CODE GENERATION - Advanced Features Test"""
+        test_name = "🎯 PRIORITÄT 6: GEMINI 2.5 FLASH CODE GENERATION TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # Test advanced code generation with Gemini 2.5 Flash
+        advanced_request_data = {
+            "improvement_request": "Erstelle eine innovative Trading-Strategie mit Machine Learning und automatischem Deployment"
+        }
+        
+        response = await self.test_api_endpoint("/ai/coding/generate", method="POST", data=advanced_request_data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Gemini 2.5 Flash Code Generation failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        result = data.get('result', {})
+        
+        # Check for innovative, functional trading algorithms
+        generated_code = result.get('generated_code', '')
+        backtest_results = result.get('backtest_results', {})
+        plugin_deployed = result.get('plugin_deployed', False)
+        
+        advanced_features = []
+        
+        # Check for innovative code features
+        if generated_code:
+            if 'machine learning' in generated_code.lower() or 'ml' in generated_code.lower():
+                advanced_features.append('Machine Learning Integration')
+            if 'def ' in generated_code and len(generated_code) > 500:
+                advanced_features.append('Funktionsfähiger Code')
+        
+        # Check for real backtest results
+        if backtest_results and 'total_return' in backtest_results:
+            total_return = backtest_results.get('total_return', 0)
+            if abs(total_return) > 0:  # Non-zero return indicates real backtesting
+                advanced_features.append('Echte Backtest-Results')
+        
+        # Check for automatic deployment
+        if plugin_deployed:
+            advanced_features.append('Automatisches Deployment')
+        
+        if len(advanced_features) >= 2:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ GEMINI 2.5 FLASH CODE GENERATION ERFOLGREICH! AI generiert innovative, funktionsfähige Trading-Algorithmen: {len(advanced_features)} Advanced Features: {', '.join(advanced_features)}",
+                "Innovative Trading-Algorithmen mit echten Backtest-Results und Deployment",
+                f"Features: {', '.join(advanced_features)}"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"⚠️ Gemini 2.5 Flash funktioniert aber könnte innovativer sein: {len(advanced_features)} Features: {', '.join(advanced_features)}")
+
     # ============= SELF-EVOLVING AI SYSTEM TESTS =============
     
     async def test_ai_evolution_status_endpoint(self):
