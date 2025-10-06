@@ -457,7 +457,7 @@ function App() {
             data-testid="nav-chat"
           >
             <Brain size={20} />
-            <span>Chat</span>
+            <span>{t('nav.chat')}</span>
           </button>
           <button 
             className={`nav-item ${activeView === 'analysis' ? 'active' : ''}`}
@@ -465,7 +465,7 @@ function App() {
             data-testid="nav-analysis"
           >
             <Activity size={20} />
-            <span>Analyse</span>
+            <span>{t('nav.analysis')}</span>
           </button>
           <button 
             className={`nav-item ${activeView === 'chart' ? 'active' : ''}`}
@@ -473,7 +473,7 @@ function App() {
             data-testid="nav-chart"
           >
             <LineChart size={20} />
-            <span>Charts</span>
+            <span>{t('nav.charts')}</span>
           </button>
           <button 
             className={`nav-item ${activeView === 'trading' ? 'active' : ''}`}
@@ -481,7 +481,7 @@ function App() {
             data-testid="nav-trading"
           >
             <DollarSign size={20} />
-            <span>Trading</span>
+            <span>{t('nav.trading')}</span>
           </button>
           <button 
             className={`nav-item ${activeView === 'evolution' ? 'active' : ''}`}
@@ -489,7 +489,7 @@ function App() {
             data-testid="nav-evolution"
           >
             <Brain size={20} />
-            <span>AI Evolution</span>
+            <span>{t('nav.evolution')}</span>
           </button>
         </nav>
 
