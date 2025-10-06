@@ -1877,6 +1877,42 @@ async def get_trading_account(authorization: str = Header(None)):
         logging.error(f"Trading account error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/trading/account/reset")
+async def reset_trading_account(authorization: str = Header(None)):
+    """Reset user's paper trading account to $10,000 and close all positions"""
+    try:
+        if not paper_trading:
+            return {
+                'status': 'error',
+                'message': 'Paper Trading system not initialized'
+            }
+        
+        user = await get_current_user(authorization)
+        user_id = user['_id']
+        
+        # Close all open positions first
+        positions = await paper_trading.get_user_positions(user_id)
+        for position in positions:
+            if position.get('status') == 'open':
+                await paper_trading.close_position(user_id, position['position_id'], 100.0)
+        
+        # Delete the account
+        await paper_trading.db['paper_trading_accounts'].delete_one({'user_id': user_id})
+        
+        # Create new account with $10,000
+        account = await paper_trading.create_user_account(user_id, 10000.0)
+        
+        return {
+            'status': 'success',
+            'message': 'Account successfully reset to $10,000',
+            'account': account,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Reset account error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/trading/order")
 async def place_trading_order(
     order_data: OrderCreate,
