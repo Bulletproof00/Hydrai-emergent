@@ -271,19 +271,61 @@ class SelfCodingAI:
             raise
 
     def _extract_python_code(self, text: str) -> str:
-        """Extract Python code from AI response"""
-        # Look for code blocks
-        if '```python' in text:
-            start = text.find('```python') + 9
-            end = text.find('```', start)
-            return text[start:end].strip()
-        elif '```' in text:
-            start = text.find('```') + 3
-            end = text.find('```', start)
-            return text[start:end].strip()
-        else:
-            # Return the whole text if no code blocks
-            return text.strip()
+        """Extract Python code from AI response with improved parsing"""
+        # Look for code blocks with various markers
+        code_markers = ['```python', '```py', '```']
+        
+        for marker in code_markers:
+            if marker in text:
+                start = text.find(marker) + len(marker)
+                end = text.find('```', start)
+                if end != -1:
+                    code = text[start:end].strip()
+                    
+                    # Clean up the code
+                    lines = code.split('\n')
+                    clean_lines = []
+                    
+                    for line in lines:
+                        # Skip empty lines at the beginning
+                        if not clean_lines and not line.strip():
+                            continue
+                        # Skip obvious non-code lines
+                        if line.strip().startswith('#') and ('HIER:' in line or 'TODO:' in line):
+                            continue
+                        clean_lines.append(line)
+                    
+                    # Remove trailing empty lines
+                    while clean_lines and not clean_lines[-1].strip():
+                        clean_lines.pop()
+                    
+                    return '\n'.join(clean_lines)
+        
+        # If no code blocks found, try to extract class definition
+        if 'class DynamicPlugin' in text:
+            start = text.find('class DynamicPlugin')
+            # Find the end by looking for the next class or end of text
+            remaining = text[start:]
+            lines = remaining.split('\n')
+            class_lines = []
+            indent_level = None
+            
+            for line in lines:
+                if line.strip().startswith('class DynamicPlugin'):
+                    class_lines.append(line)
+                    indent_level = len(line) - len(line.lstrip())
+                elif class_lines:
+                    # If we're inside the class
+                    current_indent = len(line) - len(line.lstrip()) if line.strip() else 0
+                    if line.strip() and current_indent <= indent_level and not line.strip().startswith('#'):
+                        # We've reached the end of the class
+                        break
+                    class_lines.append(line)
+            
+            return '\n'.join(class_lines).strip()
+        
+        # Last resort: return cleaned text
+        return text.strip()
 
     async def _validate_code_safety(self, generated_code: Dict[str, Any]) -> Dict[str, Any]:
         """Validate code safety before execution with detailed error reporting"""
