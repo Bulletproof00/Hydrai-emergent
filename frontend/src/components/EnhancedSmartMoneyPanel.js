@@ -38,7 +38,7 @@ const EnhancedSmartMoneyPanel = ({ globalTimeframe }) => {
         if (selectedSymbol) {
             fetchEnhancedSmartMoneyData();
         }
-    }, [selectedSymbol, selectedTimeframe]);
+    }, [selectedSymbol, selectedTimeframe, globalTimeframe]);
 
     const fetchSupportedSymbols = async () => {
         try {
