@@ -54,7 +54,10 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange, globalTimeframe, s
   };
 
   const handleTimeframeChange = (tf) => {
-    setTimeframe(tf);
+    // Update global timeframe instead of local state
+    if (setGlobalTimeframe) {
+      setGlobalTimeframe(tf);
+    }
   };
 
   const handleSymbolChange = (newSymbol) => {
