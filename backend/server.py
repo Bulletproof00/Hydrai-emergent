@@ -83,6 +83,8 @@ self_evolving_ai = None
 
 # Self-Coding AI System
 self_coding_ai = None
+# News and Sentiment Engine
+news_sentiment = None
 
 # Create the main app without a prefix
 app = FastAPI()
