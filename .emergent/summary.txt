@@ -1,78 +1,66 @@
 <analysis>
-The previous AI engineer successfully implemented complex features for a trading application, progressing through several key phases. Initially, a robust real-time, WebSocket-based streaming solution for market data was established, followed by the implementation of Smart Money Indicators (Liquidation Heatmaps, Open Interest, Funding Rates) for cryptocurrencies, designed in a Coinglass-style UI. This phase involved addressing API limitations and integrating frontend data transformations.
+The AI engineer's work primarily focused on enhancing a trading application, initially by integrating a comprehensive AI chat system. Key challenges involved resolving a persistent 422 Unprocessable Entity error at the  endpoint, migrating from the old  library to the new  SDK, and ensuring the AI had full access to all system data for analysis. The engineer meticulously updated backend modules (, , ) to support Gemini 2.5 Flash and created Pydantic models for API request bodies.
 
-The focus then shifted to enhancing Smart Money features with timeframe filters and directional bias analysis for liquidation clusters, prioritizing BTC and Coinglass-inspired design. This involved substantial backend (, ) and frontend (, ) modifications. Critical issues like incorrect URL parsing, frontend JSX errors, and persistent scrolling problems across the UI were debugged and fixed.
-
-Subsequently, a comprehensive Paper Trading System was developed, emulating real exchanges with leverage, margin management, and parallel long/short positions for the Top 30 cryptocurrencies. This required new backend modules () and a dedicated frontend interface (, ).
-
-The most recent work has focused on deep AI integration using Gemini Pro for trade analysis and chat-based commands. After initial integration, a critical CoinGecko API rate-limiting issue and persistent AI chat errors (422 Unprocessable Entity) prevented full functionality, leading to UI components (charts, smart money, plugins) failing to load. The engineer is currently re-implementing the chat system with a new  module to resolve these AI issues and ensure comprehensive system data access for the AI.
+Subsequent work addressed critical frontend and backend issues, including a 0 USD price display in paper trading, non-closable positions, and WebSocket connectivity problems. The application was then renamed to Lunara Analyze AI, and mobile responsiveness was significantly improved. Most recently, the engineer implemented a Self-Evolving AI System and a Self-Coding AI System, allowing the AI to analyze, suggest improvements, generate code (including trading strategy plugins), perform backtests, and communicate its evolution. The latest work focused on fixing syntax errors in the AI-generated code with a retry mechanism, and now a minor database error in the Plugin Status API needs addressing.
 </analysis>
 
 <product_requirements>
-The user requested Hydra AI, a modular, self-learning trading system capable of multi-timeframe analysis, order flow, backtesting, automated trading, risk management, and portfolio optimization, with a futuristic, minimalist UI.
+The user initially requested Hydra AI, a modular, self-learning trading system with multi-timeframe analysis, order flow, backtesting, automated trading, risk management, and portfolio optimization, presented with a futuristic, minimalist UI.
 
-Implemented features include:
--   **UI:** ChatGPT-like, futuristic (Lila/Schwarz, minimalist).
--   **Backend:** FastAPI with MongoDB.
--   **Data Sources:** Live crypto (Kraken), traditional markets (NASDAQ, SPX, DXY, Gold), dominance metrics; with real-time, tick-by-tick streaming across all assets.
--   **Indicators:** RSI, MFI, Bollinger Bands, Stochastic, OBV, VWAP, EMA (50, 200).
--   **AI:** Emergent LLM Key & Gemini AI for analysis and pattern recognition.
--   **Charting:** Custom Candlestick charts with OHLCV, volume, 1m-1M timeframes, zoom/scroll for cryptos and traditional markets.
--   **Authentication:** JWT-based login/registration with user profiles and paper trading balance.
--   **Paper Trading:** Basic trade opening, PnL, portfolio management, now enhanced to exchange-like functionality (1-100x leverage, margin, parallel positions, partial closing) for Top 30 Cryptos, with a dedicated UI tab and real-time prices.
--   **Gap Detection:** CME Gap-Erkennung.
--   **Smart Money Indicators:** Liquidation Heatmaps, Open Interest, Funding Rates, Orderflow, Liquidity Heatmaps for BTC, ETH, SOL, XRP, now extended to all Top 30 cryptos, designed in Coinglass-style with aggregated data, above/below price analysis, timeframe filters (12h, 1d, 3d, 1w, 2w, monthly), and directional bias analysis.
--   **Current AI Requirement:** Gemini AI must fully access Paper Trading for trade opinions, win chance calculation, TP/SL, trade type suggestions, chat-based commands, and strategy development, learning from all system data and user interactions.
+Implemented features include a FastAPI backend with MongoDB, React frontend, live crypto and traditional market data streaming, technical indicators (RSI, MFI, Bollinger Bands, Stochastic, OBV, VWAP, EMA), and custom candlestick charts. Authentication is JWT-based with user profiles and paper trading balance. The paper trading system was enhanced with leverage, margin management, parallel positions, and partial closing for the Top 30 cryptocurrencies. Smart Money Indicators (Liquidation Heatmaps, Open Interest, Funding Rates) were extended to the Top 30 cryptos with Coinglass-style UI, timeframe filters, and directional bias.
+
+The AI, initially Gemini Pro, now uses Gemini 2.5 Flash. It is required to fully access Paper Trading data for trade opinions, win chance calculation, TP/SL, trade type suggestions, chat-based commands, and strategy development, learning from all system data and user interactions. Additionally, the user explicitly requested the AI to self-develop, suggest needed data for effective analysis, continuously optimize, find new calculation methods, self-program via plugins, and perform backtests. The application was also rebranded to Lunara Analyze AI and optimized for mobile devices.
 </product_requirements>
 
 <key_technical_concepts>
--   **FastAPI:** Python backend framework.
--   **React:** Frontend library.
--   **MongoDB:** NoSQL database.
--   **Gemini AI:** AI for market analysis.
--   **JWT:** Authentication tokens.
--   **Custom Canvas Charting:** For performance.
--   **, , usage: websockets [--version | <uri>]:** For real-time data.
--   **Tailwind CSS/Shadcn UI:** For styling.
--   **:** Python library for Gemini API.
+-   **FastAPI**: Python backend framework.
+-   **React**: Frontend library.
+-   **MongoDB**: NoSQL database.
+-   **Gemini AI (2.5 Flash)**: AI for market analysis, self-evolution, code generation.
+-   **JWT**: Authentication tokens.
+-   **Custom Canvas Charting**: For performance.
+-   **, , usage: websockets [--version | <uri>]**: For real-time data streaming.
+-   ****: Python library for Gemini API.
+-   **Pydantic**: Data validation and serialization for API requests/responses.
 </key_technical_concepts>
 
 <code_architecture>
-The application utilizes a full-stack architecture with a React frontend, a FastAPI backend, and MongoDB for data persistence.
-
 
 
 **Key Files and Changes:**
--   : Central backend, significantly modified. It now handles new Smart Money API routes with timeframe parameters, paper trading endpoints (open/close position, margin management, history, account summary), AI trading APIs, and an extended chat API for AI integration. It also includes URL parsing fixes for symbol parameters and timeframe validation logic.
--   : Updated to include fallback mechanisms and rate-limiting handling for external data sources like CoinGecko to ensure robust real-time data delivery.
--   : Extended to support timeframe logic for calculating liquidation clusters and directional bias. It also now accommodates the Top 30 cryptocurrencies and features enhanced liquidation levels generation with cumulative data and improved sorting.
--   : Expanded to include comprehensive symbol mappings for the Top 30 crypto assets, enabling broader real-time Smart Money analysis across more assets.
--   : **New file.** Contains the core business logic for the paper trading system, managing virtual positions, trades, leverage, margin, and account summaries.
--   : **New file.** Implements the integration with Gemini AI, including functionalities for market analysis, trade recommendations, and processing AI-specific requests.
--   : **New file.** This module is currently being developed to re-implement the chat system and fully integrate AI functionalities, aiming to resolve existing chat errors and enhance AI's access to system data.
--   : Updated to include the  library for Gemini AI integration.
--   : Corrected  to point to , resolving a critical frontend-backend communication issue.
--   : Heavily modified for navigation to include a new Trading tab, integrates  and other new components, and extends the  function to handle AI trading commands from the chat.
--   : Extensively updated to include styling for the Coinglass-style timeframe dropdowns, directional bias display, an enhanced liquidation levels table, the new Trading Interface, AI analysis panels, and the Live Liquidation Heatmap. Critical CSS fixes for  and  in various containers (, , , , ) were implemented to enable proper scrolling.
--   : Modified to incorporate timeframe selectors, display directional bias, present an enhanced liquidation levels table, and integrate the new  component via a tab. Obsolete data transformation logic was removed.
--   : **New file.** Provides the user interface for the paper trading system, including order entry forms, position display, account summary, and integration points for AI analysis. It previously required JSX syntax corrections.
--   : **New file.** A dedicated component for visualizing the enhanced liquidation heatmap, including a live price ticker.
+-   : Central backend. Renamed Hydra AI to Lunara Analyze AI. Updated with new API endpoints for AI chat, AI trading analysis, and self-evolving/coding AI. Old chat endpoint logic replaced with . Modified  and  for AI system initialization/cleanup. New Pydantic models , ,  added to validate incoming JSON bodies for , , and  endpoints respectively.
+-   : **New module.** Centralized AI chat logic. Renamed Hydra AI to Lunara Analyze AI. Updated to use  SDK and  for AI interaction, ensuring full system data access.
+-   : Core AI trading logic. Renamed Hydra AI to Lunara Analyze AI. Updated to use  and , replacing old  logic.
+-   : **New module.** Implements continuous learning and self-improvement for the AI, tracking evolution cycles and performance.
+-   : **New module.** Enables the AI to generate, test, and deploy code (plugins), with a retry system for syntax errors and improved code extraction.
+-   : Updated with .
+-   : Renamed Hydra AI to Lunara Analyze AI. Significantly modified for mobile responsiveness with new state, logic for mobile navigation (sidebar toggle), and updated JSX structure for mobile viewports. Integrated  component. Added  header to chat  function.
+-   : Extensively updated to include comprehensive mobile-specific media queries and styles for navigation, main content, and new components. Added styles for  and  components.
+-   : Fixed price display to fall back to  if real-time data is unavailable to prevent 0 USD display.
+-   : **New component.** Displays AI evolution status, performance, reports, and a tabbed interface for Overview, Chat, Code Generator, and Plugins.
+-   : WebSocket handling significantly refactored to prevent CONNECTING state errors. Implemented  with a readiness check and delay, a robust  flag, improved error handling, and  constant.
+-   : Updated with mobile meta-tags and linked to  for PWA capabilities. Renamed application title.
+-   , , : **New files.** PWA manifest and icons for mobile web app.
+-   : **New directory and files** for Docker Compose-based server deployment, including , s for backend and frontend, Nginx configurations,  for production, and installation scripts.
 </code_architecture>
 
 <pending_tasks>
--   Complete the re-implementation and integration of the  module in the backend to fully resolve the AI chat error (422 Unprocessable Entity) and provide AI with comprehensive system access for debugging, improvements, and data analysis as requested by the user.
+-   Fix the NoneType error in Plugin Status API related to the database, as reported in the latest AI output (Chat Message 519).
+-   Address the recurring  error which was identified as critical by the AI itself but not confirmed fixed.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was in the process of resolving a critical issue: the user reported that the AI chat system was consistently returning an error (Entschuldigung, es gab einen Fehler bei der Verarbeitung deiner Anfrage.) and that the AI lacked full access to the system's data for analysis and improvements.
+Immediately before this summary request, the AI engineer was working on resolving issues with the newly implemented Self-Coding AI system. The user reported that the AI-generated code was failing safety validation due to syntax errors, specifically Syntax error: ( was never closed. This prevented the creation of plugins.
 
-A root cause analysis, including checking backend logs, revealed a 422 Unprocessable Entity error at the  endpoint, indicating a problem with how chat messages or AI interactions were being processed. Despite verifying the existing  schema in , the previous implementation of the chat system with AI integration was deemed insufficient.
+The engineer's current work involved:
+1.  **Improving Code Generation Logic**: Updates were made to  to refine how the AI generates Python code, aiming for syntactically correct output.
+2.  **Enhancing Safety Validation**: The safety validation mechanism within  was improved to provide more informative error messages when generated code fails.
+3.  **Implementing a Retry System**: A retry system was added to  so that the AI could automatically attempt to correct and regenerate code if initial attempts resulted in syntax errors. The  function was adjusted to accept a  parameter.
+4.  **Refining Code Extraction**: The logic for extracting clean Python code from the AI's output in  was enhanced.
 
-To address this, the AI engineer initiated a full re-implementation of the chat system with a stronger, more comprehensive AI integration. The current work involves:
--   **Creation of a new module:** A new Python file, , has been created. This module is intended to encapsulate the robust logic for the updated chat system and its deep integration with the AI.
--   **Integration into the server:** The next immediate step is to integrate this newly created  module into . This will involve replacing the problematic existing chat handling with the new, more robust implementation. The goal is to ensure the AI can seamlessly access and process all relevant data (inputs, outputs, timeframes, markets, assets, indicators, correlations, smart money data, chat history, user behavior) to provide accurate analysis, recommendations, and learn from interactions, as explicitly requested by the user.
+After these changes and a backend restart, the AI successfully generated three plugins, including a Scalping Strategy for 300 USD profit with 5000€ capital, indicating that the retry system and improved code generation were functional. However, the last update noted a new NoneType-Fehler im Plugin Status API which is the immediate outstanding issue.
 </current_work>
 
 <optional_next_step>
-Integrate the  module into  to fix the AI chat error.
+Fix the NoneType error in Plugin Status API reported in the latest AI output.
 </optional_next_step>

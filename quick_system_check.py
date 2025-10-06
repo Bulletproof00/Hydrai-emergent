@@ -8,7 +8,7 @@ import aiohttp
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://smart-trade-ai-28.preview.emergentagent.com/api"
+BACKEND_URL = "https://self-coding-ai.preview.emergentagent.com/api"
 
 async def quick_system_check():
     """Quick system health check"""
