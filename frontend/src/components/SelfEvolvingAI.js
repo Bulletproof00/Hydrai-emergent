@@ -88,6 +88,70 @@ const SelfEvolvingAI = () => {
         }
     };
 
+    const generateCode = async () => {
+        if (!improvementRequest.trim()) return;
+
+        try {
+            setIsGeneratingCode(true);
+            const token = localStorage.getItem('token');
+            const headers = { 'Authorization': `Bearer ${token}` };
+
+            const response = await axios.post(`${BACKEND_URL}/api/ai/coding/generate`, {
+                improvement_request: improvementRequest
+            }, { headers });
+            
+            if (response.data.status === 'success') {
+                // Add to chat messages
+                setChatMessages(prev => [...prev, 
+                    { role: 'user', content: `Code generieren: ${improvementRequest}` },
+                    { role: 'assistant', content: `✅ Code erfolgreich generiert und getestet!\n\nDetails:\n${JSON.stringify(response.data.coding_result, null, 2)}` }
+                ]);
+                setImprovementRequest('');
+                // Refresh plugin data
+                setTimeout(fetchEvolutionData, 1000);
+            } else {
+                setError(response.data.message || 'Code-Generierung fehlgeschlagen');
+            }
+        } catch (err) {
+            console.error('Code generation error:', err);
+            setError('Fehler beim Generieren von Code');
+        } finally {
+            setIsGeneratingCode(false);
+        }
+    };
+
+    const sendChatMessage = async () => {
+        if (!chatInput.trim()) return;
+
+        try {
+            setIsChatting(true);
+            const token = localStorage.getItem('token');
+            const headers = { 'Authorization': `Bearer ${token}` };
+
+            const userMessage = chatInput;
+            setChatInput('');
+
+            // Add user message immediately
+            setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+
+            const response = await axios.post(`${BACKEND_URL}/api/ai/evolution/chat`, {
+                message: userMessage
+            }, { headers });
+            
+            if (response.data.status === 'success') {
+                // Add AI response
+                setChatMessages(prev => [...prev, { role: 'assistant', content: response.data.ai_response }]);
+            } else {
+                setChatMessages(prev => [...prev, { role: 'assistant', content: 'Entschuldigung, es gab einen Fehler bei der Verarbeitung deiner Nachricht.' }]);
+            }
+        } catch (err) {
+            console.error('Chat error:', err);
+            setChatMessages(prev => [...prev, { role: 'assistant', content: 'Verbindungsfehler. Bitte versuche es erneut.' }]);
+        } finally {
+            setIsChatting(false);
+        }
+    };
+
     const formatTimestamp = (timestamp) => {
         if (!timestamp) return 'Unbekannt';
         return new Date(timestamp).toLocaleString('de-DE');
