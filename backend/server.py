@@ -2243,9 +2243,14 @@ async def get_latest_evolution_report(authorization: str = Header(...)):
                 'message': 'No evolution reports available yet'
             }
         
+        # Remove MongoDB ObjectId field to avoid JSON serialization issues
+        report = latest_report[0]
+        if '_id' in report:
+            del report['_id']
+        
         return {
             'status': 'success',
-            'latest_report': latest_report[0],
+            'latest_report': report,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
         
