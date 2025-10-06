@@ -516,11 +516,70 @@ function App() {
           <>
             <div className="chat-header">
               <h1 data-testid="chat-title">Lunara Analyze AI Assistant</h1>
-              <button className="backtest-btn" onClick={runBacktest} disabled={loading} data-testid="backtest-button">
-                <BarChart3 size={18} />
-                Backtest ausführen
-              </button>
+              <div className="chat-header-actions">
+                <button 
+                  className="chat-history-btn" 
+                  onClick={() => setShowChatHistory(!showChatHistory)}
+                  title="Chat-Historie anzeigen"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                  Historie
+                </button>
+                <button className="backtest-btn" onClick={runBacktest} disabled={loading} data-testid="backtest-button">
+                  <BarChart3 size={18} />
+                  Backtest ausführen
+                </button>
+                <button className="new-chat-btn" onClick={initializeSession} title="Neuer Chat">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  Neuer Chat
+                </button>
+              </div>
             </div>
+
+            {/* Chat History Sidebar */}
+            {showChatHistory && (
+              <div className="chat-history-sidebar">
+                <div className="chat-history-header">
+                  <h3>Chat-Historie</h3>
+                  <button onClick={() => setShowChatHistory(false)} className="close-history-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+                <div className="chat-history-list">
+                  {chatSessions.map((session) => (
+                    <div 
+                      key={session.id} 
+                      className={`chat-history-item ${session.id === sessionId ? 'active' : ''}`}
+                      onClick={() => loadChatSession(session.id)}
+                    >
+                      <div className="chat-history-date">
+                        {new Date(session.created_at).toLocaleString('de-DE', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                      <div className="chat-history-preview">
+                        Chat #{session.id.slice(0, 8)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="messages-container" data-testid="messages-container">
               {messages.map((msg, idx) => (
