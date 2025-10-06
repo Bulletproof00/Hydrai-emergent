@@ -2551,6 +2551,20 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Self-Evolving AI initialization failed: {str(e)}")
     
+    # Initialize Self-Coding AI System (Real implementation)
+    try:
+        global self_coding_ai
+        self_coding_ai = await initialize_self_coding_ai(
+            db=db,
+            paper_trading=paper_trading,
+            enhanced_smart_money=enhanced_smart_money,
+            real_time_streamer=enhanced_streamer
+        )
+        
+        logger.info("🤖 Self-Coding AI System initialized - Autonomous development ready")
+    except Exception as e:
+        logger.warning(f"Self-Coding AI initialization failed: {str(e)}")
+    
     # Start background data update task
     asyncio.create_task(update_market_data_background())
     logger.info("Background data update task started")
