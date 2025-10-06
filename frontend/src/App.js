@@ -99,6 +99,8 @@ function App() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState("");
+  const [chatSessions, setChatSessions] = useState([]);
+  const [showChatHistory, setShowChatHistory] = useState(false);
   const [livePrice, setLivePrice] = useState(null);
   const [indicators, setIndicators] = useState(null);
   const [plugins, setPlugins] = useState([]);
