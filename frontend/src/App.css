@@ -5415,3 +5415,46 @@ body {
 .position-pnl.negative {
   color: #ef4444;
 }
+
+
+/* Trading Account Reset Button */
+.account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.account-header-left h2 {
+  margin: 0;
+}
+
+.reset-account-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reset-account-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: translateY(-2px);
+}
+
+.reset-account-btn svg {
+  flex-shrink: 0;
+}
+
+.reset-account-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
