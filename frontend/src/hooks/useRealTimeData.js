@@ -98,6 +98,7 @@ export const useRealTimeData = (selectedSymbol) => {
             wsRef.current.onclose = (event) => {
                 console.log('WebSocket closed:', event.code, event.reason);
                 setConnectionStatus('disconnected');
+                setIsConnectionReady(false);
                 
                 // Attempt to reconnect with exponential backoff
                 if (reconnectAttempts.current < maxReconnectAttempts) {
