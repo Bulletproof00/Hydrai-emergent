@@ -80,6 +80,9 @@ integrated_ai = None
 # Self-Evolving AI System  
 self_evolving_ai = None
 
+# Self-Coding AI System
+self_coding_ai = None
+
 # Create the main app without a prefix
 app = FastAPI()
 
