@@ -364,24 +364,23 @@ const TradingInterface = () => {
                     </button>
                 </div>
                 <div className="account-stats">
-                        <div className="stat-item">
-                            <span className="stat-label">Balance</span>
-                            <span className="stat-value balance">{formatCurrency(account?.balance || 0)}</span>
-                        </div>
-                        <div className="stat-item">
-                            <span className="stat-label">Equity</span>
-                            <span className="stat-value equity">{formatCurrency(account?.equity || 0)}</span>
-                        </div>
-                        <div className="stat-item">
-                            <span className="stat-label">Unrealized PnL</span>
-                            <span className={`stat-value pnl ${(account?.unrealized_pnl || 0) >= 0 ? 'positive' : 'negative'}`}>
-                                {formatCurrency(account?.unrealized_pnl || 0)}
-                            </span>
-                        </div>
-                        <div className="stat-item">
-                            <span className="stat-label">Free Margin</span>
-                            <span className="stat-value margin">{formatCurrency(account?.free_margin || 0)}</span>
-                        </div>
+                    <div className="stat-item">
+                        <span className="stat-label">Balance</span>
+                        <span className="stat-value balance">{formatCurrency(account?.balance || 0)}</span>
+                    </div>
+                    <div className="stat-item">
+                        <span className="stat-label">Equity</span>
+                        <span className="stat-value equity">{formatCurrency(account?.equity || 0)}</span>
+                    </div>
+                    <div className="stat-item">
+                        <span className="stat-label">Unrealized PnL</span>
+                        <span className={`stat-value pnl ${(account?.unrealized_pnl || 0) >= 0 ? 'positive' : 'negative'}`}>
+                            {formatCurrency(account?.unrealized_pnl || 0)}
+                        </span>
+                    </div>
+                    <div className="stat-item">
+                        <span className="stat-label">Free Margin</span>
+                        <span className="stat-value margin">{formatCurrency(account?.free_margin || 0)}</span>
                     </div>
                 </div>
             </div>
