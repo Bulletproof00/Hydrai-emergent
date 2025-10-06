@@ -2375,6 +2375,22 @@ async def websocket_price(websocket: WebSocket):
     except WebSocketDisconnect:
         active_connections.remove(websocket)
 
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "services": {
+            "database": "connected" if db else "disconnected",
+            "enhanced_streamer": "running" if enhanced_streamer else "stopped",
+            "smart_money": "active" if enhanced_smart_money else "inactive",
+            "paper_trading": "available" if paper_trading else "unavailable",
+            "ai_trading": "ready" if ai_trading else "not_ready",
+            "self_evolving_ai": "learning" if self_evolving_ai else "offline"
+        }
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
@@ -2409,22 +2425,6 @@ async def continuous_evolution_loop():
         except Exception as e:
             logger.error(f"Evolution loop error: {e}")
             await asyncio.sleep(1800)  # Wait 30 minutes before retry
-
-@api_router.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "services": {
-            "database": "connected" if db else "disconnected",
-            "enhanced_streamer": "running" if enhanced_streamer else "stopped",
-            "smart_money": "active" if enhanced_smart_money else "inactive",
-            "paper_trading": "available" if paper_trading else "unavailable",
-            "ai_trading": "ready" if ai_trading else "not_ready",
-            "self_evolving_ai": "learning" if self_evolving_ai else "offline"
-        }
-    }
 
 async def update_market_data_background():
     """Background task to update market data every 5 minutes"""
