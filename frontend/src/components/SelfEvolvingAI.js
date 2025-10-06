@@ -9,6 +9,15 @@ const SelfEvolvingAI = () => {
     const [isTriggering, setIsTriggering] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    // New states for coding features
+    const [pluginStatus, setPluginStatus] = useState(null);
+    const [chatMessages, setChatMessages] = useState([]);
+    const [chatInput, setChatInput] = useState('');
+    const [improvementRequest, setImprovementRequest] = useState('');
+    const [isGeneratingCode, setIsGeneratingCode] = useState(false);
+    const [isChatting, setIsChatting] = useState(false);
+    const [activeTab, setActiveTab] = useState('overview');
 
     const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
