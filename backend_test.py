@@ -1193,22 +1193,28 @@ class TradingSystemTester:
             self.log_test(test_name, "FAIL", f"❌ Evolution Chat API returned error: {data}")
             return
         
-        chat_response = data.get('response', '')
+        chat_response = data.get('ai_response', '')
         
         # Check for German response about self-coding
-        german_indicators = ['ich', 'code', 'generiere', 'erstelle', 'algorithmus', 'python', 'trading']
+        german_indicators = ['ich', 'code', 'generiere', 'erstelle', 'algorithmus', 'python', 'trading', 'verbesserung', 'lunara']
         german_count = sum(1 for word in german_indicators if word.lower() in chat_response.lower())
         
-        if len(chat_response) > 200 and german_count >= 4:
+        # Check for self-coding specific content
+        self_coding_indicators = ['code-generierung', 'mustererkennung', 'metaprogrammierung', 'selbst-reflexion', 'plugin']
+        self_coding_count = sum(1 for word in self_coding_indicators if word.lower() in chat_response.lower())
+        
+        if len(chat_response) > 1000 and german_count >= 5 and self_coding_count >= 2:
             self.log_test(
                 test_name, 
                 "PASS", 
-                f"✅ EVOLUTION CHAT ERFOLGREICH! AI antwortet auf Deutsch über Self-Coding: {len(chat_response)} chars, {german_count} relevante Begriffe",
-                "Deutsche AI-Antwort über Self-Coding Prozess",
-                f"Response: {len(chat_response)} chars, {german_count} indicators"
+                f"✅ EVOLUTION CHAT ERFOLGREICH! AI antwortet ausführlich auf Deutsch über Self-Coding: {len(chat_response)} chars, {german_count} deutsche Begriffe, {self_coding_count} Self-Coding Konzepte",
+                "Deutsche AI-Antwort über Self-Coding Prozess mit detaillierten Erklärungen",
+                f"Response: {len(chat_response)} chars, German: {german_count}, Self-Coding: {self_coding_count}"
             )
+        elif len(chat_response) > 200:
+            self.log_test(test_name, "WARN", f"⚠️ Evolution Chat funktioniert aber könnte spezifischer sein: {len(chat_response)} chars, {german_count} German, {self_coding_count} Self-Coding indicators")
         else:
-            self.log_test(test_name, "WARN", f"⚠️ Evolution Chat funktioniert aber Antwort könnte detaillierter sein: {len(chat_response)} chars, {german_count} indicators")
+            self.log_test(test_name, "FAIL", f"❌ Evolution Chat Response zu kurz: {len(chat_response)} chars")
 
     async def test_self_coding_ai_plugin_status(self):
         """PRIORITÄT 3: PLUGIN STATUS TEST - GET /api/ai/coding/plugins"""
