@@ -93,6 +93,7 @@ export const useRealTimeData = (selectedSymbol) => {
             wsRef.current.onerror = (error) => {
                 console.error('WebSocket error:', error);
                 setConnectionStatus('error');
+                setIsConnectionReady(false);
             };
             
             wsRef.current.onclose = (event) => {
