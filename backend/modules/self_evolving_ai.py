@@ -534,10 +534,23 @@ class SelfEvolvingAI:
             latest_evolution = await self.db.ai_evolution_history.find().sort("timestamp", -1).limit(1).to_list(1)
             latest_report = await self.db.ai_evolution_reports.find().sort("timestamp", -1).limit(1).to_list(1)
             
+            # Remove MongoDB ObjectId fields to avoid JSON serialization issues
+            latest_evolution_clean = None
+            if latest_evolution:
+                latest_evolution_clean = latest_evolution[0].copy()
+                if '_id' in latest_evolution_clean:
+                    del latest_evolution_clean['_id']
+            
+            latest_report_clean = None
+            if latest_report:
+                latest_report_clean = latest_report[0].copy()
+                if '_id' in latest_report_clean:
+                    del latest_report_clean['_id']
+            
             return {
                 'total_evolution_cycles': self.learning_cycles,
-                'latest_evolution': latest_evolution[0] if latest_evolution else None,
-                'latest_report': latest_report[0] if latest_report else None,
+                'latest_evolution': latest_evolution_clean,
+                'latest_report': latest_report_clean,
                 'next_evolution_eta': self._calculate_next_evolution_time(),
                 'evolution_enabled': True,
                 'current_performance_score': await self._get_current_performance_score()
