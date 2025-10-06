@@ -12,6 +12,83 @@ import Login from "./pages/Login";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Trading Positions Widget Component
+const TradingPositionsWidget = () => {
+  const [positions, setPositions] = useState([]);
+  const [account, setAccount] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTradingData();
+    const interval = setInterval(fetchTradingData, 10000); // Update every 10s
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchTradingData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const headers = { 'Authorization': `Bearer ${token}` };
+
+      // Fetch account and positions
+      const [accountRes, positionsRes] = await Promise.all([
+        axios.get(`${API}/trading/account`, { headers }),
+        axios.get(`${API}/trading/positions`, { headers })
+      ]);
+
+      if (accountRes.data.status === 'success') {
+        setAccount(accountRes.data.account);
+      }
+      if (positionsRes.data.status === 'success') {
+        setPositions(positionsRes.data.positions || []);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching trading data:', error);
+      setLoading(false);
+    }
+  };
+
+  if (loading) return null;
+
+  const totalPnL = account?.unrealized_pnl || 0;
+  const openPositionsCount = positions.filter(p => p.status === 'open').length;
+
+  return (
+    <div className="trading-widget">
+      <div className="widget-title">Trading Übersicht</div>
+      
+      <div className="trading-stat">
+        <span className="stat-label">Offene Positionen</span>
+        <span className="stat-value">{openPositionsCount}</span>
+      </div>
+
+      <div className="trading-stat">
+        <span className="stat-label">Unrealisierter PnL</span>
+        <span className={`stat-value ${totalPnL >= 0 ? 'positive' : 'negative'}`}>
+          {totalPnL >= 0 ? '+' : ''}{totalPnL.toFixed(2)} USD
+        </span>
+      </div>
+
+      {positions.slice(0, 2).map((pos, idx) => (
+        <div key={idx} className="position-mini">
+          <div className="position-mini-header">
+            <span className="position-symbol">{pos.symbol}</span>
+            <span className={`position-side ${pos.side}`}>{pos.side === 'long' ? 'Long' : 'Short'}</span>
+          </div>
+          <div className="position-mini-stats">
+            <span className="position-size">{pos.size} @ {pos.leverage}x</span>
+            <span className={`position-pnl ${pos.unrealized_pnl >= 0 ? 'positive' : 'negative'}`}>
+              {pos.unrealized_pnl >= 0 ? '+' : ''}{pos.unrealized_pnl?.toFixed(2)}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 function App() {
   // Auth state
   const [user, setUser] = useState(null);
