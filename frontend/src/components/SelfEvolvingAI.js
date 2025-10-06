@@ -234,8 +234,11 @@ const SelfEvolvingAI = () => {
                 </div>
             </div>
 
-            {/* Evolution Status Overview */}
-            {evolutionStatus && (
+            {/* Tab Content */}
+            {activeTab === 'overview' && (
+                <div className="tab-content">
+                    {/* Evolution Status Overview */}
+                    {evolutionStatus && (
                 <div className="status-grid">
                     <div className="stat-card">
                         <div className="stat-header">
