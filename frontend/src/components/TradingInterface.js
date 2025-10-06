@@ -320,8 +320,24 @@ const TradingInterface = () => {
             {/* Account Overview */}
             <div className="account-overview">
                 <div className="account-header">
-                    <h2>Paper Trading Account</h2>
-                    <div className="account-stats">
+                    <div className="account-header-left">
+                        <h2>Trading Account</h2>
+                    </div>
+                    <button 
+                        className="reset-account-btn" 
+                        onClick={handleResetAccount}
+                        title="Account auf 10.000 USD zurücksetzen"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                            <path d="M3 21v-5h5" />
+                        </svg>
+                        Account zurücksetzen
+                    </button>
+                </div>
+                <div className="account-stats">
                         <div className="stat-item">
                             <span className="stat-label">Balance</span>
                             <span className="stat-value balance">{formatCurrency(account?.balance || 0)}</span>
