@@ -174,6 +174,13 @@ function App() {
     scrollToBottom();
   }, [messages]);
 
+  // Re-fetch indicators when globalTimeframe changes
+  useEffect(() => {
+    if (isAuthenticated && activeView === 'analysis') {
+      fetchIndicators();
+    }
+  }, [globalTimeframe]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
