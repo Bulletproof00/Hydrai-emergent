@@ -242,27 +242,39 @@ const TradingInterface = () => {
     };
 
     const handleResetAccount = async () => {
-        if (!window.confirm('Möchten Sie Ihr Trading-Konto wirklich auf 10.000 USD zurücksetzen? Alle offenen Positionen werden geschlossen.')) {
+        const confirmMessage = t ? t('trading.confirmReset') : 'Möchten Sie Ihr Trading-Konto wirklich auf 10.000 USD zurücksetzen? Alle offenen Positionen werden geschlossen.';
+        if (!window.confirm(confirmMessage)) {
             return;
         }
 
         try {
             setLoading(true);
+            setError(null);
             const token = localStorage.getItem('token');
             const headers = { 'Authorization': `Bearer ${token}` };
 
             const response = await axios.post(`${BACKEND_URL}/api/trading/account/reset`, {}, { headers });
 
             if (response.data.status === 'success') {
+                // Reload trading data
                 await fetchTradingData();
-                setError(null);
-                alert('Account erfolgreich auf 10.000 USD zurückgesetzt!');
+                
+                // Show success message
+                const successMessage = t ? t('trading.resetSuccess') : 'Account erfolgreich auf 10.000 USD zurückgesetzt!';
+                alert(successMessage);
+                
+                // Force page refresh to show updated data
+                window.location.reload();
             } else {
-                setError(response.data.message || 'Account-Reset fehlgeschlagen');
+                const errorMessage = response.data.message || (t ? t('trading.resetFailed') : 'Account-Reset fehlgeschlagen');
+                setError(errorMessage);
+                alert(errorMessage);
             }
         } catch (err) {
             console.error('Reset account error:', err);
-            setError(err.response?.data?.message || 'Fehler beim Zurücksetzen des Accounts');
+            const errorMessage = err.response?.data?.message || err.response?.data?.detail || (t ? t('errors.resetError') : 'Fehler beim Zurücksetzen des Accounts');
+            setError(errorMessage);
+            alert(errorMessage);
         } finally {
             setLoading(false);
         }
