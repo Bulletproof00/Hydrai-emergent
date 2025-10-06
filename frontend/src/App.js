@@ -92,6 +92,7 @@ const TradingPositionsWidget = () => {
 };
 
 function App() {
+  const { t, i18n } = useTranslation();
   // Auth state
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
