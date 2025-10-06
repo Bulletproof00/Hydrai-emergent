@@ -116,3 +116,7 @@ frontend/node_modules/.cache/default-development/0.pack
 *.env.*
 deployment/lunara-ai-complete.tar.gz
 deployment/lunara-ai-complete-package.tar.gz
+-e 
+# Environment files
+*.env
+*.env.*
