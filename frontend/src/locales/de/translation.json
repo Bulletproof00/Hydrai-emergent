@@ -53,6 +53,9 @@
   "trading": {
     "account": "Trading Konto",
     "resetAccount": "Konto zurücksetzen",
+    "confirmReset": "Möchten Sie Ihr Trading-Konto wirklich auf 10.000 USD zurücksetzen? Alle offenen Positionen werden geschlossen.",
+    "resetSuccess": "Account erfolgreich auf 10.000 USD zurückgesetzt!",
+    "resetFailed": "Account-Reset fehlgeschlagen",
     "balance": "Balance",
     "equity": "Eigenkapital",
     "unrealizedPnL": "Unrealisierter Gewinn/Verlust",
