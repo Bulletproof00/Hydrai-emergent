@@ -50,11 +50,11 @@ const TradingInterface = () => {
             setPositions(prevPositions => 
                 prevPositions.map(position => ({
                     ...position,
-                    current_price: getCurrentPrice(position.symbol) || position.mark_price
+                    current_price: getRealTimePrice(position.symbol) || position.mark_price
                 }))
             );
         }
-    }, [realTimeData]);
+    }, [realTimeData, getRealTimePrice]);
 
     const fetchTradingData = async () => {
         try {
