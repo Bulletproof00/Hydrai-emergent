@@ -477,186 +477,280 @@ function App() {
 
         {activeView === 'analysis' && (
           <div className="analysis-view">
-            <h1>Umfassende Marktanalyse</h1>
+            <h1>Analyse</h1>
             
-            {/* Makrodaten Section */}
-            {macroData && (
-              <>
-                <h2 className="section-title">Makroökonomische Daten</h2>
-                <div className="analysis-grid">
-                  {macroData.Bitcoin && (
-                    <div className="analysis-card">
-                      <h3>Bitcoin</h3>
-                      <div className="macro-value">${macroData.Bitcoin.price?.toLocaleString('de-DE', {minimumFractionDigits: 2})}</div>
-                      <div className={`macro-change ${macroData.Bitcoin.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                        {macroData.Bitcoin.change_24h >= 0 ? '+' : ''}{macroData.Bitcoin.change_24h?.toFixed(2)}%
-                      </div>
-                    </div>
-                  )}
-                  {macroData.Ethereum && (
-                    <div className="analysis-card">
-                      <h3>Ethereum</h3>
-                      <div className="macro-value">${macroData.Ethereum.price?.toLocaleString('de-DE', {minimumFractionDigits: 2})}</div>
-                      <div className={`macro-change ${macroData.Ethereum.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                        {macroData.Ethereum.change_24h >= 0 ? '+' : ''}{macroData.Ethereum.change_24h?.toFixed(2)}%
-                      </div>
-                    </div>
-                  )}
-                  {macroData.SPX && (
-                    <div className="analysis-card">
-                      <h3>S&P 500</h3>
-                      <div className="macro-value">{macroData.SPX.price?.toFixed(2)}</div>
-                      <div className={`macro-change ${macroData.SPX.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                        {macroData.SPX.change_24h >= 0 ? '+' : ''}{macroData.SPX.change_24h?.toFixed(2)}%
-                      </div>
-                    </div>
-                  )}
-                  {macroData.NASDAQ && (
-                    <div className="analysis-card">
-                      <h3>NASDAQ</h3>
-                      <div className="macro-value">{macroData.NASDAQ.price?.toFixed(2)}</div>
-                      <div className={`macro-change ${macroData.NASDAQ.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                        {macroData.NASDAQ.change_24h >= 0 ? '+' : ''}{macroData.NASDAQ.change_24h?.toFixed(2)}%
-                      </div>
-                    </div>
-                  )}
-                  {macroData.Gold && (
-                    <div className="analysis-card">
-                      <h3>Gold</h3>
-                      <div className="macro-value">${macroData.Gold.price?.toFixed(2)}</div>
-                      <div className={`macro-change ${macroData.Gold.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                        {macroData.Gold.change_24h >= 0 ? '+' : ''}{macroData.Gold.change_24h?.toFixed(2)}%
-                      </div>
-                    </div>
-                  )}
-                  {macroData.DXY && (
-                    <div className="analysis-card">
-                      <h3>US Dollar Index</h3>
-                      <div className="macro-value">{macroData.DXY.price?.toFixed(2)}</div>
-                      <div className={`macro-change ${macroData.DXY.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                        {macroData.DXY.change_24h >= 0 ? '+' : ''}{macroData.DXY.change_24h?.toFixed(2)}%
-                      </div>
-                    </div>
-                  )}
-                  {macroData.Russell2000 && (
-                    <div className="analysis-card">
-                      <h3>Russell 2000</h3>
-                      <div className="macro-value">{macroData.Russell2000.price?.toFixed(2)}</div>
-                      <div className={`macro-change ${macroData.Russell2000.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                        {macroData.Russell2000.change_24h >= 0 ? '+' : ''}{macroData.Russell2000.change_24h?.toFixed(2)}%
-                      </div>
-                    </div>
-                  )}
-                  {macroData.BitcoinDominance && (
-                    <div className="analysis-card">
-                      <h3>Bitcoin Dominanz</h3>
-                      <div className="macro-value">{macroData.BitcoinDominance.percentage?.toFixed(2)}%</div>
-                    </div>
-                  )}
+            {/* Sub-tabs for Analysis */}
+            <div className="analysis-tabs">
+              <button 
+                className={`analysis-tab ${analysisTab === 'indicators' ? 'active' : ''}`}
+                onClick={() => setAnalysisTab('indicators')}
+              >
+                <Zap size={18} />
+                <span>Indikatoren</span>
+              </button>
+              <button 
+                className={`analysis-tab ${analysisTab === 'heatmaps' ? 'active' : ''}`}
+                onClick={() => setAnalysisTab('heatmaps')}
+              >
+                <TrendingUp size={18} />
+                <span>Heatmaps</span>
+              </button>
+              <button 
+                className={`analysis-tab ${analysisTab === 'news' ? 'active' : ''}`}
+                onClick={() => setAnalysisTab('news')}
+              >
+                <Activity size={18} />
+                <span>Wirtschaftsdaten & News</span>
+              </button>
+              <button 
+                className={`analysis-tab ${analysisTab === 'sentiment' ? 'active' : ''}`}
+                onClick={() => setAnalysisTab('sentiment')}
+              >
+                <BarChart3 size={18} />
+                <span>Sentiment</span>
+              </button>
+            </div>
+
+            {/* Timeframe Selector - Global for all tabs */}
+            <div className="global-timeframe-selector">
+              <label>Timeframe:</label>
+              <select value={globalTimeframe} onChange={(e) => setGlobalTimeframe(e.target.value)}>
+                <option value="1m">1 Minute</option>
+                <option value="5m">5 Minuten</option>
+                <option value="15m">15 Minuten</option>
+                <option value="30m">30 Minuten</option>
+                <option value="1h">1 Stunde</option>
+                <option value="4h">4 Stunden</option>
+                <option value="1d">1 Tag</option>
+                <option value="1w">1 Woche</option>
+              </select>
+            </div>
+
+            {/* Tab Content */}
+            {analysisTab === 'indicators' && (
+              <div className="indicators-content">
+                <h2 className="section-title">Plugin System & Indikatoren</h2>
+                
+                {/* Self-Coding AI Integration */}
+                <div className="self-coding-section">
+                  <SelfEvolvingAI />
                 </div>
-              </>
+
+                {/* Technical Indicators */}
+                {indicators && (
+                  <>
+                    <h3 className="subsection-title">Technische Indikatoren</h3>
+                    <div className="analysis-grid">
+                      {indicators.indicators?.rsi && (
+                        <div className="analysis-card">
+                          <h3>RSI</h3>
+                          <div className="gauge-value">{indicators.indicators.rsi.toFixed(2)}</div>
+                          <div className="gauge-label">
+                            {indicators.indicators.rsi < 30 ? 'Überverkauft' : 
+                             indicators.indicators.rsi > 70 ? 'Überkauft' : 'Neutral'}
+                          </div>
+                        </div>
+                      )}
+                      {indicators.indicators?.mfi && (
+                        <div className="analysis-card">
+                          <h3>MFI</h3>
+                          <div className="gauge-value">{indicators.indicators.mfi.toFixed(2)}</div>
+                          <div className="gauge-label">
+                            {indicators.indicators.mfi < 20 ? 'Überverkauft' : 
+                             indicators.indicators.mfi > 80 ? 'Überkauft' : 'Neutral'}
+                          </div>
+                        </div>
+                      )}
+                      {indicators.indicators?.stochastic && (
+                        <div className="analysis-card">
+                          <h3>Stochastic</h3>
+                          <div className="indicator-row">
+                            <span>%K:</span>
+                            <span>{indicators.indicators.stochastic.k?.toFixed(2)}</span>
+                          </div>
+                          <div className="indicator-row">
+                            <span>%D:</span>
+                            <span>{indicators.indicators.stochastic.d?.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      )}
+                      {indicators.indicators?.stoch_rsi && (
+                        <div className="analysis-card">
+                          <h3>Stochastic RSI</h3>
+                          <div className="indicator-row">
+                            <span>%K:</span>
+                            <span>{indicators.indicators.stoch_rsi.k?.toFixed(2)}</span>
+                          </div>
+                          <div className="indicator-row">
+                            <span>%D:</span>
+                            <span>{indicators.indicators.stoch_rsi.d?.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      )}
+                      {indicators.indicators?.obv && (
+                        <div className="analysis-card">
+                          <h3>OBV</h3>
+                          <div className="macro-value">{indicators.indicators.obv?.toLocaleString('de-DE')}</div>
+                        </div>
+                      )}
+                      {indicators.indicators?.vwap && (
+                        <div className="analysis-card">
+                          <h3>VWAP</h3>
+                          <div className="macro-value">${indicators.indicators.vwap?.toFixed(2)}</div>
+                        </div>
+                      )}
+                      {indicators.indicators?.ema50 && (
+                        <div className="analysis-card">
+                          <h3>EMA 50</h3>
+                          <div className="macro-value">${indicators.indicators.ema50?.toFixed(2)}</div>
+                        </div>
+                      )}
+                      {indicators.indicators?.ema200 && (
+                        <div className="analysis-card">
+                          <h3>EMA 200</h3>
+                          <div className="macro-value">${indicators.indicators.ema200?.toFixed(2)}</div>
+                        </div>
+                      )}
+                      {indicators.indicators?.volume_pvsra && (
+                        <div className="analysis-card">
+                          <h3>Volume PVSRA</h3>
+                          <div className="indicator-row">
+                            <span>Klassifizierung:</span>
+                            <span className="volume-class">{indicators.indicators.volume_pvsra.classification}</span>
+                          </div>
+                          <div className="indicator-row">
+                            <span>Stärke:</span>
+                            <span>{indicators.indicators.volume_pvsra.strength}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
             )}
 
-            {/* Korrelationen */}
-            {correlations && Object.keys(correlations).length > 0 && (
-              <>
-                <h2 className="section-title">Korrelationsanalyse</h2>
-                <div className="correlation-grid">
-                  {Object.entries(correlations).map(([key, value]) => (
-                    <div key={key} className="correlation-card">
-                      <div className="correlation-label">{key.replace('BTC_vs_', 'BTC ⟷ ')}</div>
-                      <div className={`correlation-value ${value > 0.5 ? 'strong-positive' : value < -0.5 ? 'strong-negative' : 'weak'}`}>
-                        {value?.toFixed(3)}
-                      </div>
-                      <div className="correlation-bar">
-                        <div className="correlation-fill" style={{width: `${Math.abs(value) * 100}%`, backgroundColor: value > 0 ? '#10b981' : '#ef4444'}}></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
+            {analysisTab === 'heatmaps' && (
+              <div className="heatmaps-content">
+                <h2 className="section-title">Smart Money Heatmaps</h2>
+                <EnhancedSmartMoneyPanel globalTimeframe={globalTimeframe} />
+              </div>
             )}
 
-            {/* Technische Indikatoren */}
-            {indicators && (
-              <>
-                <h2 className="section-title">Technische Indikatoren</h2>
-                <div className="analysis-grid">
-                  {indicators.indicators?.rsi && (
-                    <div className="analysis-card">
-                      <h3>RSI</h3>
-                      <div className="gauge-value">{indicators.indicators.rsi.toFixed(2)}</div>
-                      <div className="gauge-label">
-                        {indicators.indicators.rsi < 30 ? 'Überverkauft' : 
-                         indicators.indicators.rsi > 70 ? 'Überkauft' : 'Neutral'}
-                      </div>
+            {analysisTab === 'news' && (
+              <div className="news-content">
+                <h2 className="section-title">Wirtschaftsdaten & News</h2>
+                
+                {/* Makrodaten Section */}
+                {macroData && (
+                  <>
+                    <h3 className="subsection-title">Makroökonomische Daten</h3>
+                    <div className="analysis-grid">
+                      {macroData.Bitcoin && (
+                        <div className="analysis-card">
+                          <h3>Bitcoin</h3>
+                          <div className="macro-value">${macroData.Bitcoin.price?.toLocaleString('de-DE', {minimumFractionDigits: 2})}</div>
+                          <div className={`macro-change ${macroData.Bitcoin.change_24h >= 0 ? 'positive' : 'negative'}`}>
+                            {macroData.Bitcoin.change_24h >= 0 ? '+' : ''}{macroData.Bitcoin.change_24h?.toFixed(2)}%
+                          </div>
+                        </div>
+                      )}
+                      {macroData.Ethereum && (
+                        <div className="analysis-card">
+                          <h3>Ethereum</h3>
+                          <div className="macro-value">${macroData.Ethereum.price?.toLocaleString('de-DE', {minimumFractionDigits: 2})}</div>
+                          <div className={`macro-change ${macroData.Ethereum.change_24h >= 0 ? 'positive' : 'negative'}`}>
+                            {macroData.Ethereum.change_24h >= 0 ? '+' : ''}{macroData.Ethereum.change_24h?.toFixed(2)}%
+                          </div>
+                        </div>
+                      )}
+                      {macroData.SPX && (
+                        <div className="analysis-card">
+                          <h3>S&P 500</h3>
+                          <div className="macro-value">{macroData.SPX.price?.toFixed(2)}</div>
+                          <div className={`macro-change ${macroData.SPX.change_24h >= 0 ? 'positive' : 'negative'}`}>
+                            {macroData.SPX.change_24h >= 0 ? '+' : ''}{macroData.SPX.change_24h?.toFixed(2)}%
+                          </div>
+                        </div>
+                      )}
+                      {macroData.NASDAQ && (
+                        <div className="analysis-card">
+                          <h3>NASDAQ</h3>
+                          <div className="macro-value">{macroData.NASDAQ.price?.toFixed(2)}</div>
+                          <div className={`macro-change ${macroData.NASDAQ.change_24h >= 0 ? 'positive' : 'negative'}`}>
+                            {macroData.NASDAQ.change_24h >= 0 ? '+' : ''}{macroData.NASDAQ.change_24h?.toFixed(2)}%
+                          </div>
+                        </div>
+                      )}
+                      {macroData.Gold && (
+                        <div className="analysis-card">
+                          <h3>Gold</h3>
+                          <div className="macro-value">${macroData.Gold.price?.toFixed(2)}</div>
+                          <div className={`macro-change ${macroData.Gold.change_24h >= 0 ? 'positive' : 'negative'}`}>
+                            {macroData.Gold.change_24h >= 0 ? '+' : ''}{macroData.Gold.change_24h?.toFixed(2)}%
+                          </div>
+                        </div>
+                      )}
+                      {macroData.DXY && (
+                        <div className="analysis-card">
+                          <h3>US Dollar Index</h3>
+                          <div className="macro-value">{macroData.DXY.price?.toFixed(2)}</div>
+                          <div className={`macro-change ${macroData.DXY.change_24h >= 0 ? 'positive' : 'negative'}`}>
+                            {macroData.DXY.change_24h >= 0 ? '+' : ''}{macroData.DXY.change_24h?.toFixed(2)}%
+                          </div>
+                        </div>
+                      )}
+                      {macroData.Russell2000 && (
+                        <div className="analysis-card">
+                          <h3>Russell 2000</h3>
+                          <div className="macro-value">{macroData.Russell2000.price?.toFixed(2)}</div>
+                          <div className={`macro-change ${macroData.Russell2000.change_24h >= 0 ? 'positive' : 'negative'}`}>
+                            {macroData.Russell2000.change_24h >= 0 ? '+' : ''}{macroData.Russell2000.change_24h?.toFixed(2)}%
+                          </div>
+                        </div>
+                      )}
+                      {macroData.BitcoinDominance && (
+                        <div className="analysis-card">
+                          <h3>Bitcoin Dominanz</h3>
+                          <div className="macro-value">{macroData.BitcoinDominance.percentage?.toFixed(2)}%</div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {indicators.indicators?.stochastic && (
-                    <div className="analysis-card">
-                      <h3>Stochastic</h3>
-                      <div className="indicator-row">
-                        <span>%K:</span>
-                        <span>{indicators.indicators.stochastic.k?.toFixed(2)}</span>
-                      </div>
-                      <div className="indicator-row">
-                        <span>%D:</span>
-                        <span>{indicators.indicators.stochastic.d?.toFixed(2)}</span>
-                      </div>
+                  </>
+                )}
+
+                {/* Korrelationen */}
+                {correlations && Object.keys(correlations).length > 0 && (
+                  <>
+                    <h3 className="subsection-title">Korrelationsanalyse</h3>
+                    <div className="correlation-grid">
+                      {Object.entries(correlations).map(([key, value]) => (
+                        <div key={key} className="correlation-card">
+                          <div className="correlation-label">{key.replace('BTC_vs_', 'BTC ⟷ ').replace('_', ' ')}</div>
+                          <div className={`correlation-value ${value > 0.5 ? 'strong-positive' : value < -0.5 ? 'strong-negative' : 'weak'}`}>
+                            {(value * 100).toFixed(1)}%
+                          </div>
+                          <div className="correlation-bar">
+                            <div className="correlation-fill" style={{width: `${Math.abs(value) * 100}%`, backgroundColor: value > 0 ? '#10b981' : '#ef4444'}}></div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                  {indicators.indicators?.stoch_rsi && (
-                    <div className="analysis-card">
-                      <h3>Stochastic RSI</h3>
-                      <div className="indicator-row">
-                        <span>%K:</span>
-                        <span>{indicators.indicators.stoch_rsi.k?.toFixed(2)}</span>
-                      </div>
-                      <div className="indicator-row">
-                        <span>%D:</span>
-                        <span>{indicators.indicators.stoch_rsi.d?.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  )}
-                  {indicators.indicators?.obv && (
-                    <div className="analysis-card">
-                      <h3>OBV</h3>
-                      <div className="macro-value">{indicators.indicators.obv?.toLocaleString('de-DE')}</div>
-                    </div>
-                  )}
-                  {indicators.indicators?.vwap && (
-                    <div className="analysis-card">
-                      <h3>VWAP</h3>
-                      <div className="macro-value">${indicators.indicators.vwap?.toFixed(2)}</div>
-                    </div>
-                  )}
-                  {indicators.indicators?.ema50 && (
-                    <div className="analysis-card">
-                      <h3>EMA 50</h3>
-                      <div className="macro-value">${indicators.indicators.ema50?.toFixed(2)}</div>
-                    </div>
-                  )}
-                  {indicators.indicators?.ema200 && (
-                    <div className="analysis-card">
-                      <h3>EMA 200</h3>
-                      <div className="macro-value">${indicators.indicators.ema200?.toFixed(2)}</div>
-                    </div>
-                  )}
-                  {indicators.indicators?.volume_pvsra && (
-                    <div className="analysis-card">
-                      <h3>Volume PVSRA</h3>
-                      <div className="indicator-row">
-                        <span>Klassifizierung:</span>
-                        <span className="volume-class">{indicators.indicators.volume_pvsra.classification}</span>
-                      </div>
-                      <div className="indicator-row">
-                        <span>Stärke:</span>
-                        <span>{indicators.indicators.volume_pvsra.strength}</span>
-                      </div>
-                    </div>
-                  )}
+                  </>
+                )}
+
+                <div className="news-feed">
+                  <h3 className="subsection-title">Aktuelle News</h3>
+                  <p className="coming-soon">News-Integration wird in Phase 4 hinzugefügt...</p>
                 </div>
-              </>
+              </div>
+            )}
+
+            {analysisTab === 'sentiment' && (
+              <div className="sentiment-content">
+                <h2 className="section-title">Market Sentiment Analyse</h2>
+                <p className="coming-soon">Sentiment-Analyse wird in Phase 4 hinzugefügt...</p>
+              </div>
             )}
           </div>
         )}
