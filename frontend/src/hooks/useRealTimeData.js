@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 export const useRealTimeData = (selectedSymbol) => {
     const [realTimeData, setRealTimeData] = useState({});
     const [connectionStatus, setConnectionStatus] = useState('disconnected');
+    const [isConnectionReady, setIsConnectionReady] = useState(false);
     const wsRef = useRef(null);
     const reconnectTimeoutRef = useRef(null);
     const reconnectAttempts = useRef(0);
