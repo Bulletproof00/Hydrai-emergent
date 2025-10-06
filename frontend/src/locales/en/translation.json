@@ -146,6 +146,7 @@
     "loadingFailed": "Failed to load data",
     "networkError": "Network error occurred",
     "unauthorized": "Unauthorized access",
-    "sessionExpired": "Session expired, please login again"
+    "sessionExpired": "Session expired, please login again",
+    "resetError": "Error resetting account"
   }
 }
