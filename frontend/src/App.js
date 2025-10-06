@@ -216,8 +216,34 @@ function App() {
           timestamp: new Date().toISOString()
         }]);
       }
+      
+      // Reload chat sessions list
+      fetchChatSessions();
     } catch (error) {
       console.error("Error creating session:", error);
+    }
+  };
+
+  const fetchChatSessions = async () => {
+    try {
+      const response = await axios.get(`${API}/sessions`);
+      setChatSessions(response.data.slice(0, 20)); // Show latest 20 sessions
+    } catch (error) {
+      console.error("Error fetching chat sessions:", error);
+    }
+  };
+
+  const loadChatSession = async (session_id) => {
+    try {
+      setLoading(true);
+      setSessionId(session_id);
+      const messagesResponse = await axios.get(`${API}/messages/${session_id}`);
+      setMessages(messagesResponse.data || []);
+      setShowChatHistory(false); // Close history sidebar after loading
+    } catch (error) {
+      console.error("Error loading chat session:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
