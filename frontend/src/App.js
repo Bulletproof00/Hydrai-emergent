@@ -511,6 +511,11 @@ function App() {
 
         {/* Trading Positions Widget */}
         <TradingPositionsWidget />
+        
+        {/* Language Switcher */}
+        <div className="sidebar-footer">
+          <LanguageSwitcher />
+        </div>
       </div>
 
       {/* Main Content */}
