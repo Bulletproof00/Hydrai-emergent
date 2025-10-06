@@ -2382,12 +2382,12 @@ async def health_check():
         "status": "healthy",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "services": {
-            "database": "connected" if db else "disconnected",
-            "enhanced_streamer": "running" if enhanced_streamer else "stopped",
-            "smart_money": "active" if enhanced_smart_money else "inactive",
-            "paper_trading": "available" if paper_trading else "unavailable",
-            "ai_trading": "ready" if ai_trading else "not_ready",
-            "self_evolving_ai": "learning" if self_evolving_ai else "offline"
+            "database": "connected" if db is not None else "disconnected",
+            "enhanced_streamer": "running" if enhanced_streamer is not None else "stopped",
+            "smart_money": "active" if enhanced_smart_money is not None else "inactive",
+            "paper_trading": "available" if paper_trading is not None else "unavailable",
+            "ai_trading": "ready" if ai_trading is not None else "not_ready",
+            "self_evolving_ai": "learning" if self_evolving_ai is not None else "offline"
         }
     }
 
