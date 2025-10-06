@@ -588,6 +588,20 @@ function App() {
                     {msg.role === 'assistant' ? <Brain size={20} /> : <div className="user-avatar">U</div>}
                   </div>
                   <div className="message-content">
+                    <div className="message-header">
+                      <span className="message-role">{msg.role === 'assistant' ? 'Lunara AI' : 'Du'}</span>
+                      {msg.timestamp && (
+                        <span className="message-timestamp">
+                          {new Date(msg.timestamp).toLocaleString('de-DE', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      )}
+                    </div>
                     <div className="message-text">{msg.content}</div>
                   </div>
                 </div>
