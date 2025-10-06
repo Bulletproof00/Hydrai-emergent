@@ -2987,6 +2987,61 @@ class TradingSystemTester:
         await self.cleanup()
         self.print_summary()
 
+    async def run_self_coding_ai_tests(self):
+        """Run SELF-CODING AI SYSTEM TESTS as requested in the review"""
+        await self.setup()
+        
+        print("🤖 SELF-CODING AI SYSTEM TESTS - Real-Implementation")
+        print("=" * 80)
+        print("PRIORITÄT 1: SELF-CODING AI ENDPOINTS")
+        print("1. Code Generation Test - POST /api/ai/coding/generate")
+        print("2. Evolution Chat Test - POST /api/ai/evolution/chat")
+        print("3. Plugin Status Test - GET /api/ai/coding/plugins")
+        print()
+        print("PRIORITÄT 2: REAL CODE IMPLEMENTATION TEST")
+        print("4. Plugin Generation & Testing Pipeline")
+        print("5. Database Integration Test")
+        print()
+        print("PRIORITÄT 3: ADVANCED FEATURES TEST")
+        print("6. Gemini 2.5 Flash Code Generation")
+        print()
+        print("ERWARTETE ERGEBNISSE:")
+        print("✅ AI generiert funktionsfähigen Python-Code")
+        print("✅ Code wird automatisch getestet und validiert")
+        print("✅ Plugins werden mit Backtesting evaluiert")
+        print("✅ Erfolgreiche Plugins werden deployed")
+        print("✅ Evolution AI kann über Self-Coding chatten")
+        print("✅ Komplettes Plugin-Management System funktioniert")
+        print("=" * 80)
+        
+        # SELF-CODING AI TEST METHODS
+        self_coding_tests = [
+            # PRIORITÄT 1: SELF-CODING AI ENDPOINTS
+            self.test_self_coding_ai_code_generation,
+            self.test_self_coding_ai_evolution_chat,
+            self.test_self_coding_ai_plugin_status,
+            
+            # PRIORITÄT 2: REAL CODE IMPLEMENTATION TEST
+            self.test_real_code_implementation_pipeline,
+            self.test_database_integration_plugins,
+            
+            # PRIORITÄT 3: ADVANCED FEATURES TEST
+            self.test_gemini_25_flash_code_generation
+        ]
+        
+        print(f"🤖 Running {len(self_coding_tests)} SELF-CODING AI TESTS...")
+        print()
+        
+        for test_func in self_coding_tests:
+            try:
+                await test_func()
+            except Exception as e:
+                test_name = test_func.__name__.replace('test_', '').replace('_', ' ').title()
+                self.log_test(test_name, "FAIL", f"Test execution error: {str(e)}")
+        
+        await self.cleanup()
+        self.print_self_coding_summary()
+
     async def run_all_tests(self):
         """Run FINALE TESTS nach Chat und AI-Reparaturen"""
         await self.setup()
