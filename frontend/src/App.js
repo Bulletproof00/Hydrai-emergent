@@ -163,17 +163,23 @@ function App() {
       fetchMacroData();
       fetchMarketOverview();
       fetchChatSessions(); // Load chat history
+      fetchNews(); // Load news
+      fetchSentiment(); // Load sentiment
       
       const priceInterval = setInterval(fetchLivePrice, 10000);
       const indicatorInterval = setInterval(fetchIndicators, 30000);
       const macroInterval = setInterval(fetchMacroData, 60000);
       const overviewInterval = setInterval(fetchMarketOverview, 60000);
+      const newsInterval = setInterval(fetchNews, 300000); // Every 5 minutes
+      const sentimentInterval = setInterval(fetchSentiment, 180000); // Every 3 minutes
       
       return () => {
         clearInterval(priceInterval);
         clearInterval(indicatorInterval);
         clearInterval(macroInterval);
         clearInterval(overviewInterval);
+        clearInterval(newsInterval);
+        clearInterval(sentimentInterval);
       };
     }
   }, [isAuthenticated]);
