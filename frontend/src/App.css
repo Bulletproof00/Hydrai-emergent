@@ -5300,6 +5300,107 @@ body {
   }
   
   .analysis-tab {
+
+/* Trading Positions Widget */
+.trading-widget {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.trading-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 14px;
+  color: #e4e4e7;
+  font-weight: 600;
+}
+
+.stat-value.positive {
+  color: #10b981;
+}
+
+.stat-value.negative {
+  color: #ef4444;
+}
+
+.position-mini {
+  margin-top: 12px;
+  padding: 10px;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.position-mini-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.position-symbol {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e4e4e7;
+}
+
+.position-side {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.position-side.long {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.position-side.short {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.position-mini-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+
+.position-size {
+  color: #94a3b8;
+}
+
+.position-pnl {
+  font-weight: 600;
+}
+
+.position-pnl.positive {
+  color: #10b981;
+}
+
+.position-pnl.negative {
+  color: #ef4444;
+}
+
     white-space: nowrap;
     font-size: 13px;
     padding: 10px 16px;
