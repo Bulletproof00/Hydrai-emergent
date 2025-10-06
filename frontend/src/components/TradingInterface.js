@@ -249,6 +249,39 @@ const TradingInterface = () => {
             } else {
                 setError(response.data.result?.error || 'Margin modification failed');
             }
+        } catch (err) {
+            console.error('Modify margin error:', err);
+            setError(err.response?.data?.message || 'Failed to modify margin');
+        }
+    };
+
+    const handleResetAccount = async () => {
+        if (!window.confirm('Möchten Sie Ihr Trading-Konto wirklich auf 10.000 USD zurücksetzen? Alle offenen Positionen werden geschlossen.')) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const headers = { 'Authorization': `Bearer ${token}` };
+
+            const response = await axios.post(`${BACKEND_URL}/api/trading/account/reset`, {}, { headers });
+
+            if (response.data.status === 'success') {
+                await fetchTradingData();
+                setError(null);
+                alert('Account erfolgreich auf 10.000 USD zurückgesetzt!');
+            } else {
+                setError(response.data.message || 'Account-Reset fehlgeschlagen');
+            }
+        } catch (err) {
+            console.error('Reset account error:', err);
+            setError(err.response?.data?.message || 'Fehler beim Zurücksetzen des Accounts');
+        } finally {
+            setLoading(false);
+        }
+    };;
+            }
             
         } catch (err) {
             console.error('Margin modification error:', err);
