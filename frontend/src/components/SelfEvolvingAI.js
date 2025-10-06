@@ -401,6 +401,219 @@ const SelfEvolvingAI = () => {
                     </div>
                 </div>
             </div>
+                </div>
+            )}
+
+            {/* AI Chat Tab */}
+            {activeTab === 'chat' && (
+                <div className="tab-content">
+                    <div className="ai-chat-section">
+                        <h3 className="section-title">
+                            <MessageSquare className="w-5 h-5 mr-2" />
+                            Chat mit der Evolution AI
+                        </h3>
+                        
+                        <div className="chat-container">
+                            <div className="chat-messages">
+                                {chatMessages.length === 0 && (
+                                    <div className="empty-chat">
+                                        <Brain className="w-12 h-12 text-purple-400 mx-auto mb-4" />
+                                        <p className="text-gray-400 text-center">
+                                            Hallo! Ich bin Lunara in meinem Evolution-Modus. 
+                                            Frage mich alles über meine Selbstentwicklung, Code-Generierung oder neue Features!
+                                        </p>
+                                    </div>
+                                )}
+                                
+                                {chatMessages.map((msg, index) => (
+                                    <div key={index} className={`chat-message ${msg.role}`}>
+                                        <div className="message-content">
+                                            <pre className="message-text">{msg.content}</pre>
+                                        </div>
+                                    </div>
+                                ))}
+                                
+                                {isChatting && (
+                                    <div className="chat-message assistant typing">
+                                        <div className="message-content">
+                                            <Loader className="animate-spin" size={16} />
+                                            <span className="ml-2">Lunara denkt nach...</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div className="chat-input-container">
+                                <input
+                                    type="text"
+                                    className="chat-input"
+                                    placeholder="Frage die Evolution AI..."
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                                />
+                                <button 
+                                    className="send-button"
+                                    onClick={sendChatMessage}
+                                    disabled={isChatting || !chatInput.trim()}
+                                >
+                                    <Send size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Code Generator Tab */}
+            {activeTab === 'coding' && (
+                <div className="tab-content">
+                    <div className="code-generator-section">
+                        <h3 className="section-title">
+                            <Code className="w-5 h-5 mr-2" />
+                            Automatische Code-Generierung
+                        </h3>
+                        
+                        <div className="code-generator-container">
+                            <div className="generator-input-section">
+                                <label className="input-label">
+                                    Verbesserungsanfrage beschreiben:
+                                </label>
+                                <textarea
+                                    className="improvement-input"
+                                    placeholder="z.B.: Erstelle eine neue Trading-Strategie basierend auf RSI und Moving Averages..."
+                                    value={improvementRequest}
+                                    onChange={(e) => setImprovementRequest(e.target.value)}
+                                    rows={4}
+                                />
+                                <button 
+                                    className="generate-button"
+                                    onClick={generateCode}
+                                    disabled={isGeneratingCode || !improvementRequest.trim()}
+                                >
+                                    {isGeneratingCode ? (
+                                        <>
+                                            <Loader className="animate-spin mr-2" size={16} />
+                                            Code wird generiert...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Code className="mr-2" size={16} />
+                                            Code generieren & implementieren
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                            
+                            <div className="generator-examples">
+                                <h4>Beispiel-Anfragen:</h4>
+                                <div className="example-buttons">
+                                    <button 
+                                        className="example-btn"
+                                        onClick={() => setImprovementRequest('Erstelle eine neue Trading-Strategie mit Machine Learning für bessere Preisvorhersagen')}
+                                    >
+                                        ML Trading-Strategie
+                                    </button>
+                                    <button 
+                                        className="example-btn"
+                                        onClick={() => setImprovementRequest('Entwickle einen neuen technischen Indikator für Volatilitäts-Analyse')}
+                                    >
+                                        Neuer Indikator
+                                    </button>
+                                    <button 
+                                        className="example-btn"
+                                        onClick={() => setImprovementRequest('Implementiere ein Risk-Management-System für automatisches Stop-Loss')}
+                                    >
+                                        Risk Management
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Plugins Tab */}
+            {activeTab === 'plugins' && (
+                <div className="tab-content">
+                    <div className="plugins-section">
+                        <h3 className="section-title">
+                            <Terminal className="w-5 h-5 mr-2" />
+                            Dynamische Plugins
+                        </h3>
+                        
+                        {pluginStatus && (
+                            <>
+                                <div className="plugin-stats">
+                                    <div className="stat-card">
+                                        <div className="stat-header">
+                                            <Settings className="w-5 h-5 text-blue-400" />
+                                            <span>Gesamt Plugins</span>
+                                        </div>
+                                        <div className="stat-value">{pluginStatus.statistics?.total_plugins || 0}</div>
+                                    </div>
+                                    
+                                    <div className="stat-card">
+                                        <div className="stat-header">
+                                            <CheckCircle className="w-5 h-5 text-green-400" />
+                                            <span>Deployed</span>
+                                        </div>
+                                        <div className="stat-value text-green-400">
+                                            {pluginStatus.statistics?.deployed_plugins || 0}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="stat-card">
+                                        <div className="stat-header">
+                                            <TrendingUp className="w-5 h-5 text-purple-400" />
+                                            <span>Erfolgreiche Backtests</span>
+                                        </div>
+                                        <div className="stat-value text-purple-400">
+                                            {pluginStatus.statistics?.successful_backtests || 0}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="plugins-list">
+                                    {pluginStatus.plugins && pluginStatus.plugins.length > 0 ? (
+                                        pluginStatus.plugins.map((plugin, index) => (
+                                            <div key={index} className="plugin-item">
+                                                <div className="plugin-header">
+                                                    <span className="plugin-name">{plugin.plugin_name}</span>
+                                                    <span className={`plugin-status ${plugin.status}`}>
+                                                        {plugin.status}
+                                                    </span>
+                                                </div>
+                                                <div className="plugin-description">
+                                                    {plugin.description}
+                                                </div>
+                                                <div className="plugin-details">
+                                                    <span className="plugin-date">
+                                                        Erstellt: {formatTimestamp(plugin.created_at)}
+                                                    </span>
+                                                    {plugin.backtest_results && (
+                                                        <span className={`plugin-backtest ${plugin.backtest_results.profitable ? 'profitable' : 'unprofitable'}`}>
+                                                            Backtest: {plugin.backtest_results.profitable ? '✅ Profitabel' : '❌ Unprofitabel'}
+                                                            ({(plugin.backtest_results.win_rate * 100).toFixed(1)}% Win Rate)
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="empty-plugins">
+                                            <Terminal className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                            <p className="text-gray-400 text-center">
+                                                Noch keine Plugins generiert. Verwende den Code Generator um neue Plugins zu erstellen!
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
