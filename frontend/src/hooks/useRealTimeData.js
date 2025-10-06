@@ -118,13 +118,7 @@ export const useRealTimeData = (selectedSymbol) => {
     // Heartbeat to keep connection alive
     useEffect(() => {
         const heartbeat = setInterval(() => {
-            if (wsRef.current?.readyState === WebSocket.OPEN) {
-                try {
-                    wsRef.current.send(JSON.stringify({ type: 'ping' }));
-                } catch (error) {
-                    console.error('Failed to send heartbeat:', error);
-                }
-            }
+            safeSendMessage({ type: 'ping' }, 'heartbeat');
         }, 30000); // Ping every 30 seconds
         
         return () => clearInterval(heartbeat);
