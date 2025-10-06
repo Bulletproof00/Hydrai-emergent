@@ -216,7 +216,7 @@ function App() {
     try {
       const response = await axios.post(`${API}/indicators`, {
         symbol: "BTC/USDT",
-        timeframe: "1h",
+        timeframe: globalTimeframe,
         limit: 200,
         indicators: ["rsi", "mfi", "bollinger", "stochastic", "stoch_rsi", "obv", "vwap", "ema50", "ema200", "volume_pvsra"]
       });
