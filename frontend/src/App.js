@@ -176,10 +176,10 @@ function App() {
 
   // Re-fetch indicators when globalTimeframe changes
   useEffect(() => {
-    if (isAuthenticated && activeView === 'analysis') {
+    if (isAuthenticated) {
       fetchIndicators();
     }
-  }, [globalTimeframe]);
+  }, [globalTimeframe, isAuthenticated]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
