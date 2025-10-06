@@ -36,6 +36,12 @@ function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Global timeframe state for synchronization across all components
+  const [globalTimeframe, setGlobalTimeframe] = useState("15m");
+  
+  // Analysis sub-tab state
+  const [analysisTab, setAnalysisTab] = useState("indicators");
+
   // Check for existing auth on mount
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
