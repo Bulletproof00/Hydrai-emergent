@@ -789,19 +789,30 @@ class SelfCodingAI:
     async def get_plugin_status(self) -> Dict[str, Any]:
         """Get status of all dynamic plugins"""
         try:
-            plugins = await self.db.dynamic_plugins.find().sort("created_at", -1).to_list(50)
-            
-            # Remove MongoDB ObjectIds
-            for plugin in plugins:
-                if '_id' in plugin:
-                    del plugin['_id']
-            
+            plugins = []
             stats = {
-                'total_plugins': len(plugins),
-                'deployed_plugins': len([p for p in plugins if p.get('status') == 'deployed']),
-                'successful_backtests': len([p for p in plugins if p.get('backtest_results', {}).get('profitable', False)]),
-                'failed_plugins': len([p for p in plugins if p.get('status') == 'failed'])
+                'total_plugins': 0,
+                'deployed_plugins': 0,
+                'successful_backtests': 0,
+                'failed_plugins': 0
             }
+            
+            if self.db is not None:
+                plugins = await self.db.dynamic_plugins.find().sort("created_at", -1).to_list(50)
+                
+                # Remove MongoDB ObjectIds
+                for plugin in plugins:
+                    if '_id' in plugin:
+                        del plugin['_id']
+                
+                stats = {
+                    'total_plugins': len(plugins),
+                    'deployed_plugins': len([p for p in plugins if p.get('status') == 'deployed']),
+                    'successful_backtests': len([p for p in plugins if p.get('backtest_results', {}).get('profitable', False)]),
+                    'failed_plugins': len([p for p in plugins if p.get('status') == 'failed'])
+                }
+            else:
+                logger.warning("Database connection not available for plugin status")
             
             return {
                 'plugins': plugins,
@@ -811,7 +822,17 @@ class SelfCodingAI:
             
         except Exception as e:
             logger.error(f"Plugin status error: {e}")
-            return {'error': str(e)}
+            return {
+                'plugins': [],
+                'statistics': {
+                    'total_plugins': 0,
+                    'deployed_plugins': 0,
+                    'successful_backtests': 0,
+                    'failed_plugins': 0
+                },
+                'error': str(e),
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
 
 # Global instance
 self_coding_ai = None
