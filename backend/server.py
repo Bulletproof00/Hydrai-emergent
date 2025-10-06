@@ -2203,6 +2203,15 @@ async def get_evolution_history(
         # Get evolution reports
         evolution_reports = await db.ai_evolution_reports.find().sort("timestamp", -1).limit(limit).to_list(limit)
         
+        # Remove MongoDB ObjectId fields to avoid JSON serialization issues
+        for item in evolution_history:
+            if '_id' in item:
+                del item['_id']
+        
+        for item in evolution_reports:
+            if '_id' in item:
+                del item['_id']
+        
         return {
             'status': 'success',
             'evolution_history': evolution_history,
