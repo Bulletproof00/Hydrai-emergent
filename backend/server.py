@@ -1892,7 +1892,7 @@ async def get_trading_account(authorization: str = Header(None)):
 
 @api_router.post("/trading/account/reset")
 async def reset_trading_account(authorization: str = Header(None)):
-    """Reset user's paper trading account to $10,000 and close all positions"""
+    """Reset ONLY the account balance to $10,000, keeping trading history and other data"""
     try:
         if not paper_trading:
             return {
@@ -1903,22 +1903,36 @@ async def reset_trading_account(authorization: str = Header(None)):
         user = await get_current_user(authorization)
         user_id = user['_id']
         
-        # Close all open positions first
-        positions = await paper_trading.get_positions(user_id)
-        for position in positions:
-            if position.get('status') == 'open':
-                await paper_trading.close_position(user_id, position['position_id'], 100.0)
+        # Get existing account or create if doesn't exist
+        existing_account = await paper_trading.db['paper_trading_accounts'].find_one({'user_id': user_id})
         
-        # Delete the account
-        await paper_trading.db['paper_trading_accounts'].delete_one({'user_id': user_id})
-        
-        # Create new account with $10,000
-        account = await paper_trading.create_user_account(user_id, 10000.0)
+        if existing_account:
+            # Update ONLY balance-related fields, keep everything else
+            reset_data = {
+                'balance': 10000.0,
+                'equity': 10000.0,
+                'margin_used': 0.0,
+                'free_margin': 10000.0,
+                'unrealized_pnl': 0.0,
+                'updated_at': datetime.now(timezone.utc)
+            }
+            
+            await paper_trading.db['paper_trading_accounts'].update_one(
+                {'user_id': user_id},
+                {'$set': reset_data}
+            )
+            
+            # Get updated account
+            updated_account = await paper_trading.db['paper_trading_accounts'].find_one({'user_id': user_id})
+            
+        else:
+            # Create new account if doesn't exist
+            updated_account = await paper_trading.create_user_account(user_id, 10000.0)
         
         return {
             'status': 'success',
-            'message': 'Account successfully reset to $10,000',
-            'account': account,
+            'message': 'Guthaben erfolgreich auf $10.000 zurückgesetzt (Historie beibehalten)',
+            'account': updated_account,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
         
