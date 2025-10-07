@@ -578,34 +578,6 @@ function App() {
 
       {/* Main Content Area */}
       <main className="main-content">
-
-        {/* Live Price Widget */}
-        {livePrice && (
-          <div className="price-widget">
-            <div className="price-header">
-              <TrendingUp size={16} />
-              <span>BTC/USDT</span>
-            </div>
-            <div className="price-value" data-testid="live-price">
-              ${livePrice.price?.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-            <div className={`price-change ${livePrice.change_24h >= 0 ? 'positive' : 'negative'}`}>
-              {livePrice.change_24h >= 0 ? '+' : ''}{livePrice.change_24h?.toFixed(2)}%
-            </div>
-          </div>
-        )}
-
-        {/* Trading Positions Widget */}
-        <TradingPositionsWidget />
-        
-        {/* Language Switcher */}
-        <div className="sidebar-footer">
-          <LanguageSwitcher />
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="main-content">
         {activeView === 'chat' && (
           <>
             <div className="chat-header">
