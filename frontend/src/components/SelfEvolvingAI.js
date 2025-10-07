@@ -601,76 +601,7 @@ const SelfEvolvingAI = () => {
                 </div>
             )}
 
-            {/* Code Generator Tab */}
-            {activeTab === 'coding' && (
-                <div className="tab-content">
-                    <div className="code-generator-section">
-                        <h3 className="section-title">
-                            <Code className="w-5 h-5 mr-2" />
-                            Automatische Code-Generierung
-                        </h3>
-                        
-                        <div className="code-generator-container">
-                            <div className="generator-input-section">
-                                <label className="input-label">
-                                    Verbesserungsanfrage beschreiben:
-                                </label>
-                                <textarea
-                                    className="improvement-input"
-                                    placeholder="z.B.: Erstelle eine neue Trading-Strategie basierend auf RSI und Moving Averages..."
-                                    value={improvementRequest}
-                                    onChange={(e) => setImprovementRequest(e.target.value)}
-                                    rows={4}
-                                />
-                                <button 
-                                    className="generate-button"
-                                    onClick={generateCode}
-                                    disabled={isGeneratingCode || !improvementRequest.trim()}
-                                >
-                                    {isGeneratingCode ? (
-                                        <>
-                                            <Loader className="animate-spin mr-2" size={16} />
-                                            Code wird generiert...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Code className="mr-2" size={16} />
-                                            Code generieren & implementieren
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                            
-                            <div className="generator-examples">
-                                <h4>Beispiel-Anfragen:</h4>
-                                <div className="example-buttons">
-                                    <button 
-                                        className="example-btn"
-                                        onClick={() => setImprovementRequest('Erstelle eine neue Trading-Strategie mit Machine Learning für bessere Preisvorhersagen')}
-                                    >
-                                        ML Trading-Strategie
-                                    </button>
-                                    <button 
-                                        className="example-btn"
-                                        onClick={() => setImprovementRequest('Entwickle einen neuen technischen Indikator für Volatilitäts-Analyse')}
-                                    >
-                                        Neuer Indikator
-                                    </button>
-                                    <button 
-                                        className="example-btn"
-                                        onClick={() => setImprovementRequest('Implementiere ein Risk-Management-System für automatisches Stop-Loss')}
-                                    >
-                                        Risk Management
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Plugins Tab */}
-            {activeTab === 'plugins' && (
+            {/* Removed Code Generator and Plugins sections as requested */}
                 <div className="tab-content">
                     <div className="plugins-section">
                         <h3 className="section-title">
