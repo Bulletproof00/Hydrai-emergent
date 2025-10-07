@@ -239,24 +239,29 @@ class TradingSystemTester:
         
         data = response['data']
         
-        # Check for successful order placement
-        if 'order' in data and data.get('status') == 'success':
-            order_info = data['order']
-            order_id = order_info.get('order_id', 'N/A')
-            fill_price = order_info.get('fill_price', 0)
-            quantity = order_info.get('quantity', 0)
-            fees = order_info.get('fees', 0)
-            
-            if fill_price > 0 and quantity > 0:
-                self.log_test(
-                    test_name, 
-                    "PASS", 
-                    f"✅ BTC/USDT LONG ORDER ERFOLGREICH PLATZIERT! Order ID: {order_id}, Fill Price: ${fill_price:,.2f}, Quantity: {quantity} BTC, Fees: ${fees:.2f}",
-                    "Erfolgreiche Market Order Platzierung mit realistischen Parametern",
-                    f"Order ID: {order_id}, Fill: ${fill_price:,.2f}, Qty: {quantity}"
-                )
+        # Check for successful order placement - handle nested response structure
+        if data.get('status') == 'success' and 'result' in data:
+            result = data['result']
+            if result.get('success') and 'order' in result:
+                order_info = result['order']
+                order_id = order_info.get('order_id', 'N/A')
+                fill_price = order_info.get('filled_price', 0)
+                quantity = order_info.get('filled_quantity', 0)
+                fees = order_info.get('fee_paid', 0)
+                status = order_info.get('status', '')
+                
+                if fill_price > 0 and quantity > 0 and status == 'filled':
+                    self.log_test(
+                        test_name, 
+                        "PASS", 
+                        f"✅ BTC/USDT LONG ORDER ERFOLGREICH PLATZIERT! Order ID: {order_id}, Fill Price: ${fill_price:,.2f}, Quantity: {quantity} BTC, Fees: ${fees:.2f}, Status: {status}",
+                        "Erfolgreiche Market Order Platzierung mit realistischen Parametern",
+                        f"Order ID: {order_id}, Fill: ${fill_price:,.2f}, Qty: {quantity}, Status: {status}"
+                    )
+                else:
+                    self.log_test(test_name, "FAIL", f"❌ Order platziert aber ungültige Daten: Fill Price: ${fill_price}, Quantity: {quantity}, Status: {status}")
             else:
-                self.log_test(test_name, "FAIL", f"❌ Order platziert aber ungültige Daten: Fill Price: ${fill_price}, Quantity: {quantity}")
+                self.log_test(test_name, "FAIL", f"❌ Order Result nicht erfolgreich: {result}")
         else:
             self.log_test(test_name, "FAIL", f"❌ Order Placement Response unvollständig: {data}")
 
