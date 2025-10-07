@@ -165,6 +165,42 @@ backend:
           agent: "testing"
           comment: "✅ TRADING HISTORY ERFOLGREICH GETESTET (2025-10-07): Trading History System funktioniert perfekt mit vollständiger Chronologie. ✅ 7 Trades in Historie gefunden ✅ Letzter Trade: b5905363-1b08-4322-ab53-b3eee89666f4 - BTC/USDT BUY 0.001 (filled) ✅ Timestamp: 2025-10-07T14:32:30.362000 korrekt ✅ Vollständige Trade-Daten: order_id, symbol, side, quantity, status ✅ Chronologische Sortierung (neueste zuerst) ✅ Limit Parameter für Pagination funktioniert ✅ Alle Order-Status korrekt getrackt (filled) ✅ Database Queries optimiert. Das Trading History System zeigt vollständige Handelshistorie korrekt an."
 
+  - task: "Paper Trading Account Reset - POST /api/trading/account/reset"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ ACCOUNT RESET ERFOLGREICH GETESTET (2025-10-07): Account Reset Funktion funktioniert perfekt mit vollständiger Wiederherstellung. ✅ Message: 'Account successfully reset to $10,000' ✅ Balance zurückgesetzt auf $10,000.00 ✅ Alle Account-Felder korrekt zurückgesetzt: equity, free_margin, unrealized_pnl ✅ Alle offenen Positionen geschlossen ✅ Trading-Historie bleibt erhalten ✅ User Authentication funktioniert ✅ Database Updates korrekt ✅ JSON Response vollständig strukturiert. Das Account Reset System stellt das Paper Trading Account vollständig auf Anfangszustand zurück."
+
+  - task: "Paper Trading Position Close - POST /api/trading/position/close"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ POSITION CLOSE ERFOLGREICH GETESTET (2025-10-07): Position Close API funktioniert perfekt mit korrekter Pydantic Model Validierung. ✅ KEINE 422 UNPROCESSABLE ENTITY ERRORS - Hauptproblem behoben ✅ ClosePositionRequest Pydantic Model funktioniert einwandfrei ✅ Position Close API verfügbar und funktionsfähig ✅ Partielle Position-Schließung (50%) unterstützt ✅ PnL-Berechnung bei Position-Schließung ✅ Error Handling für nicht existierende Positionen korrekt ✅ JSON Request/Response Struktur korrekt. Das Position Close System ermöglicht flexible Position-Verwaltung ohne 422 Errors."
+
+  - task: "Paper Trading Portfolio Check - GET /api/trading/portfolio"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PORTFOLIO/BALANCE CHECK ERFOLGREICH GETESTET (2025-10-07): Portfolio API funktioniert perfekt mit vollständiger Balance- und Trade-Übersicht. ✅ Balance: $10,000.00 korrekt angezeigt ✅ Open Trades: 0 korrekt gezählt ✅ Closed Trades: 0 korrekt gezählt ✅ Total PnL: $0.00 korrekt berechnet ✅ Win Rate: 0.0% korrekt berechnet ✅ Vollständige Portfolio-Daten mit Trade-Historie ✅ JSON Response vollständig strukturiert ✅ User Authentication funktioniert. Das Portfolio System bietet vollständige Übersicht über Trading-Performance und Balance."
+
   - task: "Paper Trading Symbols - GET /api/trading/symbols (Top 30 Crypto)"
     implemented: true
     working: true
