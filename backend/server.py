@@ -1904,7 +1904,7 @@ async def reset_trading_account(authorization: str = Header(None)):
         user_id = user['_id']
         
         # Get existing account or create if doesn't exist
-        existing_account = await paper_trading.db['paper_trading_accounts'].find_one({'user_id': user_id})
+        existing_account = await db['paper_trading_accounts'].find_one({'user_id': user_id})
         
         if existing_account:
             # Update ONLY balance-related fields, keep everything else
@@ -1917,13 +1917,13 @@ async def reset_trading_account(authorization: str = Header(None)):
                 'updated_at': datetime.now(timezone.utc)
             }
             
-            await paper_trading.db['paper_trading_accounts'].update_one(
+            await db['paper_trading_accounts'].update_one(
                 {'user_id': user_id},
                 {'$set': reset_data}
             )
             
             # Get updated account
-            updated_account = await paper_trading.db['paper_trading_accounts'].find_one({'user_id': user_id})
+            updated_account = await db['paper_trading_accounts'].find_one({'user_id': user_id})
             
         else:
             # Create new account if doesn't exist
