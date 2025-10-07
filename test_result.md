@@ -480,17 +480,15 @@ metadata:
 
 test_plan:
   current_focus:
-    - "VERBESSERTE SELF-CODING AI SYSTEM MIT RETRY-LOGIC - ✅ ERFOLGREICH ABGESCHLOSSEN"
-    - "SCALPING-STRATEGIE CODE GENERATION - ✅ RETRY-SYSTEM FUNKTIONIERT"
-    - "CODE SAFETY VALIDATION MIT DETAILLIERTEN FEHLERN - ✅ ERFOLGREICH"
-    - "PLUGIN CREATION & TESTING PIPELINE - ✅ ERFOLGREICH"
-    - "SELF-CODING AI SYSTEM TESTS - ✅ ERFOLGREICH ABGESCHLOSSEN"
-    - "PAPER TRADING REPARATUREN NACH KRITISCHEN FIXES - ✅ ERFOLGREICH ABGESCHLOSSEN"
-    - "FINALE TESTS NACH CHAT UND AI-REPARATUREN - ✅ ERFOLGREICH ABGESCHLOSSEN"
-    - "NEW INTEGRATED AI CHAT SYSTEM - ✅ COMPLETED SUCCESSFULLY"
-    - "AI Trading Engine - Analysis & Chat Commands - ✅ REPARATUREN ERFOLGREICH"
-  stuck_tasks:
-    - "SELF-CODING AI Database Integration - CRITICAL ERROR: Plugin Status API Error - needs immediate fix"
+    - "Paper Trading Account Status - GET /api/trading/account - ✅ ERFOLGREICH ABGESCHLOSSEN"
+    - "Paper Trading Order Placement - POST /api/trading/order (BTC/USDT Long) - ✅ ERFOLGREICH ABGESCHLOSSEN"
+    - "Paper Trading Open Positions - GET /api/trading/positions - ✅ ERFOLGREICH ABGESCHLOSSEN"
+    - "Paper Trading Account Reset - POST /api/trading/account/reset - ✅ ERFOLGREICH ABGESCHLOSSEN"
+    - "Paper Trading History - GET /api/trading/history - ✅ ERFOLGREICH ABGESCHLOSSEN"
+    - "Paper Trading Position Close - POST /api/trading/position/close - ✅ ERFOLGREICH ABGESCHLOSSEN"
+    - "Paper Trading Portfolio Check - GET /api/trading/portfolio - ✅ ERFOLGREICH ABGESCHLOSSEN"
+    - "Real-time Price Integration - GET /api/realtime/latest - ✅ ERFOLGREICH ABGESCHLOSSEN"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
