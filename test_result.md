@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Teste das vollständig erweiterte Trading System mit Real-time Daten und KI-Integration: Real-time Integration Tests, AI Trading Engine Tests, Enhanced Smart Money Tests, Integration Tests, Performance & Stability Tests."
+user_problem_statement: "Teste alle Trading-bezogenen Backend-Endpoints um zu verifizieren, dass das Paper Trading System funktioniert: Trading Account Status, Portfolio/Balance, Test-Order platzieren (BTC/USDT Long), Offene Positionen, Account Reset Funktion, Trading History. Backend URL: https://ai-trade-hub-4.preview.emergentagent.com"
 
 backend:
   - task: "Paper Trading Account Management - GET /api/trading/account"
