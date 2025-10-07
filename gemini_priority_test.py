@@ -12,7 +12,7 @@ import os
 from datetime import datetime
 
 # Test configuration
-BACKEND_URL = "https://self-coding-ai.preview.emergentagent.com/api"
+BACKEND_URL = "https://ai-trade-hub-4.preview.emergentagent.com/api"
 
 class GeminiPriorityTester:
     def __init__(self):
