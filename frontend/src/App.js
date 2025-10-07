@@ -130,17 +130,7 @@ function App() {
   // Analysis sub-tab state
   const [analysisTab, setAnalysisTab] = useState("indicators");
 
-  // Check for existing auth on mount
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
-    }
-  }, []);
+  // Authentication removed - direct access
   
   // Mobile detection
   useEffect(() => {
