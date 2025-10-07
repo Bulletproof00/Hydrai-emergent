@@ -503,9 +503,9 @@ function App() {
         </nav>
 
         <div className="header-right">
+          <LanguageSwitcher />
           <button className="auth-btn">Anmelden</button>
           <button className="auth-btn primary">Registrieren</button>
-          <LanguageSwitcher />
         </div>
 
         {/* Mobile Menu Button */}
