@@ -2662,10 +2662,6 @@ async def get_economic_calendar():
         logger.error(f"Economic calendar endpoint error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-            logger.info("Background market data update completed")
-        except Exception as e:
-            logger.error(f"Background update task error: {str(e)}")
-
 @app.on_event("startup")
 async def startup_event():
     global exchange, redis_client, enhanced_streamer, smart_money, enhanced_smart_money, paper_trading, ai_trading, integrated_ai, news_sentiment
