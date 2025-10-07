@@ -89,6 +89,54 @@ const TradingPositionsWidget = () => {
   );
 };
 
+// Language Switcher Component with Dropdown
+const LanguageSwitcher = () => {
+  const { i18n } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const languages = [
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+    { code: 'zh', name: '中文', flag: '🇨🇳' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' }
+  ];
+
+  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+
+  const handleLanguageChange = (languageCode) => {
+    i18n.changeLanguage(languageCode);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="language-switcher">
+      <button 
+        className="globe-button"
+        onClick={() => setIsOpen(!isOpen)}
+        title="Sprache wählen"
+      >
+        <Globe size={20} />
+      </button>
+      
+      {isOpen && (
+        <div className="language-dropdown">
+          {languages.map((lang) => (
+            <button
+              key={lang.code}
+              className={`language-option ${lang.code === i18n.language ? 'active' : ''}`}
+              onClick={() => handleLanguageChange(lang.code)}
+            >
+              <span className="flag">{lang.flag}</span>
+              <span className="name">{lang.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Sample Prompts Component
 const SamplePrompts = ({ onPromptClick }) => {
   const { t } = useTranslation();
