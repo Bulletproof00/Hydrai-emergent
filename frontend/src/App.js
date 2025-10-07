@@ -93,10 +93,14 @@ const TradingPositionsWidget = () => {
 
 function App() {
   const { t, i18n } = useTranslation();
-  // Auth state
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Authentication disabled - direct access
+  const [user, setUser] = useState({
+    _id: 'a84844e0-d4e8-4484-a452-7b647edacfed',
+    email: 'demo@lunara.ai',
+    username: 'Demo User'
+  });
+  const [token, setToken] = useState('demo-token');
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
