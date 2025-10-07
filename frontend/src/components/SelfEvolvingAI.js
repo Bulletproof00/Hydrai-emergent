@@ -17,6 +17,9 @@ const SelfEvolvingAI = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [autoAnalysisRunning, setAutoAnalysisRunning] = useState(false);
     const [lastAutoAnalysis, setLastAutoAnalysis] = useState(null);
+    const [pluginStatus, setPluginStatus] = useState(null);
+    const [improvementRequest, setImprovementRequest] = useState('');
+    const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 
     const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
