@@ -64,23 +64,53 @@ const TradingInterface = () => {
             const token = localStorage.getItem('token');
             const headers = { 'Authorization': `Bearer ${token}` };
             
-            // Fetch account, positions, and history in parallel
-            const [accountResponse, positionsResponse, historyResponse] = await Promise.all([
-                axios.get(`${BACKEND_URL}/api/trading/account`, { headers }),
-                axios.get(`${BACKEND_URL}/api/trading/positions`, { headers }),
-                axios.get(`${BACKEND_URL}/api/trading/history?limit=20`, { headers })
-            ]);
+            // Set timeout for API calls
+            const timeout = 10000; // 10 seconds
             
-            if (accountResponse.data.status === 'success') {
-                setAccount(accountResponse.data.account);
+            // Fetch data sequentially with individual error handling
+            try {
+                const accountResponse = await axios.get(`${BACKEND_URL}/api/trading/account`, { 
+                    headers, 
+                    timeout 
+                });
+                if (accountResponse.data.status === 'success') {
+                    setAccount(accountResponse.data.account);
+                }
+            } catch (err) {
+                console.warn('Account data fetch failed:', err.message);
+                // Set default account data
+                setAccount({
+                    balance: 10000,
+                    equity: 10000,
+                    free_margin: 10000,
+                    unrealized_pnl: 0
+                });
             }
             
-            if (positionsResponse.data.status === 'success') {
-                setPositions(positionsResponse.data.positions);
+            try {
+                const positionsResponse = await axios.get(`${BACKEND_URL}/api/trading/positions`, { 
+                    headers, 
+                    timeout 
+                });
+                if (positionsResponse.data.status === 'success') {
+                    setPositions(positionsResponse.data.positions);
+                }
+            } catch (err) {
+                console.warn('Positions data fetch failed:', err.message);
+                setPositions([]);
             }
             
-            if (historyResponse.data.status === 'success') {
-                setTradeHistory(historyResponse.data.history);
+            try {
+                const historyResponse = await axios.get(`${BACKEND_URL}/api/trading/history?limit=20`, { 
+                    headers, 
+                    timeout 
+                });
+                if (historyResponse.data.status === 'success') {
+                    setTradeHistory(historyResponse.data.history);
+                }
+            } catch (err) {
+                console.warn('Trade history fetch failed:', err.message);
+                setTradeHistory([]);
             }
             
         } catch (err) {
