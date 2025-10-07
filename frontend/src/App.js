@@ -176,6 +176,11 @@ function App() {
   const [token, setToken] = useState('demo-token');
   const [isAuthenticated, setIsAuthenticated] = useState(true);
 
+  // Set demo token in localStorage for components
+  useEffect(() => {
+    localStorage.setItem('token', 'demo-token');
+  }, []);
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
