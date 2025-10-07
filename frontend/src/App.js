@@ -449,9 +449,6 @@ function App() {
           {!isMobile && (
             <div className="user-info">
               <span className="username">{user?.username}</span>
-              <button className="logout-btn" onClick={handleLogout} title="Abmelden">
-                <LogOut size={18} />
-              </button>
             </div>
           )}
         </div>
