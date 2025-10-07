@@ -251,6 +251,89 @@ body {
   z-index: 1;
 }
 
+/* Welcome Screen */
+.welcome-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+}
+
+.welcome-content {
+  max-width: 800px;
+  text-align: center;
+}
+
+.welcome-header {
+  margin-bottom: 48px;
+}
+
+.welcome-icon {
+  width: 80px;
+  height: 80px;
+  color: #10b981;
+  margin: 0 auto 24px;
+}
+
+.welcome-header h1 {
+  font-size: 48px;
+  font-weight: 700;
+  color: #e4e4e7;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+.welcome-header p {
+  font-size: 18px;
+  color: #94a3b8;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Sample Prompts */
+.sample-prompts {
+  width: 100%;
+}
+
+.prompts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.prompt-card {
+  padding: 20px;
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  color: #e4e4e7;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  text-decoration: none;
+  display: block;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prompt-card:hover {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateY(-2px);
+}
+
+.prompt-card span {
+  line-height: 1.4;
+}
+
 /* Navigation */
 .nav-menu {
   display: flex;
