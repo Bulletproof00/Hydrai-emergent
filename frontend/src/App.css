@@ -3855,6 +3855,90 @@ body {
   .app-container {
     flex-direction: column;
   }
+
+  /* Top Header Mobile */
+  .top-header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+
+  .header-left .logo {
+    font-size: 20px;
+  }
+
+  .header-left .logo-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Hide desktop nav on mobile */
+  .top-nav,
+  .header-right {
+    display: none;
+  }
+
+  .mobile-menu-button {
+    display: block;
+  }
+
+  .mobile-overlay {
+    display: block;
+  }
+
+  /* Welcome Screen Mobile */
+  .welcome-screen {
+    padding: 20px;
+  }
+
+  .welcome-header h1 {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .welcome-header p {
+    font-size: 16px;
+  }
+
+  .welcome-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 16px;
+  }
+
+  .welcome-header {
+    margin-bottom: 32px;
+  }
+
+  /* Sample Prompts Mobile */
+  .prompts-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    max-width: 100%;
+  }
+
+  .prompt-card {
+    padding: 16px;
+    min-height: 60px;
+    font-size: 14px;
+  }
+
+  /* Messages Mobile */
+  .messages-container {
+    padding: 16px;
+  }
+
+  .message-content {
+    max-width: 85%;
+  }
+
+  /* Input Form Mobile */
+  .input-form {
+    padding: 16px;
+  }
+
+  .message-input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
   
   .sidebar {
     position: fixed;
