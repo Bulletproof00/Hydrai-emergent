@@ -2662,6 +2662,50 @@ async def get_economic_calendar():
         logger.error(f"Economic calendar endpoint error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/news")
+async def get_news():
+    """Get latest financial news"""
+    try:
+        # Simple placeholder news data 
+        news_data = [
+            {
+                "title": "Bitcoin reaches new monthly highs amid institutional interest", 
+                "source": "Financial Times",
+                "timestamp": "2024-10-07T12:00:00Z",
+                "sentiment": "positive"
+            },
+            {
+                "title": "Federal Reserve signals potential rate changes in Q4",
+                "source": "Reuters", 
+                "timestamp": "2024-10-07T11:30:00Z",
+                "sentiment": "neutral"
+            }
+        ]
+        return {"status": "success", "data": news_data}
+    except Exception as e:
+        logger.error(f"News endpoint error: {e}")
+        return {"status": "error", "message": str(e), "data": []}
+
+@api_router.get("/sentiment")  
+async def get_sentiment():
+    """Get market sentiment analysis"""
+    try:
+        # Simple placeholder sentiment data
+        sentiment_data = {
+            "overall_sentiment": "bullish",
+            "score": 0.65,
+            "sources": {
+                "twitter": 0.7,
+                "reddit": 0.6, 
+                "news": 0.65
+            },
+            "trending_topics": ["Bitcoin", "Ethereum", "DeFi", "NFTs"]
+        }
+        return {"status": "success", "data": sentiment_data}
+    except Exception as e:
+        logger.error(f"Sentiment endpoint error: {e}")
+        return {"status": "error", "message": str(e), "data": {}}
+
 @app.on_event("startup")
 async def startup_event():
     global exchange, redis_client, enhanced_streamer, smart_money, enhanced_smart_money, paper_trading, ai_trading, integrated_ai, news_sentiment
