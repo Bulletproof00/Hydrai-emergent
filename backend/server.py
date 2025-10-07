@@ -1903,28 +1903,24 @@ async def reset_trading_account(authorization: str = Header(None)):
         user = await get_current_user(authorization)
         user_id = user['_id']
         
-        # Get existing account or create if doesn't exist
-        existing_account = await db['paper_trading_accounts'].find_one({'user_id': user_id})
+        # Simply reset account via paper_trading engine
+        account = await paper_trading.get_user_account(user_id)
         
-        if existing_account:
-            # Update ONLY balance-related fields, keep everything else
-            reset_data = {
-                'balance': 10000.0,
-                'equity': 10000.0,
-                'margin_used': 0.0,
-                'free_margin': 10000.0,
-                'unrealized_pnl': 0.0,
-                'updated_at': datetime.now(timezone.utc)
-            }
-            
+        # Reset balance-related fields only
+        if account:
             await db['paper_trading_accounts'].update_one(
                 {'user_id': user_id},
-                {'$set': reset_data}
+                {'$set': {
+                    'balance': 10000.0,
+                    'equity': 10000.0,
+                    'margin_used': 0.0,
+                    'free_margin': 10000.0,
+                    'unrealized_pnl': 0.0,
+                    'updated_at': datetime.now(timezone.utc)
+                }}
             )
             
-            # Get updated account
             updated_account = await db['paper_trading_accounts'].find_one({'user_id': user_id})
-            
         else:
             # Create new account if doesn't exist
             updated_account = await paper_trading.create_user_account(user_id, 10000.0)
