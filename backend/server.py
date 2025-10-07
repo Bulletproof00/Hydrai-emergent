@@ -2589,7 +2589,9 @@ async def update_market_data_background():
                     await asyncio.sleep(1)  # Rate limit protection
                 except Exception as e:
                     logger.error(f"Background update error for {symbol}: {str(e)}")
-            
+        except Exception as e:
+            logger.error(f"Market data background error: {e}")
+            await asyncio.sleep(300)  # Wait 5 minutes before retry
 
 
 # ============================
