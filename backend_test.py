@@ -3911,6 +3911,7 @@ class TradingSystemTester:
             await self.test_trading_history()
             
             print("\n🔧 ADDITIONAL FUNCTIONALITY TESTS...")
+            await self.test_close_position_functionality()
             await self.test_position_schliessen_reparatur_test()
             await self.test_preisanzeige_reparatur_test()
             
