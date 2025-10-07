@@ -345,34 +345,19 @@ class TradingSystemTester:
         
         data = response['data']
         
-        # Handle nested response structure
-        if data.get('status') == 'success' and 'result' in data:
-            result = data['result']
-            new_balance = result.get('new_balance', 0)
-            positions_closed = result.get('positions_closed', 0)
+        # Handle the actual response structure from debug
+        if data.get('status') == 'success' and 'account' in data:
+            account = data['account']
+            new_balance = account.get('balance', 0)
+            message = data.get('message', '')
             
             if new_balance == 10000.0:  # Default reset balance
                 self.log_test(
                     test_name, 
                     "PASS", 
-                    f"✅ ACCOUNT RESET ERFOLGREICH! Balance zurückgesetzt auf ${new_balance:,.2f}, {positions_closed} Positionen geschlossen (vorher: ${balance_before:,.2f})",
+                    f"✅ ACCOUNT RESET ERFOLGREICH! {message}, Balance zurückgesetzt auf ${new_balance:,.2f} (vorher: ${balance_before:,.2f})",
                     "Account erfolgreich auf $10,000 zurückgesetzt, alle Positionen geschlossen",
-                    f"Reset: ${balance_before:,.2f} → ${new_balance:,.2f}, {positions_closed} positions closed"
-                )
-            else:
-                self.log_test(test_name, "FAIL", f"❌ Account Reset Balance falsch: ${new_balance} (erwartet: $10,000)")
-        elif data.get('status') == 'success':
-            # Direct response structure
-            new_balance = data.get('new_balance', 0)
-            positions_closed = data.get('positions_closed', 0)
-            
-            if new_balance == 10000.0:
-                self.log_test(
-                    test_name, 
-                    "PASS", 
-                    f"✅ ACCOUNT RESET ERFOLGREICH! Balance zurückgesetzt auf ${new_balance:,.2f}, {positions_closed} Positionen geschlossen (vorher: ${balance_before:,.2f})",
-                    "Account erfolgreich auf $10,000 zurückgesetzt, alle Positionen geschlossen",
-                    f"Reset: ${balance_before:,.2f} → ${new_balance:,.2f}, {positions_closed} positions closed"
+                    f"Reset: ${balance_before:,.2f} → ${new_balance:,.2f}"
                 )
             else:
                 self.log_test(test_name, "FAIL", f"❌ Account Reset Balance falsch: ${new_balance} (erwartet: $10,000)")
