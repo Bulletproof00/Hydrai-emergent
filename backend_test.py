@@ -3827,12 +3827,16 @@ class TradingSystemTester:
         self.print_finale_summary()
 
 async def main():
-    """Main test runner - SELF-CODING AI SYSTEM TESTS"""
+    """Main test runner - PAPER TRADING SYSTEM TESTS"""
     tester = TradingSystemTester()
     
-    # Run SELF-CODING AI TESTS as requested in the review
-    print("🤖 RUNNING SELF-CODING AI SYSTEM TESTS")
-    await tester.run_self_coding_ai_tests()
+    # Run PAPER TRADING SYSTEM TESTS as requested in the review
+    print("📈 RUNNING PAPER TRADING SYSTEM TESTS")
+    print("Testing alle Trading-bezogenen Backend-Endpoints für Paper Trading System")
+    print("Backend URL: https://ai-trade-hub-4.preview.emergentagent.com")
+    print()
+    
+    await tester.run_paper_trading_tests()
 
 if __name__ == "__main__":
     asyncio.run(main())
