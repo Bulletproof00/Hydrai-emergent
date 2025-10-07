@@ -9,7 +9,6 @@ import EnhancedSmartMoneyPanel from "./components/EnhancedSmartMoneyPanel";
 import TradingInterface from "./components/TradingInterface";
 import SelfEvolvingAI from "./components/SelfEvolvingAI";
 import LanguageSwitcher from "./components/LanguageSwitcher";
-import Login from "./pages/Login";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
