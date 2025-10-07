@@ -90,6 +90,34 @@ const TradingPositionsWidget = () => {
   );
 };
 
+// Sample Prompts Component
+const SamplePrompts = ({ onPromptClick }) => {
+  const { t } = useTranslation();
+  
+  const prompts = [
+    "Analysiere den Bitcoinchart im Multitimeframe",
+    "Finde mir eine Strategie für Swingtrading",
+    "Zeige mir die aktuellen Smart Money Indikatoren",
+    "Erstelle ein Backtest für die RSI Strategie"
+  ];
+
+  return (
+    <div className="sample-prompts">
+      <div className="prompts-grid">
+        {prompts.map((prompt, index) => (
+          <button
+            key={index}
+            className="prompt-card"
+            onClick={() => onPromptClick(prompt)}
+          >
+            <span>{prompt}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const { t, i18n } = useTranslation();
   // Authentication disabled - direct access
