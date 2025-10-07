@@ -428,9 +428,6 @@ function App() {
           <div className="mobile-title">
             Lunara Analyze AI
           </div>
-          <button className="logout-btn" onClick={handleLogout} title="Abmelden">
-            <LogOut size={18} />
-          </button>
         </div>
       )}
 
