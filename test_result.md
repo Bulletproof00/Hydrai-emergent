@@ -117,7 +117,7 @@ backend:
           agent: "testing"
           comment: "✅ PAPER TRADING ACCOUNT STATUS ERFOLGREICH GETESTET (2025-10-07): Trading Account API funktioniert perfekt mit vollständiger Datenstruktur. ✅ Balance: $10,000.00 korrekt angezeigt ✅ Equity: $10,000.00 berechnet ✅ Free Margin: $10,000.00 verfügbar ✅ Unrealized PnL: $0.00 korrekt ✅ Alle erforderlichen Felder vorhanden: balance, equity, free_margin, unrealized_pnl ✅ Benutzerauthentifizierung funktioniert ✅ Account-Erstellung bei erstem Zugriff automatisch. Das Paper Trading Account Management System ist vollständig funktionsfähig."
 
-  - task: "Paper Trading Order Management - POST /api/trading/order"
+  - task: "Paper Trading Order Placement - POST /api/trading/order (BTC/USDT Long)"
     implemented: true
     working: true
     file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
@@ -127,7 +127,7 @@ backend:
     status_history:
         - working: true
           agent: "testing"
-          comment: "COMPREHENSIVE TESTING COMPLETED: Order management system fully operational. ✅ MARKET ORDERS: Immediate execution with realistic fill prices and slippage ✅ LIMIT ORDERS: Proper order creation with stop loss and take profit support ✅ LEVERAGE SUPPORT: All tested leverage levels working (1x, 25x, 50x, 100x) ✅ FEE CALCULATION: Accurate taker fees (0.04%) applied to all orders ✅ SLIPPAGE CALCULATION: Realistic slippage based on order size ✅ ORDER VALIDATION: Proper validation of order parameters and balance checks ✅ JSON API: Pydantic models for proper request/response handling."
+          comment: "✅ BTC/USDT LONG ORDER ERFOLGREICH GETESTET (2025-10-07): Market Order Platzierung funktioniert perfekt mit realistischen Trading-Parametern. ✅ Order ID: b5905363-1b08-4322-ab53-b3eee89666f4 erfolgreich erstellt ✅ Fill Price: $66,256.47 realistisch ✅ Quantity: 0.001 BTC korrekt ausgeführt ✅ Fees: $0.03 korrekt berechnet (Taker Fee) ✅ Status: filled - sofortige Ausführung ✅ Market Order Typ funktioniert ✅ Leverage: 1x angewendet ✅ JSON Response korrekt strukturiert ✅ Pydantic Models funktionieren einwandfrei. Das Order Management System ist vollständig funktionsfähig für realistische Trading-Szenarien."
 
   - task: "Paper Trading Position Management - GET /api/trading/positions"
     implemented: true
