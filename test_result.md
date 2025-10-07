@@ -129,7 +129,7 @@ backend:
           agent: "testing"
           comment: "✅ BTC/USDT LONG ORDER ERFOLGREICH GETESTET (2025-10-07): Market Order Platzierung funktioniert perfekt mit realistischen Trading-Parametern. ✅ Order ID: b5905363-1b08-4322-ab53-b3eee89666f4 erfolgreich erstellt ✅ Fill Price: $66,256.47 realistisch ✅ Quantity: 0.001 BTC korrekt ausgeführt ✅ Fees: $0.03 korrekt berechnet (Taker Fee) ✅ Status: filled - sofortige Ausführung ✅ Market Order Typ funktioniert ✅ Leverage: 1x angewendet ✅ JSON Response korrekt strukturiert ✅ Pydantic Models funktionieren einwandfrei. Das Order Management System ist vollständig funktionsfähig für realistische Trading-Szenarien."
 
-  - task: "Paper Trading Position Management - GET /api/trading/positions"
+  - task: "Paper Trading Open Positions - GET /api/trading/positions"
     implemented: true
     working: true
     file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
@@ -139,7 +139,7 @@ backend:
     status_history:
         - working: true
           agent: "testing"
-          comment: "VERIFIED: Position tracking system working correctly. ✅ Position creation and tracking for all order types ✅ Complete position data: position_id, symbol, side, size, entry_price, leverage, liquidation_price ✅ Position aggregation: Multiple orders correctly add to existing positions ✅ Real-time position updates with mark prices ✅ Position status management (open/closed) ✅ Database storage and retrieval working properly."
+          comment: "✅ OPEN POSITIONS ERFOLGREICH GETESTET (2025-10-07): Position Tracking System funktioniert perfekt mit vollständiger Datenstruktur. ✅ 1 Position gefunden: BTC/USDT LONG 0.001 @ $66,256.47 ✅ Leverage: 1x korrekt angezeigt ✅ Unrealized PnL: $0.00 berechnet ✅ Vollständige Position-Daten: position_id, symbol, side, size, entry_price, leverage ✅ Position-Aggregation funktioniert ✅ Real-time Position Updates ✅ Database Storage und Retrieval arbeitet korrekt ✅ JSON API Response korrekt strukturiert. Das Position Management System zeigt alle offenen Positionen korrekt an."
 
   - task: "Paper Trading Margin Management - POST /api/trading/position/margin"
     implemented: true
