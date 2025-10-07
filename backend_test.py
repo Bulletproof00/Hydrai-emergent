@@ -3826,6 +3826,66 @@ class TradingSystemTester:
         await self.cleanup()
         self.print_finale_summary()
 
+    async def run_paper_trading_tests(self):
+        """Run comprehensive Paper Trading System tests as requested"""
+        await self.setup()
+        
+        try:
+            print("🎯 TESTING PAPER TRADING SYSTEM ENDPOINTS")
+            print("=" * 80)
+            
+            # Core Paper Trading System Tests as requested in review
+            print("\n📊 CORE TRADING FUNCTIONALITY TESTS...")
+            await self.test_trading_account_status()
+            await self.test_portfolio_balance_check()
+            await self.test_place_test_order_btc_long()
+            await self.test_get_open_positions()
+            await self.test_account_reset_function()
+            await self.test_trading_history()
+            
+            print("\n🔧 ADDITIONAL FUNCTIONALITY TESTS...")
+            await self.test_position_schliessen_reparatur_test()
+            await self.test_preisanzeige_reparatur_test()
+            
+        except Exception as e:
+            print(f"❌ Error during Paper Trading tests: {e}")
+        finally:
+            await self.cleanup()
+        
+        # Print summary
+        self.print_paper_trading_summary()
+    
+    def print_paper_trading_summary(self):
+        """Print summary of Paper Trading System tests"""
+        print("\n" + "=" * 80)
+        print("📈 PAPER TRADING SYSTEM TEST SUMMARY")
+        print("=" * 80)
+        
+        total_tests = len(self.test_results)
+        passed_tests = len([r for r in self.test_results if r['status'] == 'PASS'])
+        failed_tests = len([r for r in self.test_results if r['status'] == 'FAIL'])
+        warned_tests = len([r for r in self.test_results if r['status'] == 'WARN'])
+        
+        print(f"📊 TOTAL TESTS: {total_tests}")
+        print(f"✅ PASSED: {passed_tests}")
+        print(f"❌ FAILED: {failed_tests}")
+        print(f"⚠️  WARNINGS: {warned_tests}")
+        
+        if total_tests > 0:
+            success_rate = (passed_tests / total_tests) * 100
+            print(f"📈 SUCCESS RATE: {success_rate:.1f}%")
+        
+        print("\n🎯 DETAILED RESULTS:")
+        for result in self.test_results:
+            status_emoji = "✅" if result['status'] == "PASS" else "❌" if result['status'] == "FAIL" else "⚠️"
+            print(f"{status_emoji} {result['test']}: {result['status']}")
+            if result['details']:
+                print(f"   {result['details']}")
+        
+        print("\n" + "=" * 80)
+        print("📈 PAPER TRADING SYSTEM TESTING COMPLETE")
+        print("=" * 80)
+
 async def main():
     """Main test runner - PAPER TRADING SYSTEM TESTS"""
     tester = TradingSystemTester()
