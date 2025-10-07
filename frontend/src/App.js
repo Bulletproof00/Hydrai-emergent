@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "@/App.css";
 import axios from "axios";
-import { Send, TrendingUp, Activity, BarChart3, Brain, Zap, Settings, LineChart, LogOut, DollarSign, Menu } from "lucide-react";
+import { Send, TrendingUp, Activity, BarChart3, Brain, Zap, Settings, LineChart, DollarSign, Menu } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import AdvancedChart from "./components/AdvancedChart";
 import SmartMoneyPanel from "./components/SmartMoneyPanel";
