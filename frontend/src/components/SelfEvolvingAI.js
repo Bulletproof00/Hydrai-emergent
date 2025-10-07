@@ -547,6 +547,22 @@ const SelfEvolvingAI = () => {
                                 
                                 {chatMessages.map((msg, index) => (
                                     <div key={index} className={`chat-message ${msg.role}`}>
+                                        <div className="message-header">
+                                            <span className="message-role">
+                                                {msg.role === 'assistant' ? '🤖 Lunara AI' : '👤 Sie'}
+                                            </span>
+                                            {msg.timestamp && (
+                                                <span className="message-timestamp">
+                                                    {new Date(msg.timestamp).toLocaleString('de-DE', {
+                                                        day: '2-digit',
+                                                        month: '2-digit',
+                                                        year: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="message-content">
                                             <pre className="message-text">{msg.content}</pre>
                                         </div>
