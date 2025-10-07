@@ -124,8 +124,295 @@ class TradingSystemTester:
                 'error': str(e)
             }
 
-    # ============= PRIORITY TESTS - PAPER TRADING REPARATUREN =============
+    # ============= PRIORITY TESTS - PAPER TRADING SYSTEM =============
     
+    async def test_trading_account_status(self):
+        """Test 1: Trading Account Status - GET /api/trading/account"""
+        test_name = "🎯 TEST 1: TRADING ACCOUNT STATUS"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        response = await self.test_api_endpoint("/trading/account", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Trading Account API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check for account data structure
+        if 'account' not in data:
+            self.log_test(test_name, "FAIL", f"❌ Trading Account Response missing 'account' object: {data}")
+            return
+        
+        account_data = data['account']
+        required_fields = ['balance', 'equity', 'free_margin', 'unrealized_pnl']
+        missing_fields = [field for field in required_fields if field not in account_data]
+        
+        if missing_fields:
+            self.log_test(test_name, "FAIL", f"❌ Trading Account Response unvollständig, fehlende Felder: {missing_fields}")
+            return
+        
+        balance = account_data.get('balance', 0)
+        equity = account_data.get('equity', 0)
+        free_margin = account_data.get('free_margin', 0)
+        unrealized_pnl = account_data.get('unrealized_pnl', 0)
+        
+        if balance > 0 and equity >= 0:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ TRADING ACCOUNT STATUS ERFOLGREICH! Balance: ${balance:,.2f}, Equity: ${equity:,.2f}, Free Margin: ${free_margin:,.2f}, Unrealized PnL: ${unrealized_pnl:,.2f}",
+                "Korrekte Account-Daten mit allen erforderlichen Feldern",
+                f"Balance: ${balance:,.2f}, Equity: ${equity:,.2f}"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Trading Account Daten ungültig: Balance: ${balance}, Equity: ${equity}")
+
+    async def test_portfolio_balance_check(self):
+        """Test 2: Portfolio/Balance Check - GET /api/trading/portfolio"""
+        test_name = "🎯 TEST 2: PORTFOLIO/BALANCE CHECK"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        response = await self.test_api_endpoint("/trading/portfolio", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Portfolio API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check for portfolio data structure
+        required_fields = ['balance', 'open_trades', 'closed_trades', 'total_pnl', 'win_rate']
+        missing_fields = [field for field in required_fields if field not in data]
+        
+        if missing_fields:
+            self.log_test(test_name, "FAIL", f"❌ Portfolio Response unvollständig, fehlende Felder: {missing_fields}")
+            return
+        
+        balance = data.get('balance', 0)
+        open_trades = data.get('open_trades', [])
+        closed_trades = data.get('closed_trades', [])
+        total_pnl = data.get('total_pnl', 0)
+        win_rate = data.get('win_rate', 0)
+        
+        if balance > 0:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ PORTFOLIO/BALANCE CHECK ERFOLGREICH! Balance: ${balance:,.2f}, Open Trades: {len(open_trades)}, Closed Trades: {len(closed_trades)}, Total PnL: ${total_pnl:,.2f}, Win Rate: {win_rate:.1f}%",
+                "Vollständige Portfolio-Daten mit Balance und Trade-Historie",
+                f"Balance: ${balance:,.2f}, Trades: {len(open_trades)} open, {len(closed_trades)} closed"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Portfolio Balance ungültig: ${balance}")
+
+    async def test_place_test_order_btc_long(self):
+        """Test 3: Place Test Order - BTC/USDT Long - POST /api/trading/order"""
+        test_name = "🎯 TEST 3: PLACE TEST ORDER - BTC/USDT LONG"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # Place a realistic BTC Long order as requested
+        order_data = {
+            "symbol": "BTC/USDT",
+            "side": "buy",
+            "order_type": "market",
+            "quantity": 0.001,  # Small amount for testing
+            "leverage": 1,      # Conservative leverage
+            "stop_loss": None,
+            "take_profit": None
+        }
+        
+        response = await self.test_api_endpoint("/trading/order", method="POST", data=order_data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Place Order API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check for successful order placement
+        if 'order' in data and data.get('status') == 'success':
+            order_info = data['order']
+            order_id = order_info.get('order_id', 'N/A')
+            fill_price = order_info.get('fill_price', 0)
+            quantity = order_info.get('quantity', 0)
+            fees = order_info.get('fees', 0)
+            
+            if fill_price > 0 and quantity > 0:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ BTC/USDT LONG ORDER ERFOLGREICH PLATZIERT! Order ID: {order_id}, Fill Price: ${fill_price:,.2f}, Quantity: {quantity} BTC, Fees: ${fees:.2f}",
+                    "Erfolgreiche Market Order Platzierung mit realistischen Parametern",
+                    f"Order ID: {order_id}, Fill: ${fill_price:,.2f}, Qty: {quantity}"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Order platziert aber ungültige Daten: Fill Price: ${fill_price}, Quantity: {quantity}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Order Placement Response unvollständig: {data}")
+
+    async def test_get_open_positions(self):
+        """Test 4: Get Open Positions - GET /api/trading/positions"""
+        test_name = "🎯 TEST 4: GET OPEN POSITIONS"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        response = await self.test_api_endpoint("/trading/positions", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Get Positions API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Handle different response structures
+        if isinstance(data, dict):
+            positions = data.get('positions', [])
+        else:
+            positions = data if isinstance(data, list) else []
+        
+        if len(positions) == 0:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ GET OPEN POSITIONS ERFOLGREICH! Keine offenen Positionen gefunden (API funktioniert korrekt)",
+                "Positions API funktioniert, keine offenen Positionen",
+                "No open positions (API working)"
+            )
+            return
+        
+        # Check position data structure
+        position = positions[0]
+        required_fields = ['position_id', 'symbol', 'side', 'size', 'entry_price', 'leverage']
+        missing_fields = [field for field in required_fields if field not in position]
+        
+        if missing_fields:
+            self.log_test(test_name, "FAIL", f"❌ Position Daten unvollständig, fehlende Felder: {missing_fields}")
+            return
+        
+        position_id = position.get('position_id')
+        symbol = position.get('symbol')
+        side = position.get('side')
+        size = position.get('size', 0)
+        entry_price = position.get('entry_price', 0)
+        leverage = position.get('leverage', 1)
+        unrealized_pnl = position.get('unrealized_pnl', 0)
+        
+        self.log_test(
+            test_name, 
+            "PASS", 
+            f"✅ GET OPEN POSITIONS ERFOLGREICH! {len(positions)} Position(en) gefunden. Beispiel: {symbol} {side.upper()} {size} @ ${entry_price:,.2f} (Leverage: {leverage}x, PnL: ${unrealized_pnl:,.2f})",
+            "Vollständige Position-Daten mit allen erforderlichen Feldern",
+            f"{len(positions)} positions, complete data structure"
+        )
+
+    async def test_account_reset_function(self):
+        """Test 5: Account Reset Function - POST /api/trading/account/reset"""
+        test_name = "🎯 TEST 5: ACCOUNT RESET FUNCTION"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # Get account balance before reset
+        account_before = await self.test_api_endpoint("/trading/account", auth=True)
+        balance_before = 0
+        if account_before['success']:
+            balance_before = account_before['data'].get('account', {}).get('balance', 0)
+        
+        # Reset account
+        response = await self.test_api_endpoint("/trading/account/reset", method="POST", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Account Reset API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if data.get('status') == 'success':
+            new_balance = data.get('new_balance', 0)
+            positions_closed = data.get('positions_closed', 0)
+            
+            if new_balance == 10000.0:  # Default reset balance
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ ACCOUNT RESET ERFOLGREICH! Balance zurückgesetzt auf ${new_balance:,.2f}, {positions_closed} Positionen geschlossen (vorher: ${balance_before:,.2f})",
+                    "Account erfolgreich auf $10,000 zurückgesetzt, alle Positionen geschlossen",
+                    f"Reset: ${balance_before:,.2f} → ${new_balance:,.2f}, {positions_closed} positions closed"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Account Reset Balance falsch: ${new_balance} (erwartet: $10,000)")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Account Reset Response unvollständig: {data}")
+
+    async def test_trading_history(self):
+        """Test 6: Trading History - GET /api/trading/history"""
+        test_name = "🎯 TEST 6: TRADING HISTORY"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        response = await self.test_api_endpoint("/trading/history?limit=10", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Trading History API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Handle different response structures
+        if isinstance(data, dict):
+            history = data.get('history', [])
+        else:
+            history = data if isinstance(data, list) else []
+        
+        if len(history) == 0:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ TRADING HISTORY ERFOLGREICH! Keine Trading-Historie gefunden (API funktioniert korrekt)",
+                "Trading History API funktioniert, keine Historie vorhanden",
+                "No trading history (API working)"
+            )
+            return
+        
+        # Check history data structure
+        trade = history[0]
+        required_fields = ['order_id', 'symbol', 'side', 'quantity', 'status', 'timestamp']
+        missing_fields = [field for field in required_fields if field not in trade]
+        
+        if missing_fields:
+            self.log_test(test_name, "FAIL", f"❌ Trading History Daten unvollständig, fehlende Felder: {missing_fields}")
+            return
+        
+        order_id = trade.get('order_id')
+        symbol = trade.get('symbol')
+        side = trade.get('side')
+        quantity = trade.get('quantity', 0)
+        status = trade.get('status')
+        timestamp = trade.get('timestamp')
+        
+        self.log_test(
+            test_name, 
+            "PASS", 
+            f"✅ TRADING HISTORY ERFOLGREICH! {len(history)} Trade(s) in Historie. Letzter Trade: {order_id} - {symbol} {side.upper()} {quantity} ({status}) am {timestamp}",
+            "Vollständige Trading-Historie mit chronologischer Sortierung",
+            f"{len(history)} trades, complete data structure"
+        )
+
     async def test_preisanzeige_reparatur_test(self):
         """PRIORITÄT 1: PREISANZEIGE-REPARATUR TEST - GET /api/realtime/latest?symbols=BTC/USDT"""
         test_name = "🎯 PRIORITÄT 1: PREISANZEIGE-REPARATUR TEST"
