@@ -122,6 +122,16 @@ async def get_current_user(authorization: str = Header(None)):
     if not authorization or not authorization.startswith('Bearer '):
         raise HTTPException(status_code=401, detail="Not authenticated")
     token = authorization.split(' ')[1]
+    
+    # Demo token support for development
+    if token == "demo-token":
+        return {
+            "_id": "a84844e0-d4e8-4484-a452-7b647edacfed",
+            "email": "demo@lunara.ai", 
+            "username": "Demo User",
+            "created_at": datetime.now(timezone.utc)
+        }
+    
     payload = decode_access_token(token)
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid token")
