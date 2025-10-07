@@ -1903,38 +1903,33 @@ async def reset_trading_account(authorization: str = Header(None)):
         user = await get_current_user(authorization)
         user_id = user['_id']
         
-        # Simply reset account via paper_trading engine
-        account = await paper_trading.get_user_account(user_id)
-        
-        # Reset balance-related fields only
-        if account:
-            await db['paper_trading_accounts'].update_one(
-                {'user_id': user_id},
-                {'$set': {
-                    'balance': 10000.0,
-                    'equity': 10000.0,
-                    'margin_used': 0.0,
-                    'free_margin': 10000.0,
-                    'unrealized_pnl': 0.0,
-                    'updated_at': datetime.now(timezone.utc)
-                }}
-            )
-            
-            updated_account = await db['paper_trading_accounts'].find_one({'user_id': user_id})
-        else:
-            # Create new account if doesn't exist
-            updated_account = await paper_trading.create_user_account(user_id, 10000.0)
+        # Simple and fast reset - just update the balance fields
+        result = await db.paper_trading_accounts.update_one(
+            {'user_id': user_id},
+            {'$set': {
+                'balance': 10000.0,
+                'equity': 10000.0,
+                'margin_used': 0.0,
+                'free_margin': 10000.0,
+                'unrealized_pnl': 0.0,
+                'updated_at': datetime.now(timezone.utc)
+            }},
+            upsert=True  # Create if doesn't exist
+        )
         
         return {
             'status': 'success',
-            'message': 'Guthaben erfolgreich auf $10.000 zurückgesetzt (Historie beibehalten)',
-            'account': updated_account,
+            'message': 'Guthaben erfolgreich zurückgesetzt auf $10.000',
+            'reset': True,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
         
     except Exception as e:
-        logging.error(f"Reset account error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Reset account error: {e}")
+        return {
+            'status': 'error', 
+            'message': f'Account reset fehlgeschlagen: {str(e)}'
+        }
 
 @api_router.post("/trading/order")
 async def place_trading_order(
