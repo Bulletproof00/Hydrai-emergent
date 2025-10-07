@@ -2538,8 +2538,7 @@ async def health_check():
         }
     }
 
-# Include the router in the main app
-app.include_router(api_router)
+# Router will be included later after all endpoints are defined
 
 app.add_middleware(
     CORSMiddleware,
