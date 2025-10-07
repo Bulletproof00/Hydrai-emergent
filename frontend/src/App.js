@@ -110,7 +110,7 @@ function App() {
   const [livePrice, setLivePrice] = useState(null);
   const [indicators, setIndicators] = useState(null);
   const [plugins, setPlugins] = useState([]);
-  const [activeView, setActiveView] = useState("chart");
+  const [activeView, setActiveView] = useState("chat");
   const [selectedSymbol, setSelectedSymbol] = useState("BTC/USDT");
   const [macroData, setMacroData] = useState(null);
   const [correlations, setCorrelations] = useState(null);
