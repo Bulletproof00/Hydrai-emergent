@@ -387,10 +387,7 @@ function App() {
     }
   };
 
-  // If not authenticated, show login page
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
-  }
+  // Authentication check removed - direct access
 
   const runBacktest = async () => {
     setLoading(true);
