@@ -1044,7 +1044,7 @@ function App() {
             <SelfEvolvingAI />
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
