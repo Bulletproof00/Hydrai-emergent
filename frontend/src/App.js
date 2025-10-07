@@ -675,47 +675,61 @@ function App() {
               </div>
             )}
 
-            <div className="messages-container" data-testid="messages-container">
-              {messages.map((msg, idx) => (
-                <div key={idx} className={`message ${msg.role}`} data-testid={`message-${msg.role}`}>
-                  <div className="message-avatar">
-                    {msg.role === 'assistant' ? <Brain size={20} /> : <div className="user-avatar">U</div>}
+            {/* Welcome Screen or Messages */}
+            {messages.length === 0 && !loading ? (
+              <div className="welcome-screen">
+                <div className="welcome-content">
+                  <div className="welcome-header">
+                    <Brain className="welcome-icon" />
+                    <h1>Willkommen bei LUNARA AiNALYZE</h1>
+                    <p>Ihr intelligenter Trading-Assistent für professionelle Marktanalyse</p>
                   </div>
-                  <div className="message-content">
-                    <div className="message-header">
-                      <span className="message-role">{msg.role === 'assistant' ? 'Lunara AI' : 'Du'}</span>
-                      {msg.timestamp && (
-                        <span className="message-timestamp">
-                          {new Date(msg.timestamp).toLocaleString('de-DE', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                      )}
-                    </div>
-                    <div className="message-text">{msg.content}</div>
-                  </div>
+                  <SamplePrompts onPromptClick={handlePromptClick} />
                 </div>
-              ))}
-              {loading && (
-                <div className="message assistant" data-testid="loading-message">
-                  <div className="message-avatar">
-                    <Brain size={20} />
-                  </div>
-                  <div className="message-content">
-                    <div className="typing-indicator">
-                      <span></span>
-                      <span></span>
-                      <span></span>
+              </div>
+            ) : (
+              <div className="messages-container" data-testid="messages-container">
+                {messages.map((msg, idx) => (
+                  <div key={idx} className={`message ${msg.role}`} data-testid={`message-${msg.role}`}>
+                    <div className="message-avatar">
+                      {msg.role === 'assistant' ? <Brain size={20} /> : <div className="user-avatar">U</div>}
+                    </div>
+                    <div className="message-content">
+                      <div className="message-header">
+                        <span className="message-role">{msg.role === 'assistant' ? 'Lunara AI' : 'Du'}</span>
+                        {msg.timestamp && (
+                          <span className="message-timestamp">
+                            {new Date(msg.timestamp).toLocaleString('de-DE', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        )}
+                      </div>
+                      <div className="message-text">{msg.content}</div>
                     </div>
                   </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
+                ))}
+                {loading && (
+                  <div className="message assistant" data-testid="loading-message">
+                    <div className="message-avatar">
+                      <Brain size={20} />
+                    </div>
+                    <div className="message-content">
+                      <div className="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
 
             <form className="input-form" onSubmit={sendMessage}>
               <input
