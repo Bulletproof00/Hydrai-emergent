@@ -444,49 +444,28 @@ function App() {
     }
   };
 
+  const handlePromptClick = (promptText) => {
+    setInput(promptText);
+  };
+
   return (
     <div className="app-container">
-      {/* Mobile Header */}
-      {isMobile && (
-        <div className="mobile-header">
-          <button className="mobile-menu-button" onClick={toggleMobileMenu}>
-            <Menu size={24} />
-          </button>
-          <div className="mobile-title">
-            Lunara Analyze AI
-          </div>
-        </div>
-      )}
-
-      {/* Mobile Overlay */}
-      {isMobile && (
-        <div 
-          className={`mobile-overlay ${isMobileMenuOpen ? 'active' : ''}`}
-          onClick={closeMobileMenu}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div className={`sidebar ${isMobile && isMobileMenuOpen ? 'mobile-open' : ''}`}>
-        <div className="sidebar-header">
+      {/* Top Header Navigation */}
+      <header className="top-header">
+        <div className="header-left">
           <div className="logo">
             <Brain className="logo-icon" />
-            <span>LUNARA ANALYZE AI</span>
+            <span>LUNARA AiNALYZE</span>
           </div>
-          {!isMobile && (
-            <div className="user-info">
-              <span className="username">{user?.username}</span>
-            </div>
-          )}
         </div>
 
-        <nav className="nav-menu">
+        <nav className="top-nav">
           <button 
             className={`nav-item ${activeView === 'chat' ? 'active' : ''}`}
             onClick={() => handleViewChange('chat')}
             data-testid="nav-chat"
           >
-            <Brain size={20} />
+            <Brain size={18} />
             <span>{t('nav.chat')}</span>
           </button>
           <button 
@@ -494,7 +473,7 @@ function App() {
             onClick={() => handleViewChange('analysis')}
             data-testid="nav-analysis"
           >
-            <Activity size={20} />
+            <Activity size={18} />
             <span>{t('nav.analysis')}</span>
           </button>
           <button 
@@ -502,7 +481,7 @@ function App() {
             onClick={() => handleViewChange('chart')}
             data-testid="nav-chart"
           >
-            <LineChart size={20} />
+            <LineChart size={18} />
             <span>{t('nav.charts')}</span>
           </button>
           <button 
@@ -510,7 +489,7 @@ function App() {
             onClick={() => handleViewChange('trading')}
             data-testid="nav-trading"
           >
-            <DollarSign size={20} />
+            <DollarSign size={18} />
             <span>{t('nav.trading')}</span>
           </button>
           <button 
@@ -518,10 +497,87 @@ function App() {
             onClick={() => handleViewChange('evolution')}
             data-testid="nav-evolution"
           >
-            <Brain size={20} />
+            <Brain size={18} />
             <span>{t('nav.evolution')}</span>
           </button>
         </nav>
+
+        <div className="header-right">
+          <button className="auth-btn">Anmelden</button>
+          <button className="auth-btn primary">Registrieren</button>
+          <LanguageSwitcher />
+        </div>
+
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <button className="mobile-menu-button" onClick={toggleMobileMenu}>
+            <Menu size={24} />
+          </button>
+        )}
+      </header>
+
+      {/* Mobile Navigation Overlay */}
+      {isMobile && (
+        <>
+          <div 
+            className={`mobile-overlay ${isMobileMenuOpen ? 'active' : ''}`}
+            onClick={closeMobileMenu}
+          />
+          <div className={`mobile-nav ${isMobileMenuOpen ? 'open' : ''}`}>
+            <div className="mobile-nav-header">
+              <div className="logo">
+                <Brain className="logo-icon" />
+                <span>LUNARA AiNALYZE</span>
+              </div>
+            </div>
+            <div className="mobile-nav-items">
+              <button 
+                className={`nav-item ${activeView === 'chat' ? 'active' : ''}`}
+                onClick={() => handleViewChange('chat')}
+              >
+                <Brain size={20} />
+                <span>{t('nav.chat')}</span>
+              </button>
+              <button 
+                className={`nav-item ${activeView === 'analysis' ? 'active' : ''}`}
+                onClick={() => handleViewChange('analysis')}
+              >
+                <Activity size={20} />
+                <span>{t('nav.analysis')}</span>
+              </button>
+              <button 
+                className={`nav-item ${activeView === 'chart' ? 'active' : ''}`}
+                onClick={() => handleViewChange('chart')}
+              >
+                <LineChart size={20} />
+                <span>{t('nav.charts')}</span>
+              </button>
+              <button 
+                className={`nav-item ${activeView === 'trading' ? 'active' : ''}`}
+                onClick={() => handleViewChange('trading')}
+              >
+                <DollarSign size={20} />
+                <span>{t('nav.trading')}</span>
+              </button>
+              <button 
+                className={`nav-item ${activeView === 'evolution' ? 'active' : ''}`}
+                onClick={() => handleViewChange('evolution')}
+              >
+                <Brain size={20} />
+                <span>{t('nav.evolution')}</span>
+              </button>
+            </div>
+            <div className="mobile-nav-footer">
+              <button className="auth-btn">Anmelden</button>
+              <button className="auth-btn primary">Registrieren</button>
+              <LanguageSwitcher />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Main Content Area */}
+      <main className="main-content">
 
         {/* Live Price Widget */}
         {livePrice && (
