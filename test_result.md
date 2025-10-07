@@ -105,7 +105,7 @@
 user_problem_statement: "Teste alle Trading-bezogenen Backend-Endpoints um zu verifizieren, dass das Paper Trading System funktioniert: Trading Account Status, Portfolio/Balance, Test-Order platzieren (BTC/USDT Long), Offene Positionen, Account Reset Funktion, Trading History. Backend URL: https://ai-trade-hub-4.preview.emergentagent.com"
 
 backend:
-  - task: "Paper Trading Account Management - GET /api/trading/account"
+  - task: "Paper Trading Account Status - GET /api/trading/account"
     implemented: true
     working: true
     file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
@@ -115,7 +115,7 @@ backend:
     status_history:
         - working: true
           agent: "testing"
-          comment: "VERIFIED: Trading account creation working perfectly. ✅ Creates new account with $10,000 initial balance ✅ Account structure includes all required fields: balance, equity, free_margin, unrealized_pnl ✅ Automatic account creation on first access ✅ Proper user authentication and account linking ✅ Database storage in paper_trading_accounts collection working correctly."
+          comment: "✅ PAPER TRADING ACCOUNT STATUS ERFOLGREICH GETESTET (2025-10-07): Trading Account API funktioniert perfekt mit vollständiger Datenstruktur. ✅ Balance: $10,000.00 korrekt angezeigt ✅ Equity: $10,000.00 berechnet ✅ Free Margin: $10,000.00 verfügbar ✅ Unrealized PnL: $0.00 korrekt ✅ Alle erforderlichen Felder vorhanden: balance, equity, free_margin, unrealized_pnl ✅ Benutzerauthentifizierung funktioniert ✅ Account-Erstellung bei erstem Zugriff automatisch. Das Paper Trading Account Management System ist vollständig funktionsfähig."
 
   - task: "Paper Trading Order Management - POST /api/trading/order"
     implemented: true
