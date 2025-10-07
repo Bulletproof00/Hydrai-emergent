@@ -22,6 +22,8 @@ const SelfEvolvingAI = () => {
 
     useEffect(() => {
         fetchEvolutionData();
+        loadChatHistory();
+        startAutoAnalysisProcess();
         // Refresh data every 30 seconds
         const interval = setInterval(fetchEvolutionData, 30000);
         return () => clearInterval(interval);
