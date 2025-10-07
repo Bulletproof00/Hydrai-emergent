@@ -92,37 +92,7 @@ const SelfEvolvingAI = () => {
         }
     };
 
-    const generateCode = async () => {
-        if (!improvementRequest.trim()) return;
-
-        try {
-            setIsGeneratingCode(true);
-            const token = localStorage.getItem('token');
-            const headers = { 'Authorization': `Bearer ${token}` };
-
-            const response = await axios.post(`${BACKEND_URL}/api/ai/coding/generate`, {
-                improvement_request: improvementRequest
-            }, { headers });
-            
-            if (response.data.status === 'success') {
-                // Add to chat messages
-                setChatMessages(prev => [...prev, 
-                    { role: 'user', content: `Code generieren: ${improvementRequest}` },
-                    { role: 'assistant', content: `✅ Code erfolgreich generiert und getestet!\n\nDetails:\n${JSON.stringify(response.data.coding_result, null, 2)}` }
-                ]);
-                setImprovementRequest('');
-                // Refresh plugin data
-                setTimeout(fetchEvolutionData, 1000);
-            } else {
-                setError(response.data.message || 'Code-Generierung fehlgeschlagen');
-            }
-        } catch (err) {
-            console.error('Code generation error:', err);
-            setError('Fehler beim Generieren von Code');
-        } finally {
-            setIsGeneratingCode(false);
-        }
-    };
+    // Removed generateCode function as Code Generator is no longer needed
 
     // Load chat history from localStorage
     const loadChatHistory = () => {
