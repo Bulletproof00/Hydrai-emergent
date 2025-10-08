@@ -443,11 +443,11 @@ backend:
 
   - task: "CHART-DATEN REPARATUR - Frontend Chart-Integration nach Binance-Fallback-System"
     implemented: true
-    working: true
-    file: "/app/backend/server.py, /app/backend/modules/ai_data_module.py"
-    stuck_count: 0
+    working: false
+    file: "/app/backend/server.py, /app/backend/modules/ai_data_module.py, /app/frontend/src/components/CandlestickChart.js"
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "testing"
