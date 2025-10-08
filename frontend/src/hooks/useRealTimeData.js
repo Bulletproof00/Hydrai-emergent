@@ -12,140 +12,52 @@ export const useRealTimeData = (selectedSymbol = 'BTC/USDT') => {
     const maxReconnectAttempts = 5;
     const reconnectTimeoutRef = useRef(null);
 
-    // Helper function to safely send WebSocket messages
-    const safeSendMessage = (message, description = 'message') => {
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && isConnectionReady) {
-            try {
-                wsRef.current.send(JSON.stringify(message));
-                console.log(`📡 Sent ${description}:`, message);
-                return true;
-            } catch (error) {
-                console.error(`Failed to send ${description}:`, error);
-                return false;
-            }
-        } else {
-            const state = wsRef.current?.readyState;
-            const stateNames = {
-                [WebSocket.CONNECTING]: 'CONNECTING',
-                [WebSocket.OPEN]: 'OPEN', 
-                [WebSocket.CLOSING]: 'CLOSING',
-                [WebSocket.CLOSED]: 'CLOSED'
-            };
-            console.warn(`Cannot send ${description}: WebSocket not ready (state: ${stateNames[state] || 'UNKNOWN'}, ready: ${isConnectionReady})`);
-            return false;
-        }
-    };
-
-    const connectWebSocket = () => {
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-            return;
-        }
-
-        try {
-            // Direct Binance WebSocket connection (bypassing slow backend)
-            const binanceSymbol = selectedSymbol.replace('/', '').toLowerCase(); // BTC/USDT -> btcusdt
-            const wsUrl = `wss://stream.binance.com:9443/ws/${binanceSymbol}@ticker`;
-            
-            console.log('🔄 Connecting to Binance WebSocket:', binanceSymbol);
-            setConnectionStatus('connecting');
-
-            wsRef.current = new WebSocket(wsUrl);
-
-            wsRef.current.onopen = () => {
-                console.log('✅ Binance WebSocket connected successfully for', selectedSymbol);
-                setConnectionStatus('connected');
-                setIsConnectionReady(true);
-                reconnectAttempts.current = 0;
-                // Binance WebSocket doesn't require subscription messages
-            };
-            
-            wsRef.current.onmessage = (event) => {
-                try {
-                    const binanceData = JSON.parse(event.data);
-                    
-                    // Binance ticker format: { s: "BTCUSDT", c: "43250.00", P: "1.25", ... }
-                    if (binanceData.s && binanceData.c) {
-                        const symbol = selectedSymbol; // Use the selected symbol format (BTC/USDT)
-                        const price = parseFloat(binanceData.c);
-                        const changePercent = parseFloat(binanceData.P);
-                        const volume = parseFloat(binanceData.v);
-                        const high = parseFloat(binanceData.h);
-                        const low = parseFloat(binanceData.l);
-                        
-                        console.log('📈 Binance price update:', symbol, '$' + price.toFixed(2), changePercent.toFixed(2) + '%');
-                        
-                        setRealTimeData(prev => ({
-                            ...prev,
-                            [symbol]: {
-                                price: price,
-                                change: (price * changePercent) / 100, // Calculate absolute change
-                                change_percent: changePercent,
-                                volume: volume,
-                                high: high,
-                                low: low,
-                                timestamp: new Date().toISOString()
-                            }
-                        }));
-                    }
-                } catch (error) {
-                    console.error('Error parsing Binance WebSocket message:', error);
-                }
-            };
-            
-            wsRef.current.onerror = (error) => {
-                console.error('WebSocket error:', error);
-                setConnectionStatus('error');
-                setIsConnectionReady(false);
-            };
-            
-            wsRef.current.onclose = (event) => {
-                console.log('WebSocket closed:', event.code, event.reason);
-                setConnectionStatus('disconnected');
-                setIsConnectionReady(false);
-                
-                // Attempt to reconnect with exponential backoff
-                if (reconnectAttempts.current < maxReconnectAttempts) {
-                    const delay = Math.pow(2, reconnectAttempts.current) * 1000; // 1s, 2s, 4s, 8s, 16s
-                    console.log(`Reconnecting in ${delay}ms... (attempt ${reconnectAttempts.current + 1})`);
-                    
-                    reconnectTimeoutRef.current = setTimeout(() => {
-                        reconnectAttempts.current++;
-                        connectWebSocket();
-                    }, delay);
-                }
-            };
-            
-        } catch (error) {
-            console.error('WebSocket connection error:', error);
-            setConnectionStatus('error');
-        }
-    };
-
-    // Binance WebSocket doesn't require heartbeat
-
-    // Initialize WebSocket connection
+    // Initialize Binance WebSocket connection
     useEffect(() => {
-        connectWebSocket();
+        console.log('🔥 Starting Binance EXCLUSIVE integration for:', selectedSymbol);
+        setConnectionStatus('connecting');
         
-        return () => {
-            if (reconnectTimeoutRef.current) {
-                clearTimeout(reconnectTimeoutRef.current);
-            }
-            if (wsRef.current) {
-                wsRef.current.close();
-            }
+        // Subscribe to real-time price updates from Binance
+        const handlePriceUpdate = (priceData) => {
+            console.log('📈 Binance EXCLUSIVE price update:', selectedSymbol, `$${priceData.price.toLocaleString()}`, `${priceData.changePercent >= 0 ? '+' : ''}${priceData.changePercent.toFixed(2)}%`);
+            
+            setRealTimeData(prev => ({
+                ...prev,
+                [priceData.symbol]: {
+                    price: priceData.price,
+                    change: priceData.change,
+                    change_percent: priceData.changePercent,
+                    volume: priceData.volume,
+                    high: priceData.high,
+                    low: priceData.low,
+                    timestamp: priceData.timestamp
+                }
+            }));
+            
+            setConnectionStatus('connected');
+            setIsConnectionReady(true);
         };
-    }, []);
 
-    // Reconnect to new Binance WebSocket when symbol changes
-    useEffect(() => {
-        if (selectedSymbol && wsRef.current) {
-            console.log('🔄 Symbol changed to:', selectedSymbol, '- reconnecting WebSocket');
-            wsRef.current.close(); // Close current connection
-            setTimeout(() => {
-                connectWebSocket(); // Reconnect with new symbol
-            }, 100);
-        }
+        // Subscribe to Binance WebSocket
+        binanceClient.subscribeToPrice(selectedSymbol, handlePriceUpdate);
+
+        // Also fetch initial price immediately
+        binanceClient.getCurrentPrice(selectedSymbol)
+            .then(initialPrice => {
+                if (initialPrice) {
+                    handlePriceUpdate(initialPrice);
+                    console.log(`💰 Binance EXCLUSIVE initial price for ${selectedSymbol}: $${initialPrice.price.toLocaleString()}`);
+                }
+            })
+            .catch(err => console.error('Initial price fetch error:', err));
+
+        currentSymbolRef.current = selectedSymbol;
+
+        // Cleanup on unmount or symbol change
+        return () => {
+            console.log('🛑 Cleaning up Binance connection for:', selectedSymbol);
+            binanceClient.unsubscribe(selectedSymbol);
+        };
     }, [selectedSymbol]);
 
     // Fallback API polling if WebSocket fails
