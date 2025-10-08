@@ -447,7 +447,7 @@ backend:
     file: "/app/backend/server.py, /app/backend/modules/ai_data_module.py, /app/frontend/src/components/CandlestickChart.js"
     stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
