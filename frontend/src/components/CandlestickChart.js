@@ -180,20 +180,24 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
       ctx.lineTo(centerX, lowY);
       ctx.stroke();
       
-      // Draw body from open to close with minimum visible height
-      ctx.fillStyle = isGreen ? '#10b981' : '#ef4444';
+      // Draw body from open to close with enhanced visibility
+      ctx.fillStyle = isGreen ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)';
       const bodyTop = Math.min(openY, closeY);
       const bodyBottom = Math.max(openY, closeY);
-      const bodyHeight = Math.max(bodyBottom - bodyTop, 3); // Minimum 3px height for visibility
-      const bodyWidth = Math.max(candleWidth - candleSpacing * 2, 2); // Minimum 2px width
+      const bodyHeight = Math.max(bodyBottom - bodyTop, 5); // Minimum 5px height for better visibility
+      const bodyWidth = Math.max(candleWidth - candleSpacing * 2, 3); // Minimum 3px width
       
-      // Always draw filled candles for better visibility
+      // Always draw filled candles with strong visibility
       ctx.fillRect(x + candleSpacing, bodyTop, bodyWidth, bodyHeight);
       
-      // Add border for better definition
+      // Add strong border for definition
       ctx.strokeStyle = isGreen ? '#059669' : '#dc2626';
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 2;
       ctx.strokeRect(x + candleSpacing, bodyTop, bodyWidth, bodyHeight);
+      
+      // Add inner highlight for 3D effect
+      ctx.fillStyle = isGreen ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+      ctx.fillRect(x + candleSpacing + 1, bodyTop + 1, Math.max(bodyWidth - 2, 1), Math.max(bodyHeight - 2, 1));
       
       // Draw open/close markers for better visibility (optional for larger candles)
       if (candleWidth > 10) {
