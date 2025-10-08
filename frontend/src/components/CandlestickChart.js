@@ -172,9 +172,9 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
       const openY = ((maxPrice + padding - displayOpen) / priceRange) * chartHeight;
       const closeY = ((maxPrice + padding - displayClose) / priceRange) * chartHeight;
       
-      // Draw wick from high to low (CORRECT OHLC representation)
-      ctx.strokeStyle = isGreen ? '#10b981' : '#ef4444';
-      ctx.lineWidth = 1;
+      // Draw wick from high to low with enhanced visibility
+      ctx.strokeStyle = isGreen ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)';
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(centerX, highY);
       ctx.lineTo(centerX, lowY);
