@@ -166,7 +166,7 @@ class BinanceClient {
         }
     }
 
-    // WebSocket for real-time price updates
+    // WebSocket for real-time price updates with fallback
     subscribeToPrice(symbol, callback) {
         const binanceSymbol = this.formatSymbol(symbol).toLowerCase();
         const streamName = `${binanceSymbol}@ticker`;
@@ -179,13 +179,15 @@ class BinanceClient {
             return;
         }
 
+        // Try WebSocket connection
         try {
             const ws = new WebSocket(`${this.wsURL}/${streamName}`);
+            let connectionTimeout;
             
             ws.onopen = () => {
                 console.log(`✅ Binance WebSocket connected: ${symbol}`);
-                // Initialize subscribers array
                 this.subscribers.set(streamName, [callback]);
+                clearTimeout(connectionTimeout);
             };
 
             ws.onmessage = (event) => {
