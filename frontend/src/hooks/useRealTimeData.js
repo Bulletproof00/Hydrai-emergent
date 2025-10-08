@@ -149,13 +149,14 @@ export const useRealTimeData = (selectedSymbol) => {
         };
     }, []);
 
-    // Subscribe to new symbol when selection changes
+    // Reconnect to new Binance WebSocket when symbol changes
     useEffect(() => {
-        if (selectedSymbol) {
-            safeSendMessage({
-                type: 'subscribe',
-                symbols: [selectedSymbol]
-            }, 'symbol change subscription');
+        if (selectedSymbol && wsRef.current) {
+            console.log('🔄 Symbol changed to:', selectedSymbol, '- reconnecting WebSocket');
+            wsRef.current.close(); // Close current connection
+            setTimeout(() => {
+                connectWebSocket(); // Reconnect with new symbol
+            }, 100);
         }
     }, [selectedSymbol]);
 
