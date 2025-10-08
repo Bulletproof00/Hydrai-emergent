@@ -134,50 +134,55 @@ class EnhancedRealTimeStreamer:
                 logger.error(f"Price simulation error: {e}")
                 await asyncio.sleep(5)
     
-    async def _fetch_binance_data(self):
-        """Fetch crypto data from Binance with fallback to CoinGecko"""
+    async def _fetch_binance_data_only(self):
+        """Fetch crypto data EXCLUSIVELY from Binance - NO fallbacks, Spot + Futures"""
         try:
-            # Use Binance provider for primary crypto data
             success_count = 0
             
             for symbol in self.crypto_symbols.keys():
                 try:
-                    # Get 24h stats from Binance (includes current price and change)
-                    stats_24h = await self.binance_provider.get_24h_stats(symbol, 'spot')
+                    # Get BOTH Spot and Futures data from Binance
+                    spot_stats = await self.binance_provider.get_24h_stats(symbol, 'spot')
+                    futures_stats = await self.binance_provider.get_24h_stats(symbol, 'futures')
                     
-                    if stats_24h:
+                    # Use Spot as primary, Futures as additional data
+                    if spot_stats:
                         price_data = {
                             'symbol': symbol,
-                            'price': stats_24h['price'],
-                            'change_24h': stats_24h['change_24h'],
-                            'volume_24h': stats_24h['volume_24h'],
-                            'high_24h': stats_24h['high_24h'],
-                            'low_24h': stats_24h['low_24h'],
+                            'price': spot_stats['price'],
+                            'change_24h': spot_stats['change_24h'],
+                            'volume_24h': spot_stats['volume_24h'],
+                            'high_24h': spot_stats['high_24h'],
+                            'low_24h': spot_stats['low_24h'],
                             'timestamp': datetime.now(timezone.utc).isoformat(),
-                            'source': 'binance',
-                            'asset_type': 'crypto'
+                            'source': 'binance_spot',
+                            'asset_type': 'crypto',
+                            
+                            # Add Futures data if available
+                            'futures_price': futures_stats['price'] if futures_stats else spot_stats['price'],
+                            'futures_volume': futures_stats['volume_24h'] if futures_stats else 0,
+                            'spot_futures_spread': abs(spot_stats['price'] - futures_stats['price']) if futures_stats else 0
                         }
                         
                         self.latest_prices[symbol] = price_data
                         await self._store_tick_data(price_data)
                         await self._broadcast_price_update(symbol, price_data)
                         
-                        logger.info(f"📈 {symbol}: ${price_data['price']:,.2f} ({price_data['change_24h']:+.2f}%) [Binance]")
+                        spread_info = f"(Spread: ${price_data['spot_futures_spread']:.2f})" if futures_stats else ""
+                        logger.info(f"📈 {symbol}: ${price_data['price']:,.2f} ({price_data['change_24h']:+.2f}%) [Binance Spot+Futures] {spread_info}")
                         success_count += 1
                         
                 except Exception as e:
-                    logger.debug(f"Binance error for {symbol}: {e}")
+                    logger.warning(f"❌ Binance error for {symbol}: {e}")
             
-            # If no symbols were successfully fetched, fallback to CoinGecko
-            if success_count == 0:
-                logger.warning("🔄 No Binance data available, falling back to CoinGecko")
-                await self._fetch_coingecko_data()
+            if success_count > 0:
+                logger.info(f"✅ Binance ONLY: Successfully fetched {success_count}/{len(self.crypto_symbols)} symbols")
             else:
-                logger.info(f"✅ Binance: Successfully fetched {success_count}/{len(self.crypto_symbols)} symbols")
+                logger.error("❌ NO Binance data available - Application may not work correctly!")
                 
         except Exception as e:
-            logger.error(f"❌ Binance fetch error: {e} - falling back to CoinGecko")
-            await self._fetch_coingecko_data()
+            logger.error(f"❌ Critical Binance fetch error: {e}")
+            # NO fallbacks - force Binance only
 
     async def _fetch_coingecko_data(self):
         """Fetch crypto data from CoinGecko with rate limiting and fallback"""
