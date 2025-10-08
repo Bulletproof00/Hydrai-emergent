@@ -478,21 +478,42 @@ async def get_market_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit
         raise HTTPException(status_code=500, detail=str(e))
 
 async def get_live_price(symbol: str = "BTC/USDT"):
-    """Get current ticker price"""
+    """Get current ticker price from Binance"""
     try:
-        if exchange is None:
-            raise HTTPException(status_code=500, detail="Exchange not initialized")
+        from .modules.binance_data import binance_provider
         
-        ticker = await exchange.fetch_ticker(symbol)
-        return {
-            'symbol': symbol,
-            'price': ticker['last'],
-            'change_24h': ticker['percentage'],
-            'volume_24h': ticker['quoteVolume'],
-            'high_24h': ticker['high'],
-            'low_24h': ticker['low'],
-            'timestamp': datetime.now(timezone.utc).isoformat()
-        }
+        # Use Binance provider for live price
+        price = await binance_provider.get_current_price(symbol, 'spot')
+        
+        if price:
+            logging.debug(f"💰 Binance live price {symbol}: ${price:,.2f}")
+            # Return in the same format as before for compatibility
+            return {
+                'symbol': symbol,
+                'price': price,
+                'change_24h': 0,  # Would need additional API call for 24h change
+                'volume_24h': 0,  # Would need additional API call for volume
+                'high_24h': 0,    # Would need additional API call for high
+                'low_24h': 0,     # Would need additional API call for low
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+        else:
+            # Fallback to old exchange
+            if exchange is None:
+                raise HTTPException(status_code=500, detail="No exchange available")
+            
+            ticker = await exchange.fetch_ticker(symbol)
+            logging.warning(f"⚠️ Fallback price for {symbol}: ${ticker['last']:,.2f}")
+            return {
+                'symbol': symbol,
+                'price': ticker['last'],
+                'change_24h': ticker['percentage'],
+                'volume_24h': ticker['quoteVolume'],
+                'high_24h': ticker['high'],
+                'low_24h': ticker['low'],
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+            
     except Exception as e:
         logging.error(f"Error fetching live price: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
