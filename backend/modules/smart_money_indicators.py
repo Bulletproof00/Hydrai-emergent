@@ -51,7 +51,7 @@ class SmartMoneyIndicators:
             },
             'ETH/USDT': {
                 'binance_spot': 'ETHUSDT',
-                'binance_futures': 'ETHUSDT'
+                'binance_futures': 'ETHUSDT',
                 'coinank': 'ETHUSDT'
             },
             'SOL/USDT': {
