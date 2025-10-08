@@ -8,9 +8,20 @@ const LiveLiquidationHeatmap = ({ symbol = 'BTC/USDT', timeframe = '1h' }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [autoRefresh, setAutoRefresh] = useState(true);
+    const [selectedTimeframe, setSelectedTimeframe] = useState(timeframe);
+    const [timeframeClusters, setTimeframeClusters] = useState({});
     
     const intervalRef = useRef();
     const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+
+    // Timeframe options with cluster settings
+    const timeframes = [
+        { label: '5m', value: '5m', clusterSize: 50, maxClusters: 20 },
+        { label: '15m', value: '15m', clusterSize: 100, maxClusters: 25 },
+        { label: '1h', value: '1h', clusterSize: 200, maxClusters: 30 },
+        { label: '4h', value: '4h', clusterSize: 500, maxClusters: 35 },
+        { label: '1d', value: '1d', clusterSize: 1000, maxClusters: 40 }
+    ];
 
     useEffect(() => {
         fetchLiquidationData();
