@@ -32,7 +32,7 @@ class EnhancedRealTimeStreamer:
             }
         }
         
-        # Primary crypto symbols supported by Binance
+        # ALL crypto data exclusively from Binance (Spot + Futures)
         self.crypto_symbols = {
             'BTC/USDT': {'binance_spot': 'BTC/USDT', 'binance_futures': 'BTC/USDT'},
             'ETH/USDT': {'binance_spot': 'ETH/USDT', 'binance_futures': 'ETH/USDT'},
@@ -50,6 +50,8 @@ class EnhancedRealTimeStreamer:
             'ATOM/USDT': {'binance_spot': 'ATOM/USDT', 'binance_futures': 'ATOM/USDT'},
             'LINK/USDT': {'binance_spot': 'LINK/USDT', 'binance_futures': 'LINK/USDT'}
         }
+        
+        logger.info("🟡 Real-Time Enhanced: EXCLUSIVELY using Binance data (Spot + Futures)")
         
         self.traditional_symbols = {
             'SPX': {'yahoo': '^GSPC', 'iex': 'SPY'},
