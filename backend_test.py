@@ -3751,7 +3751,7 @@ class TradingSystemTester:
             await self.cleanup()
         
         # Print summary
-        self.print_test_summary()
+        self.print_summary()
 
     async def run_priority_tests(self):
         """Run PRIORITY tests for VERBESSERTE SELF-CODING AI SYSTEM mit Retry-Logic"""
