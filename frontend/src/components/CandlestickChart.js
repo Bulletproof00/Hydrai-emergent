@@ -495,8 +495,13 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
       const prev2 = data[i - 2];
       const prev3 = data[i - 3];
       
-      // Doji pattern
-      if (Math.abs(current.close - current.open) < (current.high - current.low) * 0.1) {
+      // Doji pattern (more restrictive to avoid false positives with synthetic data)
+      const bodySize = Math.abs(current.close - current.open);
+      const shadowSize = current.high - current.low;
+      const avgPrice = (current.high + current.low) / 2;
+      
+      // Only detect Doji if body is very small relative to shadows AND we have real price movement
+      if (bodySize < shadowSize * 0.05 && shadowSize > avgPrice * 0.001) {
         patterns.push({
           index: i,
           price: current.high,
