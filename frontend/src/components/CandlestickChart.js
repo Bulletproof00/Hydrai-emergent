@@ -253,13 +253,13 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
     const ema50 = calculateEMA(data, 50);
     drawLine(ctx, ema50, data, chartHeight, maxPrice, minPrice, padding, candleWidth, 'rgba(245, 158, 11, 0.7)', 1);
     
-    // Calculate and draw Bollinger Bands
+    // Calculate and draw Bollinger Bands (more transparent)
     const bb = calculateBollingerBands(data, 20, 2);
-    drawLine(ctx, bb.upper, data, chartHeight, maxPrice, minPrice, padding, candleWidth, '#8b5cf6', 1);
-    drawLine(ctx, bb.lower, data, chartHeight, maxPrice, minPrice, padding, candleWidth, '#8b5cf6', 1);
+    drawLine(ctx, bb.upper, data, chartHeight, maxPrice, minPrice, padding, candleWidth, 'rgba(139, 92, 246, 0.5)', 1);
+    drawLine(ctx, bb.lower, data, chartHeight, maxPrice, minPrice, padding, candleWidth, 'rgba(139, 92, 246, 0.5)', 1);
     
-    // Fill Bollinger Band area
-    fillBetweenLines(ctx, bb.upper, bb.lower, data, chartHeight, maxPrice, minPrice, padding, candleWidth, 'rgba(139, 92, 246, 0.1)');
+    // Fill Bollinger Band area (very transparent)
+    fillBetweenLines(ctx, bb.upper, bb.lower, data, chartHeight, maxPrice, minPrice, padding, candleWidth, 'rgba(139, 92, 246, 0.05)');
     
     // Draw RSI in bottom panel
     const rsi = calculateRSI(data, 14);
