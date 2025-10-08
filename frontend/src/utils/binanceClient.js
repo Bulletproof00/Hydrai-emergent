@@ -224,22 +224,57 @@ class BinanceClient {
 
             ws.onerror = (error) => {
                 console.error(`❌ Binance WebSocket error for ${symbol}:`, error);
+                clearTimeout(connectionTimeout);
+                this.startFallbackPolling(symbol, callback);
             };
 
             ws.onclose = () => {
-                console.log(`🔄 Binance WebSocket closed for ${symbol}, reconnecting...`);
-                // Auto-reconnect after 3 seconds
-                setTimeout(() => {
-                    this.websockets.delete(streamName);
-                    this.subscribeToPrice(symbol, callback);
-                }, 3000);
+                console.log(`🔄 Binance WebSocket closed for ${symbol}`);
+                this.websockets.delete(streamName);
+                this.startFallbackPolling(symbol, callback);
             };
+
+            // Set connection timeout for geographic restrictions
+            connectionTimeout = setTimeout(() => {
+                console.warn(`⚠️ WebSocket connection timeout for ${symbol}, using fallback polling`);
+                ws.close();
+                this.startFallbackPolling(symbol, callback);
+            }, 5000);
 
             this.websockets.set(streamName, ws);
 
         } catch (error) {
             console.error(`❌ Failed to create WebSocket for ${symbol}:`, error);
+            this.startFallbackPolling(symbol, callback);
         }
+    }
+
+    // Fallback polling when WebSocket fails
+    startFallbackPolling(symbol, callback) {
+        console.log(`🔄 Starting fallback polling for ${symbol}`);
+        
+        const pollPrice = async () => {
+            try {
+                const priceData = await this.getCurrentPrice(symbol);
+                if (priceData && callback) {
+                    callback(priceData);
+                }
+            } catch (err) {
+                console.error(`Polling error for ${symbol}:`, err);
+            }
+        };
+
+        // Initial call
+        pollPrice();
+        
+        // Poll every 5 seconds
+        const pollInterval = setInterval(pollPrice, 5000);
+        
+        // Store interval for cleanup
+        const streamName = `${this.formatSymbol(symbol).toLowerCase()}@ticker`;
+        this.subscribers.set(streamName, [callback]);
+        this.websockets.set(streamName, { type: 'polling', interval: pollInterval });
+    }
     }
 
     // Unsubscribe from WebSocket
