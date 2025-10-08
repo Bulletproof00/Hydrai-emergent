@@ -4,6 +4,14 @@ export const useRealTimeData = (selectedSymbol) => {
     const [realTimeData, setRealTimeData] = useState({});
     const [connectionStatus, setConnectionStatus] = useState('disconnected');
     const [isConnectionReady, setIsConnectionReady] = useState(false);
+    const [priceData, setPriceData] = useState({
+        price: 0,
+        change: 0,
+        volume: 0,
+        high: 0,
+        low: 0
+    });
+    
     const wsRef = useRef(null);
     const reconnectTimeoutRef = useRef(null);
     const reconnectAttempts = useRef(0);
