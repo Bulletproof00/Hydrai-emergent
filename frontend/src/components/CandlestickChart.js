@@ -227,6 +227,301 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
     ctx.fillText('Volume', 60, volumeY + 15);
   };
 
+  // Draw technical indicators
+  const drawIndicators = (ctx, data, chartHeight, maxPrice, minPrice, padding, candleWidth) => {
+    if (data.length < 20) return; // Need minimum data for indicators
+
+    const priceRange = maxPrice + padding - (minPrice - padding);
+    
+    // Calculate and draw SMA20
+    const sma20 = calculateSMA(data, 20);
+    drawLine(ctx, sma20, data, chartHeight, maxPrice, minPrice, padding, candleWidth, '#3b82f6', 2);
+    
+    // Calculate and draw EMA50
+    const ema50 = calculateEMA(data, 50);
+    drawLine(ctx, ema50, data, chartHeight, maxPrice, minPrice, padding, candleWidth, '#f59e0b', 2);
+    
+    // Calculate and draw Bollinger Bands
+    const bb = calculateBollingerBands(data, 20, 2);
+    drawLine(ctx, bb.upper, data, chartHeight, maxPrice, minPrice, padding, candleWidth, '#8b5cf6', 1);
+    drawLine(ctx, bb.lower, data, chartHeight, maxPrice, minPrice, padding, candleWidth, '#8b5cf6', 1);
+    
+    // Fill Bollinger Band area
+    fillBetweenLines(ctx, bb.upper, bb.lower, data, chartHeight, maxPrice, minPrice, padding, candleWidth, 'rgba(139, 92, 246, 0.1)');
+    
+    // Draw RSI in bottom panel
+    const rsi = calculateRSI(data, 14);
+    drawRSIPanel(ctx, rsi, data, chartHeight, candleWidth);
+  };
+
+  // Draw line indicator
+  const drawLine = (ctx, values, data, chartHeight, maxPrice, minPrice, padding, candleWidth, color, lineWidth) => {
+    if (!values || values.length === 0) return;
+    
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    
+    let firstPoint = true;
+    const priceRange = maxPrice + padding - (minPrice - padding);
+    
+    values.forEach((value, i) => {
+      if (value !== null && value !== undefined && !isNaN(value)) {
+        const x = 60 + i * candleWidth + candleWidth / 2;
+        const y = ((maxPrice + padding - value) / priceRange) * chartHeight;
+        
+        if (firstPoint) {
+          ctx.moveTo(x, y);
+          firstPoint = false;
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+    });
+    
+    ctx.stroke();
+  };
+
+  // Fill area between two lines (for Bollinger Bands)
+  const fillBetweenLines = (ctx, upperValues, lowerValues, data, chartHeight, maxPrice, minPrice, padding, candleWidth, color) => {
+    if (!upperValues || !lowerValues) return;
+    
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    
+    const priceRange = maxPrice + padding - (minPrice - padding);
+    
+    // Draw upper line
+    upperValues.forEach((value, i) => {
+      if (value !== null && value !== undefined) {
+        const x = 60 + i * candleWidth + candleWidth / 2;
+        const y = ((maxPrice + padding - value) / priceRange) * chartHeight;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+    });
+    
+    // Draw lower line in reverse
+    for (let i = lowerValues.length - 1; i >= 0; i--) {
+      const value = lowerValues[i];
+      if (value !== null && value !== undefined) {
+        const x = 60 + i * candleWidth + candleWidth / 2;
+        const y = ((maxPrice + padding - value) / priceRange) * chartHeight;
+        ctx.lineTo(x, y);
+      }
+    }
+    
+    ctx.closePath();
+    ctx.fill();
+  };
+
+  // Calculate Simple Moving Average
+  const calculateSMA = (data, period) => {
+    const sma = [];
+    for (let i = 0; i < data.length; i++) {
+      if (i < period - 1) {
+        sma.push(null);
+      } else {
+        const sum = data.slice(i - period + 1, i + 1).reduce((acc, candle) => acc + candle.close, 0);
+        sma.push(sum / period);
+      }
+    }
+    return sma;
+  };
+
+  // Calculate Exponential Moving Average
+  const calculateEMA = (data, period) => {
+    const ema = [];
+    const multiplier = 2 / (period + 1);
+    
+    for (let i = 0; i < data.length; i++) {
+      if (i === 0) {
+        ema.push(data[i].close);
+      } else {
+        const value = (data[i].close * multiplier) + (ema[i - 1] * (1 - multiplier));
+        ema.push(value);
+      }
+    }
+    return ema;
+  };
+
+  // Calculate Bollinger Bands
+  const calculateBollingerBands = (data, period, stdDev) => {
+    const sma = calculateSMA(data, period);
+    const upper = [];
+    const lower = [];
+    
+    for (let i = 0; i < data.length; i++) {
+      if (i < period - 1) {
+        upper.push(null);
+        lower.push(null);
+      } else {
+        const slice = data.slice(i - period + 1, i + 1);
+        const mean = sma[i];
+        const variance = slice.reduce((acc, candle) => acc + Math.pow(candle.close - mean, 2), 0) / period;
+        const standardDeviation = Math.sqrt(variance);
+        
+        upper.push(mean + (standardDeviation * stdDev));
+        lower.push(mean - (standardDeviation * stdDev));
+      }
+    }
+    
+    return { upper, lower, middle: sma };
+  };
+
+  // Calculate RSI
+  const calculateRSI = (data, period) => {
+    const rsi = [];
+    const gains = [];
+    const losses = [];
+    
+    for (let i = 1; i < data.length; i++) {
+      const change = data[i].close - data[i - 1].close;
+      gains.push(change > 0 ? change : 0);
+      losses.push(change < 0 ? Math.abs(change) : 0);
+    }
+    
+    for (let i = 0; i < gains.length; i++) {
+      if (i < period - 1) {
+        rsi.push(null);
+      } else {
+        const avgGain = gains.slice(i - period + 1, i + 1).reduce((a, b) => a + b) / period;
+        const avgLoss = losses.slice(i - period + 1, i + 1).reduce((a, b) => a + b) / period;
+        
+        if (avgLoss === 0) {
+          rsi.push(100);
+        } else {
+          const rs = avgGain / avgLoss;
+          rsi.push(100 - (100 / (1 + rs)));
+        }
+      }
+    }
+    
+    return rsi;
+  };
+
+  // Draw RSI panel
+  const drawRSIPanel = (ctx, rsi, data, chartHeight, candleWidth) => {
+    const rsiHeight = 80;
+    const rsiY = chartHeight + 40;
+    
+    // Draw RSI background
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.fillRect(60, rsiY, (data.length * candleWidth), rsiHeight);
+    
+    // Draw RSI grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1;
+    [30, 50, 70].forEach(level => {
+      const y = rsiY + ((100 - level) / 100) * rsiHeight;
+      ctx.beginPath();
+      ctx.moveTo(60, y);
+      ctx.lineTo(60 + (data.length * candleWidth), y);
+      ctx.stroke();
+    });
+    
+    // Draw RSI line
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    
+    let firstPoint = true;
+    rsi.forEach((value, i) => {
+      if (value !== null && value !== undefined) {
+        const x = 60 + i * candleWidth + candleWidth / 2;
+        const y = rsiY + ((100 - value) / 100) * rsiHeight;
+        
+        if (firstPoint) {
+          ctx.moveTo(x, y);
+          firstPoint = false;
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+    });
+    
+    ctx.stroke();
+    
+    // RSI labels
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px Space Grotesk';
+    ctx.textAlign = 'right';
+    ctx.fillText('RSI', 55, rsiY + 12);
+    ctx.fillText('70', 55, rsiY + 24);
+    ctx.fillText('30', 55, rsiY + 66);
+  };
+
+  // Pattern Recognition and Alerts
+  const drawPatterns = (ctx, data, chartHeight, maxPrice, minPrice, padding, candleWidth) => {
+    const patterns = detectPatterns(data);
+    const priceRange = maxPrice + padding - (minPrice - padding);
+    
+    patterns.forEach(pattern => {
+      const x = 60 + pattern.index * candleWidth + candleWidth / 2;
+      const y = ((maxPrice + padding - pattern.price) / priceRange) * chartHeight;
+      
+      // Draw pattern marker
+      ctx.fillStyle = pattern.type === 'bullish' ? '#10b981' : '#ef4444';
+      ctx.beginPath();
+      ctx.arc(x, y - 10, 4, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      // Draw pattern label
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '10px Space Grotesk';
+      ctx.textAlign = 'center';
+      ctx.fillText(pattern.name, x, y - 20);
+    });
+  };
+
+  // Simple pattern detection
+  const detectPatterns = (data) => {
+    const patterns = [];
+    
+    for (let i = 3; i < data.length - 1; i++) {
+      const current = data[i];
+      const prev1 = data[i - 1];
+      const prev2 = data[i - 2];
+      const prev3 = data[i - 3];
+      
+      // Doji pattern
+      if (Math.abs(current.close - current.open) < (current.high - current.low) * 0.1) {
+        patterns.push({
+          index: i,
+          price: current.high,
+          type: 'neutral',
+          name: 'Doji'
+        });
+      }
+      
+      // Hammer pattern
+      if (current.close > current.open && 
+          (current.close - current.open) > (current.high - current.close) * 2 &&
+          (current.open - current.low) > (current.close - current.open) * 2) {
+        patterns.push({
+          index: i,
+          price: current.high,
+          type: 'bullish',
+          name: 'Hammer'
+        });
+      }
+      
+      // Shooting Star pattern
+      if (current.open > current.close &&
+          (current.high - current.open) > (current.open - current.close) * 2 &&
+          (current.close - current.low) < (current.open - current.close) * 0.5) {
+        patterns.push({
+          index: i,
+          price: current.high,
+          type: 'bearish',
+          name: 'Star'
+        });
+      }
+    }
+    
+    return patterns;
+  };
+
   const handleScroll = (e) => {
     const delta = e.deltaY > 0 ? 10 : -10;
     const newStart = Math.max(0, visibleRange.start + delta);
