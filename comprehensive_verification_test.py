@@ -12,7 +12,7 @@ import os
 from datetime import datetime
 
 # Test configuration
-BACKEND_URL = "https://ai-trade-hub-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://market-genius-39.preview.emergentagent.com/api"
 
 class ComprehensiveVerificationTester:
     def __init__(self):

@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Dict, List, Any
 
 # Test configuration
-BACKEND_URL = "https://ai-trade-hub-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://market-genius-39.preview.emergentagent.com/api"
 WEBSOCKET_URL = "wss://liquidation-oracle.preview.emergentagent.com/api/realtime"
 
 class TradingSystemTester:
@@ -4016,7 +4016,7 @@ async def main():
     # Run PAPER TRADING SYSTEM TESTS as requested in the review
     print("📈 RUNNING PAPER TRADING SYSTEM TESTS")
     print("Testing alle Trading-bezogenen Backend-Endpoints für Paper Trading System")
-    print("Backend URL: https://ai-trade-hub-4.preview.emergentagent.com")
+    print("Backend URL: https://market-genius-39.preview.emergentagent.com")
     print()
     
     await tester.run_paper_trading_tests()

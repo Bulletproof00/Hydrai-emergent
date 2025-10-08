@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 
 # Test configuration
-BACKEND_URL = "https://ai-trade-hub-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://market-genius-39.preview.emergentagent.com/api"
 
 class PaperTradingTester:
     def __init__(self):

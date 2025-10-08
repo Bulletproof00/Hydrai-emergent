@@ -7,7 +7,7 @@ import asyncio
 import aiohttp
 import json
 
-BACKEND_URL = "https://ai-trade-hub-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://market-genius-39.preview.emergentagent.com/api"
 
 async def test_positions():
     async with aiohttp.ClientSession() as session:
