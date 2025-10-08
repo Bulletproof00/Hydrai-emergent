@@ -565,7 +565,9 @@ test_plan:
     - "PHASE 2 - Korrelations-System Backend Testing - ✅ ERFOLGREICH ABGESCHLOSSEN (100% success rate)"
     - "PHASE 2.1 - Korrelations-Heatmap Frontend Integration - ✅ ERFOLGREICH ABGESCHLOSSEN (Perfect success)"
     - "PHASE 3 - Economic Data & News/Sentiment UI - ✅ ERFOLGREICH ABGESCHLOSSEN (Comprehensive success)"
-  stuck_tasks: []
+    - "🚨 KRITISCHER TRADING-BUG: Position Close Funktionalität - ❌ DEFEKT (Binance Geographic Restrictions + Price Unavailability)"
+  stuck_tasks: 
+    - "Paper Trading Position Close - POST /api/trading/position/close (Cannot get current price due to Binance 451 errors)"
   test_all: false
   test_priority: "high_first"
 
