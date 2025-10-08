@@ -452,7 +452,7 @@ plugin_manager = PluginManager()
 async def get_market_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit: int = 100):
     """Fetch OHLCV data from Binance using new provider"""
     try:
-        from .modules.binance_data import binance_provider
+        from modules.binance_data import binance_provider
         
         # Use Binance provider for OHLCV data
         ohlcv = await binance_provider.get_ohlcv_data(symbol, timeframe, limit, 'spot')
