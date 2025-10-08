@@ -319,7 +319,7 @@ const TradingInterface = () => {
 
     const getCurrentPrice = (symbol) => {
         // Try real-time price from WebSocket first
-        const realTimePrice = getRealTimePrice(symbol);
+        const realTimePrice = getCurrentPrice(symbol);
         if (realTimePrice && realTimePrice > 0) {
             return realTimePrice;
         }
