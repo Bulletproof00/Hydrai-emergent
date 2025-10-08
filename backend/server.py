@@ -1461,38 +1461,48 @@ async def get_chart_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit:
         
         stored_data = []
         
-        # For crypto, try Binance first
+        # For crypto, EXCLUSIVELY use Binance - NO fallbacks
         if asset_type == 'crypto':
             try:
-                # Get OHLCV data directly from Binance
-                binance_ohlcv = await binance_provider.get_ohlcv_data(symbol, timeframe, limit, 'spot')
+                # Get BOTH Spot and Futures OHLCV data from Binance
+                spot_ohlcv = await binance_provider.get_ohlcv_data(symbol, timeframe, limit, 'spot')
+                futures_ohlcv = await binance_provider.get_ohlcv_data(symbol, timeframe, limit, 'futures')
                 
-                if binance_ohlcv:
-                    # Convert Binance OHLCV format to our format
-                    for candle in binance_ohlcv:
-                        stored_data.append({
+                # Use Spot as primary data source
+                if spot_ohlcv:
+                    for i, candle in enumerate(spot_ohlcv):
+                        candle_data = {
                             'timestamp': candle[0],
                             'open': candle[1],
                             'high': candle[2], 
                             'low': candle[3],
                             'close': candle[4],
-                            'volume': candle[5]
-                        })
+                            'volume': candle[5],
+                            'source': 'binance_spot'
+                        }
+                        
+                        # Add futures data if available
+                        if futures_ohlcv and i < len(futures_ohlcv):
+                            futures_candle = futures_ohlcv[i]
+                            candle_data.update({
+                                'futures_open': futures_candle[1],
+                                'futures_high': futures_candle[2],
+                                'futures_low': futures_candle[3],
+                                'futures_close': futures_candle[4],
+                                'futures_volume': futures_candle[5],
+                                'spot_futures_spread': abs(candle[4] - futures_candle[4])
+                            })
+                        
+                        stored_data.append(candle_data)
                     
-                    logger.info(f"📊 Binance chart data: {symbol} {timeframe} - {len(stored_data)} candles")
+                    logger.info(f"📊 Binance EXCLUSIVE chart data: {symbol} {timeframe} - {len(stored_data)} candles (Spot+Futures)")
                 else:
-                    raise Exception("No Binance data available")
+                    logger.error(f"❌ NO Binance data for {symbol} - Charts may not work!")
+                    stored_data = []
                     
             except Exception as e:
-                logger.warning(f"⚠️ Binance chart data failed for {symbol}: {e}, using fallback")
-                # Fallback to old system
-                from modules.market_data import MarketDataFetcher
-                fetcher = MarketDataFetcher(exchange, db)
-                stored_data = await fetcher.get_stored_ohlcv(symbol, timeframe, limit)
-                
-                if len(stored_data) < limit * 0.9:
-                    fresh_data = await fetcher.fetch_and_store_crypto(symbol, timeframe, limit)
-                    stored_data = await fetcher.get_stored_ohlcv(symbol, timeframe, limit)
+                logger.error(f"❌ Binance EXCLUSIVE error for {symbol}: {e}")
+                stored_data = []  # NO fallbacks
         
         else:
             # Traditional markets still use old system
