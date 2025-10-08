@@ -3985,7 +3985,7 @@ class TradingSystemTester:
                 "Binance Integration sollte realistische OHLCV-Daten mit Preisvariationen liefern",
                 f"✅ SUCCESS: {realistic_prices} realistic prices, {price_variations} variations"
             )
-        elif realistic_prices > 0 but price_variations == 0:
+        elif realistic_prices > 0 and price_variations == 0:
             self.log_test(
                 test_name, 
                 "FAIL", 
