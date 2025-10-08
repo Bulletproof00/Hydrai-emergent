@@ -210,6 +210,9 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
       }
     });
 
+    // Draw indicators AFTER candles (so they don't hide the candlesticks)
+    drawIndicators(ctx, visibleData, chartHeight, maxPrice, minPrice, padding, candleWidth);
+
     // Draw price patterns and alerts
     drawPatterns(ctx, visibleData, chartHeight, maxPrice, minPrice, padding, candleWidth);
 
