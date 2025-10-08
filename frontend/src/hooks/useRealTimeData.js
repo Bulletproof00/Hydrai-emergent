@@ -61,17 +61,7 @@ export const useRealTimeData = (selectedSymbol) => {
                 setConnectionStatus('connected');
                 setIsConnectionReady(true);
                 reconnectAttempts.current = 0;
-                
-                // Small delay to ensure WebSocket is fully ready
-                setTimeout(() => {
-                    // Subscribe to symbols using safe send
-                    if (selectedSymbol) {
-                        safeSendMessage({
-                            type: 'subscribe',
-                            symbols: [selectedSymbol]
-                        }, 'initial subscription');
-                    }
-                }, 100); // 100ms delay
+                // Binance WebSocket doesn't require subscription messages
             };
             
             wsRef.current.onmessage = (event) => {
