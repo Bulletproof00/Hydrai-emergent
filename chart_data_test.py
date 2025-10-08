@@ -78,7 +78,8 @@ class ChartDataTester:
 
     def validate_ohlcv_data(self, candle: dict) -> bool:
         """Validate OHLCV candle data structure and logic"""
-        required_fields = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
+        # Chart-data API uses 'time' field instead of 'timestamp'
+        required_fields = ['time', 'open', 'high', 'low', 'close', 'volume']
         
         # Check all required fields exist
         for field in required_fields:
@@ -86,7 +87,7 @@ class ChartDataTester:
                 return False
         
         try:
-            timestamp = candle['timestamp']
+            timestamp = candle['time']
             open_price = float(candle['open'])
             high_price = float(candle['high'])
             low_price = float(candle['low'])
@@ -100,7 +101,7 @@ class ChartDataTester:
             if low_price > min(open_price, close_price):
                 return False  # Low should be <= min(Open, Close)
             
-            if volume < 0:
+            if volume <= 0:
                 return False  # Volume should be > 0
             
             if timestamp <= 0:
