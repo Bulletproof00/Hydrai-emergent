@@ -50,6 +50,15 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange, globalTimeframe, s
       setMarkets(response.data);
     } catch (error) {
       console.error('Error fetching markets:', error);
+      // Fallback market data
+      setMarkets({
+        crypto: ['BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'ADA/USDT', 'SOL/USDT'],
+        traditional: {
+          indices: ['SPX', 'NASDAQ', 'DJI'],
+          forex: ['EURUSD', 'GBPUSD', 'USDJPY'],
+          commodities: ['GOLD', 'SILVER', 'OIL']
+        }
+      });
     }
   };
 
