@@ -3212,6 +3212,34 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"News and Sentiment Engine initialization failed: {str(e)}")
     
+    # Initialize AI Data Module (Comprehensive historical and real-time data)
+    try:
+        global ai_data_module
+        ai_data_module = await get_ai_data_module(db)
+        logger.info("🤖 AI Data Module initialized - Ready for comprehensive market analysis")
+    except Exception as e:
+        logger.warning(f"AI Data Module initialization failed: {str(e)}")
+    
+    # Initialize Correlation Analysis Module
+    try:
+        global correlation_analysis
+        correlation_analysis = await get_correlation_analysis(db)
+        logger.info("🔗 Correlation Analysis Module initialized - Ready for BTC correlations with M2, DXY, Russell2000")
+    except Exception as e:
+        logger.warning(f"Correlation Analysis initialization failed: {str(e)}")
+    
+    # Initialize News & Sentiment Analysis Module 
+    try:
+        global news_sentiment_analysis
+        news_sentiment_analysis = await get_news_sentiment_analysis(db)
+        
+        # Start background news fetching
+        asyncio.create_task(background_news_fetching())
+        
+        logger.info("📊 News & Sentiment Analysis Module initialized - 24h news & 1 week economic events")
+    except Exception as e:
+        logger.warning(f"News & Sentiment Analysis initialization failed: {str(e)}")
+    
     # Start background data update task
     asyncio.create_task(update_market_data_background())
     logger.info("Background data update task started")
