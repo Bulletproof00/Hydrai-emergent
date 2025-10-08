@@ -948,116 +948,14 @@ function App() {
             {analysisTab === 'news' && (
               <div className="news-content">
                 <h2 className="section-title">Wirtschaftsdaten & News</h2>
-                
-                {/* Makrodaten Section */}
-                {macroData && (
-                  <>
-                    <h3 className="subsection-title">Makroökonomische Daten</h3>
-                    <div className="analysis-grid">
-                      {macroData.Bitcoin && (
-                        <div className="analysis-card">
-                          <h3>Bitcoin</h3>
-                          <div className="macro-value">${macroData.Bitcoin.price?.toLocaleString('de-DE', {minimumFractionDigits: 2})}</div>
-                          <div className={`macro-change ${macroData.Bitcoin.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                            {macroData.Bitcoin.change_24h >= 0 ? '+' : ''}{macroData.Bitcoin.change_24h?.toFixed(2)}%
-                          </div>
-                        </div>
-                      )}
-                      {macroData.Ethereum && (
-                        <div className="analysis-card">
-                          <h3>Ethereum</h3>
-                          <div className="macro-value">${macroData.Ethereum.price?.toLocaleString('de-DE', {minimumFractionDigits: 2})}</div>
-                          <div className={`macro-change ${macroData.Ethereum.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                            {macroData.Ethereum.change_24h >= 0 ? '+' : ''}{macroData.Ethereum.change_24h?.toFixed(2)}%
-                          </div>
-                        </div>
-                      )}
-                      {macroData.SPX && (
-                        <div className="analysis-card">
-                          <h3>S&P 500</h3>
-                          <div className="macro-value">{macroData.SPX.price?.toFixed(2)}</div>
-                          <div className={`macro-change ${macroData.SPX.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                            {macroData.SPX.change_24h >= 0 ? '+' : ''}{macroData.SPX.change_24h?.toFixed(2)}%
-                          </div>
-                        </div>
-                      )}
-                      {macroData.NASDAQ && (
-                        <div className="analysis-card">
-                          <h3>NASDAQ</h3>
-                          <div className="macro-value">{macroData.NASDAQ.price?.toFixed(2)}</div>
-                          <div className={`macro-change ${macroData.NASDAQ.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                            {macroData.NASDAQ.change_24h >= 0 ? '+' : ''}{macroData.NASDAQ.change_24h?.toFixed(2)}%
-                          </div>
-                        </div>
-                      )}
-                      {macroData.Gold && (
-                        <div className="analysis-card">
-                          <h3>Gold</h3>
-                          <div className="macro-value">${macroData.Gold.price?.toFixed(2)}</div>
-                          <div className={`macro-change ${macroData.Gold.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                            {macroData.Gold.change_24h >= 0 ? '+' : ''}{macroData.Gold.change_24h?.toFixed(2)}%
-                          </div>
-                        </div>
-                      )}
-                      {macroData.DXY && (
-                        <div className="analysis-card">
-                          <h3>US Dollar Index</h3>
-                          <div className="macro-value">{macroData.DXY.price?.toFixed(2)}</div>
-                          <div className={`macro-change ${macroData.DXY.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                            {macroData.DXY.change_24h >= 0 ? '+' : ''}{macroData.DXY.change_24h?.toFixed(2)}%
-                          </div>
-                        </div>
-                      )}
-                      {macroData.Russell2000 && (
-                        <div className="analysis-card">
-                          <h3>Russell 2000</h3>
-                          <div className="macro-value">{macroData.Russell2000.price?.toFixed(2)}</div>
-                          <div className={`macro-change ${macroData.Russell2000.change_24h >= 0 ? 'positive' : 'negative'}`}>
-                            {macroData.Russell2000.change_24h >= 0 ? '+' : ''}{macroData.Russell2000.change_24h?.toFixed(2)}%
-                          </div>
-                        </div>
-                      )}
-                      {macroData.BitcoinDominance && (
-                        <div className="analysis-card">
-                          <h3>Bitcoin Dominanz</h3>
-                          <div className="macro-value">{macroData.BitcoinDominance.percentage?.toFixed(2)}%</div>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {/* Korrelationen */}
-                {correlations && Object.keys(correlations).length > 0 && (
-                  <>
-                    <h3 className="subsection-title">Korrelationsanalyse</h3>
-                    <div className="correlation-grid">
-                      {Object.entries(correlations).map(([key, value]) => (
-                        <div key={key} className="correlation-card">
-                          <div className="correlation-label">{key.replace('BTC_vs_', 'BTC ⟷ ').replace('_', ' ')}</div>
-                          <div className={`correlation-value ${value > 0.5 ? 'strong-positive' : value < -0.5 ? 'strong-negative' : 'weak'}`}>
-                            {(value * 100).toFixed(1)}%
-                          </div>
-                          <div className="correlation-bar">
-                            <div className="correlation-fill" style={{width: `${Math.abs(value) * 100}%`, backgroundColor: value > 0 ? '#10b981' : '#ef4444'}}></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-
-                <div className="news-feed">
-                  <h3 className="subsection-title">Aktuelle News</h3>
-                  <p className="coming-soon">News-Integration wird in Phase 4 hinzugefügt...</p>
-                </div>
+                <EconomicDataPanel globalTimeframe={globalTimeframe} />
               </div>
             )}
 
             {analysisTab === 'sentiment' && (
               <div className="sentiment-content">
                 <h2 className="section-title">Market Sentiment Analyse</h2>
-                <p className="coming-soon">Sentiment-Analyse wird in Phase 4 hinzugefügt...</p>
+                <SentimentAnalysis globalTimeframe={globalTimeframe} />
               </div>
             )}
           </div>
