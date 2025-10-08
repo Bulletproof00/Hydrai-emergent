@@ -240,22 +240,24 @@ export const useRealTimeData = (selectedSymbol) => {
         isConnectionReady,
         priceData: realTimeData[selectedSymbol] || priceData,
         
-        // Existing functions
-        getCurrentPrice,
-        getPriceChange,
+        // Original functions (keeping existing behavior)
+        getCurrentPrice: getCurrentPriceCompat,
+        getPriceChange: getPriceChangeCompat,
         getLastUpdate,
-        isLive,
+        isLive: (symbol) => {
+            const data = realTimeData[symbol];
+            if (!data?.timestamp) return false;
+            
+            const lastUpdate = new Date(data.timestamp);
+            const now = new Date();
+            return (now - lastUpdate) < 60000; // Live if updated within last minute
+        },
         reconnect: connectWebSocket,
         
         // New utility functions
-        getCurrentPrice: getCurrentPriceCompat,
-        getPriceChange: getPriceChangeCompat,
         getVolume: getVolumeCompat,
         isConnected,
         formatPrice,
-        formatChange,
-        
-        // Backward compatibility
-        isLive: connectionStatus === 'connected'
+        formatChange
     };
 };
