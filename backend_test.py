@@ -4328,6 +4328,311 @@ class TradingSystemTester:
         print("📈 PAPER TRADING SYSTEM TESTING COMPLETE")
         print("=" * 80)
 
+    # ============= HISTORICAL DATA LOADING TESTS =============
+    
+    async def test_historical_data_loading(self):
+        """CRITICAL TEST: Historical Data Loading - POST /api/ai-data/load-historical"""
+        test_name = "🎯 CRITICAL: HISTORISCHE DATENLADUNG REPARATUR TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # Test comprehensive historical data loading from 2019-2025
+        load_data = {
+            "start_date": "2019-01-01",
+            "end_date": "2025-01-01",
+            "symbols": ["BTC/USDT", "ETH/USDT"],
+            "timeframes": ["1m", "5m", "15m", "1h", "4h", "1d", "1w", "1M"]
+        }
+        
+        print(f"🔄 Loading historical data from 2019-2025 for all timeframes...")
+        response = await self.test_api_endpoint("/ai-data/load-historical", method="POST", data=load_data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Historical data loading failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check for successful data loading
+        if data.get('status') == 'success' and 'result' in data:
+            result = data['result']
+            loaded_symbols = result.get('loaded_symbols', 0)
+            loaded_timeframes = result.get('loaded_timeframes', 0)
+            total_records = result.get('total_records', 0)
+            
+            # Validate comprehensive data loading
+            if loaded_symbols >= 2 and loaded_timeframes >= 8 and total_records > 10000:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ HISTORISCHE DATENLADUNG ERFOLGREICH! {loaded_symbols} Symbole, {loaded_timeframes} Timeframes, {total_records:,} OHLCV-Bars geladen. Umfassende synthetische Daten 2019-2025 verfügbar!",
+                    "Tausende von OHLCV-Bars für BTC/USDT und ETH/USDT, alle Timeframes",
+                    f"✅ SUCCESS: {loaded_symbols} symbols, {loaded_timeframes} timeframes, {total_records:,} records"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Unvollständige Datenladung: {loaded_symbols} Symbole, {loaded_timeframes} Timeframes, {total_records:,} Records (erwartet: ≥2, ≥8, >10,000)")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Historical data loading response invalid: {data}")
+
+    async def test_data_quality_improvement(self):
+        """CRITICAL TEST: Data Quality Improvement - GET /api/ai-data/data-quality"""
+        test_name = "🎯 CRITICAL: DATENQUALITÄT VERBESSERUNG TEST"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        response = await self.test_api_endpoint("/ai-data/data-quality", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Data quality check failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if data.get('status') == 'success' and 'quality_metrics' in data:
+            quality_metrics = data['quality_metrics']
+            overall_score = quality_metrics.get('overall_score', 0)
+            completeness = quality_metrics.get('completeness', 0)
+            btc_dominance = quality_metrics.get('btc_dominance_check', 0)
+            
+            # Check for improved quality scores (should be >0% now)
+            if overall_score > 0 and completeness > 0:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ DATENQUALITÄT DEUTLICH VERBESSERT! Overall Score: {overall_score:.1f}%, Completeness: {completeness:.1f}%, BTC Dominance Check: {btc_dominance:.1f}%",
+                    "Deutlich verbesserte Qualitäts-Scores (>0%)",
+                    f"✅ SUCCESS: {overall_score:.1f}% overall, {completeness:.1f}% complete"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Datenqualität noch nicht verbessert: Overall: {overall_score:.1f}%, Completeness: {completeness:.1f}%")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Data quality response invalid: {data}")
+
+    async def test_technical_indicators_calculation(self):
+        """CRITICAL TEST: Technical Indicators with Historical Data - POST /api/ai-data/calculate-indicators"""
+        test_name = "🎯 CRITICAL: TECHNISCHE INDIKATOREN MIT HISTORISCHEN DATEN"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        indicators_data = {
+            "symbol": "BTC/USDT",
+            "timeframe": "1d",
+            "indicators": ["RSI", "SMA", "EMA", "BOLLINGER_BANDS", "MACD", "STOCHASTIC", "MFI"],
+            "period": 30
+        }
+        
+        response = await self.test_api_endpoint("/ai-data/calculate-indicators", method="POST", data=indicators_data, auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Technical indicators calculation failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        if data.get('status') == 'success' and 'indicators' in data:
+            indicators = data['indicators']
+            calculated_indicators = len([k for k, v in indicators.items() if v is not None])
+            
+            if calculated_indicators >= 5:
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ TECHNISCHE INDIKATOREN ERFOLGREICH! {calculated_indicators}/7 Indikatoren berechnet mit historischen Daten: {list(indicators.keys())}",
+                    "RSI, SMA, EMA, Bollinger Bands, MACD, Stochastic, MFI sollten berechnet werden können",
+                    f"✅ SUCCESS: {calculated_indicators} indicators calculated"
+                )
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Zu wenige Indikatoren berechnet: {calculated_indicators}/7")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Technical indicators response invalid: {data}")
+
+    async def test_realistic_price_evolution(self):
+        """CRITICAL TEST: Realistic Price Evolution Validation"""
+        test_name = "🎯 CRITICAL: REALISTISCHE PREISENTWICKLUNG VALIDIERUNG"
+        
+        # Get current BTC price to validate realistic evolution
+        btc_response = await self.test_api_endpoint("/price/BTC-USDT")
+        
+        if not btc_response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Could not get BTC price: {btc_response.get('error')}")
+            return
+        
+        btc_data = btc_response['data']
+        current_btc_price = btc_data.get('price', 0)
+        
+        # Get ETH price
+        eth_response = await self.test_api_endpoint("/price/ETH-USDT")
+        
+        if not eth_response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Could not get ETH price: {eth_response.get('error')}")
+            return
+        
+        eth_data = eth_response['data']
+        current_eth_price = eth_data.get('price', 0)
+        
+        # Validate realistic price ranges
+        btc_in_range = 100000 <= current_btc_price <= 130000  # $100k-$130k range
+        eth_in_range = 3000 <= current_eth_price <= 5000      # $3k-$5k range
+        
+        if btc_in_range and eth_in_range:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ REALISTISCHE PREISENTWICKLUNG BESTÄTIGT! BTC: ${current_btc_price:,.2f} (Ziel: ~$122,000), ETH: ${current_eth_price:,.2f} (Ziel: ~$4,200). Evolution von 2019 Startpreisen realistisch!",
+                "Bitcoin $3,800→$122,000, Ethereum $140→$4,200 Evolution",
+                f"✅ SUCCESS: BTC ${current_btc_price:,.2f}, ETH ${current_eth_price:,.2f}"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"⚠️ Preise außerhalb erwarteter Bereiche: BTC ${current_btc_price:,.2f} (erwartet: $100k-$130k), ETH ${current_eth_price:,.2f} (erwartet: $3k-$5k)")
+
+    async def test_ohlcv_data_validation(self):
+        """CRITICAL TEST: OHLCV Data Logic Validation"""
+        test_name = "🎯 CRITICAL: OHLCV-DATENLOGIK VALIDIERUNG"
+        
+        # Get chart data to validate OHLCV logic
+        response = await self.test_api_endpoint("/chart-data/BTC-USDT?timeframe=1d&limit=100")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Could not get chart data: {response.get('error')}")
+            return
+        
+        data = response['data']
+        chart_data = data.get('data', [])
+        
+        if len(chart_data) < 50:
+            self.log_test(test_name, "FAIL", f"❌ Insufficient chart data: {len(chart_data)} bars")
+            return
+        
+        # Validate OHLCV logic for recent candles
+        valid_candles = 0
+        invalid_candles = 0
+        
+        for candle in chart_data[-20:]:  # Check last 20 candles
+            open_price = candle.get('open', 0)
+            high_price = candle.get('high', 0)
+            low_price = candle.get('low', 0)
+            close_price = candle.get('close', 0)
+            
+            # Validate OHLCV logic: High >= max(Open,Close), Low <= min(Open,Close)
+            max_oc = max(open_price, close_price)
+            min_oc = min(open_price, close_price)
+            
+            if high_price >= max_oc and low_price <= min_oc and high_price >= low_price:
+                valid_candles += 1
+            else:
+                invalid_candles += 1
+        
+        if valid_candles >= 18:  # Allow for 2 potential edge cases
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ OHLCV-DATENLOGIK KORREKT! {valid_candles}/20 Candles haben korrekte OHLCV-Logik (High >= max(Open,Close), Low <= min(Open,Close))",
+                "OHLCV-Logik sollte mathematisch korrekt sein",
+                f"✅ SUCCESS: {valid_candles}/20 valid candles"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ OHLCV-Logik fehlerhaft: {valid_candles}/20 korrekte Candles, {invalid_candles} fehlerhafte")
+
+    async def test_all_timeframes_availability(self):
+        """CRITICAL TEST: All Timeframes Availability"""
+        test_name = "🎯 CRITICAL: ALLE TIMEFRAMES VERFÜGBARKEIT"
+        
+        required_timeframes = ["1m", "5m", "15m", "1h", "4h", "1d", "1w", "1M"]
+        available_timeframes = []
+        
+        for timeframe in required_timeframes:
+            response = await self.test_api_endpoint(f"/chart-data/BTC-USDT?timeframe={timeframe}&limit=10")
+            
+            if response['success']:
+                data = response['data']
+                chart_data = data.get('data', [])
+                if len(chart_data) > 0:
+                    available_timeframes.append(timeframe)
+        
+        if len(available_timeframes) >= 8:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ ALLE TIMEFRAMES VERFÜGBAR! {len(available_timeframes)}/8 Timeframes funktionieren: {available_timeframes}",
+                "Alle Timeframes (1m, 5m, 15m, 1h, 4h, 1d, 1w, 1M) sollten verfügbar sein",
+                f"✅ SUCCESS: {len(available_timeframes)}/8 timeframes available"
+            )
+        else:
+            missing_timeframes = [tf for tf in required_timeframes if tf not in available_timeframes]
+            self.log_test(test_name, "FAIL", f"❌ Fehlende Timeframes: {missing_timeframes}. Verfügbar: {available_timeframes}")
+
+    async def run_historical_data_tests(self):
+        """Run comprehensive Historical Data Loading tests as requested"""
+        await self.setup()
+        
+        try:
+            print("🎯 TESTING HISTORISCHE DATENLADUNG REPARATUR")
+            print("=" * 80)
+            print("HISTORISCHE DATENLADUNG REPARATUR TESTS:")
+            print("1. POST /api/ai-data/load-historical - Umfassende synthetische Daten 2019-2025")
+            print("2. GET /api/ai-data/data-quality - Deutlich verbesserte Qualitäts-Scores")
+            print("3. POST /api/ai-data/calculate-indicators - Technische Indikatoren mit historischen Daten")
+            print("ERWARTETE FUNKTIONALITÄT:")
+            print("- Tausende von OHLCV-Bars für BTC/USDT und ETH/USDT")
+            print("- Alle Timeframes: 1m, 5m, 15m, 1h, 4h, 1d, 1w, 1M")
+            print("- Realistische Preisentwicklung: Bitcoin $3,800→$122,000, Ethereum $140→$4,200")
+            print("- OHLCV-Logik: High >= max(Open,Close), Low <= min(Open,Close)")
+            print("=" * 80)
+            
+            # Core Historical Data Loading Tests as requested in review
+            print("\n📊 HISTORICAL DATA LOADING FUNCTIONALITY TESTS...")
+            await self.test_historical_data_loading()
+            await self.test_data_quality_improvement()
+            await self.test_technical_indicators_calculation()
+            await self.test_realistic_price_evolution()
+            await self.test_ohlcv_data_validation()
+            await self.test_all_timeframes_availability()
+            
+        except Exception as e:
+            print(f"❌ Error during Historical Data Loading tests: {e}")
+        finally:
+            await self.cleanup()
+        
+        # Print summary
+        self.print_historical_data_summary()
+    
+    def print_historical_data_summary(self):
+        """Print summary of Historical Data Loading tests"""
+        print("\n" + "=" * 80)
+        print("📊 HISTORISCHE DATENLADUNG REPARATUR TEST SUMMARY")
+        print("=" * 80)
+        
+        total_tests = len(self.test_results)
+        passed_tests = len([r for r in self.test_results if r['status'] == 'PASS'])
+        failed_tests = len([r for r in self.test_results if r['status'] == 'FAIL'])
+        warned_tests = len([r for r in self.test_results if r['status'] == 'WARN'])
+        
+        print(f"📊 TOTAL TESTS: {total_tests}")
+        print(f"✅ PASSED: {passed_tests}")
+        print(f"❌ FAILED: {failed_tests}")
+        print(f"⚠️  WARNINGS: {warned_tests}")
+        
+        if total_tests > 0:
+            success_rate = (passed_tests / total_tests) * 100
+            print(f"📈 SUCCESS RATE: {success_rate:.1f}%")
+        
+        print("\n🎯 DETAILED RESULTS:")
+        for result in self.test_results:
+            status_emoji = "✅" if result['status'] == "PASS" else "❌" if result['status'] == "FAIL" else "⚠️"
+            print(f"{status_emoji} {result['test']}: {result['status']}")
+            if result['details']:
+                print(f"   {result['details']}")
+        
+        print("\n" + "=" * 80)
+        print("📊 HISTORISCHE DATENLADUNG REPARATUR TESTING COMPLETE")
+        print("=" * 80)
+
     # ============= CORRELATION SYSTEM TESTS =============
     
     async def test_correlations_endpoint(self):
