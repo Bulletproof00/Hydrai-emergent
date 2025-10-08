@@ -480,7 +480,7 @@ async def get_market_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit
 async def get_live_price(symbol: str = "BTC/USDT"):
     """Get current ticker price from Binance"""
     try:
-        from .modules.binance_data import binance_provider
+        from modules.binance_data import binance_provider
         
         # Use Binance provider for live price and 24h stats
         stats_24h = await binance_provider.get_24h_stats(symbol, 'spot')
