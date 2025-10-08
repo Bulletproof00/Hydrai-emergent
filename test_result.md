@@ -489,6 +489,18 @@ backend:
           agent: "testing"
           comment: "✅ KORRELATIONS-PROZENTWERTE-BERECHNUNG ERFOLGREICH GETESTET (2025-01-27): Prozentwerte-Berechnung funktioniert perfekt wie angefordert. ✅ 3 gültige Korrelationen konvertiert: BTC_vs_ETH (0.706 → 70.6%), BTC_vs_SPX (0.367 → 36.7%), BTC_vs_NASDAQ (0.318 → 31.8%) ✅ Korrelationswerte zwischen -1 und 1 gültig ✅ Prozentwerte-Formel: correlation * 100 ✅ Beispiel aus Anfrage bestätigt: BTC_vs_SPX: 0.367 → 36.7% (ähnlich zu 0.45 → 45% Beispiel) ✅ Multiple Asset-Korrelationen als Prozentwerte angezeigt. Die Korrelations-Prozentwerte-Berechnung zeigt Korrelationen als Prozentwerte an (z.B. BTC_vs_SPX: 0.45 → 45%)."
 
+  - task: "KI-DATENMODUL - Umfassendes System für historische und Echtzeit-Marktanalyse"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py, /app/backend/modules/ai_data_module.py, /app/backend/modules/correlation_analysis.py, /app/backend/modules/news_sentiment_analysis.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ KI-DATENMODUL COMPREHENSIVE TESTING FAILED (2025-10-08): 14.3% SUCCESS RATE (2/14 tests passed) - Critical functionality gaps identified. ✅ SYSTEM INITIALIZATION: All 6 new API endpoints correctly implemented and responding ✅ FALLBACK SYSTEMS: 4/5 endpoints working with error handling ❌ MAJOR CRITICAL ISSUES: 1) HISTORISCHE DATENLADUNG (POST /api/ai-data/load-historical): Returns empty data (0 symbols, 0 timeframes, 0 bars) - no historical OHLCV data from 2019-today loaded for any timeframes (1m, 5m, 15m, 1h, 4h, 1d, 1w, 1M) 2) TECHNISCHE INDIKATOREN (POST /api/ai-data/calculate-indicators): Returns empty results (0 indicators calculated) - RSI, SMA, EMA, Bollinger Bands, MACD, Stochastic, MFI not working 3) KORRELATIONSANALYSE MIT ZEITVERSATZ (POST /api/correlations/calculate-comprehensive): Missing time lag analysis and BTC correlations with M2, DXY, Russell2000, Altcoin-Dominanz 4) NEWS-SENTIMENT APIs: Multiple 500 server errors for /api/news-sentiment/fetch-news, /api/news-sentiment/fetch-economic-events, /api/news-sentiment/real-time-sentiment 5) BITCOIN DOMINANCE CORRECTION: Shows 74.8% instead of required 59% target 6) DATENQUALITÄT: Overall scores 0.0% across all metrics, completeness 0.0% - using fallback values instead of real data quality assessment. ⚠️ PARTIALLY WORKING: /api/correlations/real-time returns basic correlation data but lacks comprehensive analysis, /api/financial-news and /api/market-sentiment return mock data but missing required structure. ROOT CAUSE: APIs are structurally implemented but lack the comprehensive data processing, historical data loading, and real-time analysis capabilities described in the KI-DATENMODUL requirements. REQUIRES: Complete implementation of historical data loading from 2019, technical indicator calculations, comprehensive correlation analysis with time lag correction, functional news sentiment analysis, and Bitcoin dominance correction to 59%."
+
 frontend:
   - task: "Display Smart Money Indicators in frontend UI"
     implemented: true
