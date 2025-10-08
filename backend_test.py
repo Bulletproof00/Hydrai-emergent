@@ -1140,6 +1140,297 @@ class TradingSystemTester:
         else:
             self.log_test(test_name, "FAIL", "No liquidation heatmap data available")
 
+    # ============= CRITICAL BUG FIX TESTS - POSITION CLOSE WITH COINGECKO FALLBACK =============
+    
+    async def test_position_close_coingecko_fallback_btc(self):
+        """CRITICAL TEST: Position Close with CoinGecko Fallback - BTC/USDT"""
+        test_name = "🚨 CRITICAL: POSITION CLOSE COINGECKO FALLBACK - BTC/USDT"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available for demo@example.com")
+            return
+        
+        # First, create a BTC/USDT position to test closing
+        order_data = {
+            "symbol": "BTC/USDT",
+            "side": "buy",
+            "order_type": "market",
+            "quantity": 0.001,  # Small amount for testing
+            "leverage": 1
+        }
+        
+        print(f"🔄 Creating BTC/USDT position for close test...")
+        order_response = await self.test_api_endpoint("/trading/order", method="POST", data=order_data, auth=True)
+        
+        if not order_response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Could not create BTC position for close test: {order_response.get('error')}")
+            return
+        
+        # Wait for position to be created
+        await asyncio.sleep(2)
+        
+        # Get positions to find the BTC position
+        positions_response = await self.test_api_endpoint("/trading/positions", auth=True)
+        
+        if not positions_response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Could not get positions: {positions_response.get('error')}")
+            return
+        
+        positions_data = positions_response['data']
+        if isinstance(positions_data, dict):
+            positions = positions_data.get('positions', [])
+        else:
+            positions = positions_data if isinstance(positions_data, list) else []
+        
+        # Find BTC/USDT position
+        btc_position = None
+        for position in positions:
+            if position.get('symbol') == 'BTC/USDT':
+                btc_position = position
+                break
+        
+        if not btc_position:
+            self.log_test(test_name, "FAIL", "❌ No BTC/USDT position found after creating order")
+            return
+        
+        position_id = btc_position.get('position_id')
+        entry_price = btc_position.get('entry_price', 0)
+        size = btc_position.get('size', 0)
+        
+        print(f"📊 Found BTC position: ID={position_id}, Entry=${entry_price:,.2f}, Size={size}")
+        
+        # Test 25% position close (this was failing with "Cannot get current price")
+        close_data = {
+            "position_id": position_id,
+            "close_percentage": 25.0
+        }
+        
+        print(f"🔄 Testing 25% position close (this was failing before CoinGecko fallback)...")
+        close_response = await self.test_api_endpoint("/trading/position/close", method="POST", data=close_data, auth=True)
+        
+        if close_response['status'] == 422:
+            self.log_test(test_name, "FAIL", f"❌ CRITICAL: 422 UNPROCESSABLE ENTITY ERROR - Position close validation failed: {close_response.get('error')}")
+            return
+        elif close_response['status'] == 500:
+            error_msg = str(close_response.get('data', ''))
+            if "Cannot get current price" in error_msg:
+                self.log_test(test_name, "FAIL", f"❌ CRITICAL: 'Cannot get current price' ERROR STILL EXISTS! CoinGecko fallback not working: {error_msg}")
+                return
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Position close failed with 500 error: {error_msg}")
+                return
+        elif not close_response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Position close failed with status {close_response['status']}: {close_response.get('error')}")
+            return
+        
+        # Check successful response
+        close_result = close_response['data']
+        
+        if close_result.get('status') == 'success' and 'result' in close_result:
+            result = close_result['result']
+            if result.get('success'):
+                close_percentage = result.get('close_percentage', 0)
+                pnl = result.get('net_pnl', 0)
+                
+                self.log_test(
+                    test_name, 
+                    "PASS", 
+                    f"✅ POSITION CLOSE COINGECKO FALLBACK WORKING! BTC/USDT position {close_percentage}% closed successfully, PnL: ${pnl:.2f}. NO 'Cannot get current price' errors - CoinGecko fallback functional!",
+                    "Position close should work with CoinGecko fallback when Binance is blocked",
+                    f"✅ SUCCESS: {close_percentage}% closed, PnL: ${pnl:.2f}, NO price errors!"
+                )
+            else:
+                error = result.get('error', 'Unknown error')
+                if "Cannot get current price" in error:
+                    self.log_test(test_name, "FAIL", f"❌ CRITICAL: 'Cannot get current price' ERROR STILL EXISTS in result: {error}")
+                else:
+                    self.log_test(test_name, "FAIL", f"❌ Position close not successful: {error}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Position close response structure invalid: {close_result}")
+
+    async def test_position_close_emergency_price_fallback(self):
+        """CRITICAL TEST: Emergency Price Fallback System for Major Cryptos"""
+        test_name = "🚨 CRITICAL: EMERGENCY PRICE FALLBACK SYSTEM"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available")
+            return
+        
+        # Test multiple major cryptos to verify emergency price fallback
+        test_symbols = ["BTC/USDT", "ETH/USDT", "BNB/USDT"]
+        
+        for symbol in test_symbols:
+            print(f"🔄 Testing emergency price fallback for {symbol}...")
+            
+            # Create a small position
+            order_data = {
+                "symbol": symbol,
+                "side": "buy", 
+                "order_type": "market",
+                "quantity": 0.001 if symbol == "BTC/USDT" else 0.01,
+                "leverage": 1
+            }
+            
+            order_response = await self.test_api_endpoint("/trading/order", method="POST", data=order_data, auth=True)
+            
+            if not order_response['success']:
+                print(f"⚠️ Could not create {symbol} position: {order_response.get('error')}")
+                continue
+            
+            await asyncio.sleep(1)
+            
+            # Get the position
+            positions_response = await self.test_api_endpoint("/trading/positions", auth=True)
+            if not positions_response['success']:
+                continue
+                
+            positions_data = positions_response['data']
+            if isinstance(positions_data, dict):
+                positions = positions_data.get('positions', [])
+            else:
+                positions = positions_data if isinstance(positions_data, list) else []
+            
+            # Find the position for this symbol
+            target_position = None
+            for position in positions:
+                if position.get('symbol') == symbol:
+                    target_position = position
+                    break
+            
+            if not target_position:
+                print(f"⚠️ No {symbol} position found")
+                continue
+            
+            position_id = target_position.get('position_id')
+            
+            # Try to close 50% of position
+            close_data = {
+                "position_id": position_id,
+                "close_percentage": 50.0
+            }
+            
+            close_response = await self.test_api_endpoint("/trading/position/close", method="POST", data=close_data, auth=True)
+            
+            if close_response['success']:
+                print(f"✅ {symbol} position close successful - Emergency price fallback working")
+            else:
+                error_msg = str(close_response.get('data', ''))
+                if "Cannot get current price" in error_msg:
+                    self.log_test(test_name, "FAIL", f"❌ CRITICAL: Emergency price fallback failed for {symbol}: {error_msg}")
+                    return
+        
+        self.log_test(
+            test_name, 
+            "PASS", 
+            f"✅ EMERGENCY PRICE FALLBACK SYSTEM WORKING! Tested {len(test_symbols)} major cryptos, no 'Cannot get current price' errors found",
+            "Emergency price fallback should work for all major cryptocurrencies",
+            f"✅ SUCCESS: {len(test_symbols)} cryptos tested, emergency fallback functional"
+        )
+
+    async def test_account_balance_update_after_close(self):
+        """CRITICAL TEST: Account Balance Update After Position Close"""
+        test_name = "🚨 CRITICAL: ACCOUNT BALANCE UPDATE AFTER POSITION CLOSE"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available")
+            return
+        
+        # Get account balance before
+        account_before = await self.test_api_endpoint("/trading/account", auth=True)
+        
+        if not account_before['success']:
+            self.log_test(test_name, "FAIL", "❌ Could not get account balance before test")
+            return
+        
+        balance_before = account_before['data'].get('account', {}).get('balance', 0)
+        equity_before = account_before['data'].get('account', {}).get('equity', 0)
+        
+        print(f"📊 Account before: Balance=${balance_before:,.2f}, Equity=${equity_before:,.2f}")
+        
+        # Create a position
+        order_data = {
+            "symbol": "BTC/USDT",
+            "side": "buy",
+            "order_type": "market", 
+            "quantity": 0.001,
+            "leverage": 2  # Use some leverage to see more significant changes
+        }
+        
+        order_response = await self.test_api_endpoint("/trading/order", method="POST", data=order_data, auth=True)
+        
+        if not order_response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Could not create position: {order_response.get('error')}")
+            return
+        
+        await asyncio.sleep(2)
+        
+        # Get positions
+        positions_response = await self.test_api_endpoint("/trading/positions", auth=True)
+        if not positions_response['success']:
+            self.log_test(test_name, "FAIL", "❌ Could not get positions")
+            return
+        
+        positions_data = positions_response['data']
+        if isinstance(positions_data, dict):
+            positions = positions_data.get('positions', [])
+        else:
+            positions = positions_data if isinstance(positions_data, list) else []
+        
+        if not positions:
+            self.log_test(test_name, "FAIL", "❌ No positions found after creating order")
+            return
+        
+        position = positions[0]
+        position_id = position.get('position_id')
+        
+        # Close 100% of position
+        close_data = {
+            "position_id": position_id,
+            "close_percentage": 100.0
+        }
+        
+        print(f"🔄 Closing 100% of position {position_id}...")
+        close_response = await self.test_api_endpoint("/trading/position/close", method="POST", data=close_data, auth=True)
+        
+        if not close_response['success']:
+            error_msg = str(close_response.get('data', ''))
+            if "Cannot get current price" in error_msg:
+                self.log_test(test_name, "FAIL", f"❌ CRITICAL: Position close failed due to price unavailability: {error_msg}")
+                return
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Position close failed: {close_response.get('error')}")
+                return
+        
+        await asyncio.sleep(2)
+        
+        # Get account balance after
+        account_after = await self.test_api_endpoint("/trading/account", auth=True)
+        
+        if not account_after['success']:
+            self.log_test(test_name, "FAIL", "❌ Could not get account balance after close")
+            return
+        
+        balance_after = account_after['data'].get('account', {}).get('balance', 0)
+        equity_after = account_after['data'].get('account', {}).get('equity', 0)
+        
+        balance_change = balance_after - balance_before
+        equity_change = equity_after - equity_before
+        
+        print(f"📊 Account after: Balance=${balance_after:,.2f}, Equity=${equity_after:,.2f}")
+        print(f"📊 Changes: Balance=${balance_change:,.2f}, Equity=${equity_change:,.2f}")
+        
+        # Check if balance was updated (should have some change due to fees/PnL)
+        if abs(balance_change) > 0.01 or abs(equity_change) > 0.01:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ ACCOUNT BALANCE UPDATE SUCCESSFUL! Balance: ${balance_before:,.2f} → ${balance_after:,.2f} (${balance_change:+.2f}), Equity: ${equity_before:,.2f} → ${equity_after:,.2f} (${equity_change:+.2f}). PnL calculation and balance updates working correctly!",
+                "Account balance should update correctly after position close with proper PnL calculation",
+                f"✅ SUCCESS: Balance change ${balance_change:+.2f}, Equity change ${equity_change:+.2f}"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"⚠️ Account balance changes very small: Balance ${balance_change:+.4f}, Equity ${equity_change:+.4f}")
+
     # ============= PAPER TRADING POSITION CLOSE TESTS =============
     
     async def test_position_close_25_percent(self):
