@@ -66,38 +66,34 @@ export const useRealTimeData = (selectedSymbol) => {
             
             wsRef.current.onmessage = (event) => {
                 try {
-                    const message = JSON.parse(event.data);
+                    const binanceData = JSON.parse(event.data);
                     
-                    switch (message.type) {
-                        case 'initial_data':
-                            console.log('📊 Received initial data:', Object.keys(message.data).length, 'symbols');
-                            setRealTimeData(message.data);
-                            break;
-                            
-                        case 'price_update':
-                            console.log('📈 Price update:', message.symbol, '$' + message.data.price?.toFixed(2));
-                            setRealTimeData(prev => ({
-                                ...prev,
-                                [message.symbol]: message.data
-                            }));
-                            break;
-                            
-                        case 'tick':
-                            setRealTimeData(prev => ({
-                                ...prev,
-                                [message.data.symbol]: message.data
-                            }));
-                            break;
-                            
-                        case 'pong':
-                            // Heartbeat response
-                            break;
-                            
-                        default:
-                            console.log('Unknown message type:', message.type);
+                    // Binance ticker format: { s: "BTCUSDT", c: "43250.00", P: "1.25", ... }
+                    if (binanceData.s && binanceData.c) {
+                        const symbol = selectedSymbol; // Use the selected symbol format (BTC/USDT)
+                        const price = parseFloat(binanceData.c);
+                        const changePercent = parseFloat(binanceData.P);
+                        const volume = parseFloat(binanceData.v);
+                        const high = parseFloat(binanceData.h);
+                        const low = parseFloat(binanceData.l);
+                        
+                        console.log('📈 Binance price update:', symbol, '$' + price.toFixed(2), changePercent.toFixed(2) + '%');
+                        
+                        setRealTimeData(prev => ({
+                            ...prev,
+                            [symbol]: {
+                                price: price,
+                                change: (price * changePercent) / 100, // Calculate absolute change
+                                change_percent: changePercent,
+                                volume: volume,
+                                high: high,
+                                low: low,
+                                timestamp: new Date().toISOString()
+                            }
+                        }));
                     }
                 } catch (error) {
-                    console.error('Error parsing WebSocket message:', error);
+                    console.error('Error parsing Binance WebSocket message:', error);
                 }
             };
             
