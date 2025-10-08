@@ -3092,7 +3092,7 @@ app.include_router(api_router)
 
 @app.on_event("startup")
 async def startup_event():
-    global exchange, redis_client, enhanced_streamer, smart_money, enhanced_smart_money, paper_trading, ai_trading, integrated_ai, news_sentiment
+    global exchange, redis_client, enhanced_streamer, smart_money, enhanced_smart_money, paper_trading, ai_trading, integrated_ai, news_sentiment, ai_data_module, correlation_analysis, news_sentiment_analysis
     logger.info("Starting Lunara Analyze AI...")
     
     # Initialize exchange - Try Kraken as it has less restrictions
