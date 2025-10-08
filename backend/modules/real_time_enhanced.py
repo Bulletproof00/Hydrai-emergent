@@ -1,6 +1,6 @@
 """
 Enhanced Real-Time Data Fetcher
-Combines HTTP polling with WebSocket broadcasting for free-tier APIs
+Combines HTTP polling with WebSocket broadcasting - Now using Binance for crypto data
 """
 import asyncio
 import aiohttp
@@ -9,6 +9,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any
 import os
+from .binance_data import binance_provider
 
 logger = logging.getLogger(__name__)
 
