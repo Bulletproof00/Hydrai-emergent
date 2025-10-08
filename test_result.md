@@ -179,15 +179,18 @@ backend:
 
   - task: "Paper Trading Position Close - POST /api/trading/position/close"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
           comment: "✅ POSITION CLOSE ERFOLGREICH GETESTET (2025-10-07): Position Close API funktioniert perfekt mit korrekter Pydantic Model Validierung. ✅ KEINE 422 UNPROCESSABLE ENTITY ERRORS - Hauptproblem behoben ✅ ClosePositionRequest Pydantic Model funktioniert einwandfrei ✅ Position Close API verfügbar und funktionsfähig ✅ Partielle Position-Schließung (50%) unterstützt ✅ PnL-Berechnung bei Position-Schließung ✅ Error Handling für nicht existierende Positionen korrekt ✅ JSON Request/Response Struktur korrekt. Das Position Close System ermöglicht flexible Position-Verwaltung ohne 422 Errors."
+        - working: false
+          agent: "testing"
+          comment: "❌ KRITISCHER TRADING-BUG IDENTIFIZIERT (2025-10-08): Position Close funktioniert NICHT aufgrund von zwei kritischen Problemen: 1) BINANCE API GEOGRAPHIC RESTRICTIONS: Binance API returns 451 'Service unavailable from restricted location' errors, causing _get_current_price() to return None, resulting in 'Cannot get current price' error when closing positions. 2) PYDANTIC VALIDATION ISSUES: 422 UNPROCESSABLE ENTITY errors when required fields are missing (e.g., position_id), preventing frontend from properly handling validation errors. ❌ ACTUAL POSITION CLOSE FAILS: Cannot close existing BTC/USDT position due to price unavailability. ❌ REAL-TIME PRICE DATA UNAVAILABLE: /api/realtime/latest returns empty data for BTC/USDT. ROOT CAUSE: Geographic restrictions on Binance API prevent price fetching, breaking the entire position close functionality. SOLUTION NEEDED: Add fallback price sources and improve error handling."
 
   - task: "Paper Trading Portfolio Check - GET /api/trading/portfolio"
     implemented: true
