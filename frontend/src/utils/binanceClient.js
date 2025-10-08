@@ -275,7 +275,6 @@ class BinanceClient {
         this.subscribers.set(streamName, [callback]);
         this.websockets.set(streamName, { type: 'polling', interval: pollInterval });
     }
-    }
 
     // Unsubscribe from WebSocket
     unsubscribe(symbol) {
