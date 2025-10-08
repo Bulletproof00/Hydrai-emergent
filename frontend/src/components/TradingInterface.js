@@ -46,7 +46,7 @@ const TradingInterface = () => {
             setPositions(prevPositions => 
                 prevPositions.map(position => ({
                     ...position,
-                    current_price: getCurrentPrice(position.symbol) || position.mark_price
+                    current_price: getRealtimePrice(position.symbol) || position.mark_price
                 }))
             );
         }
