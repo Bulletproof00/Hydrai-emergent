@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 # Test configuration
-BACKEND_URL = "https://market-genius-39.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-ai-trading-2.preview.emergentagent.com/api"
 AUTH_TOKEN = "demo-token"
 
 class HistoricalDataTester:

@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Dict, List, Any
 
 # Test configuration
-BACKEND_URL = "https://market-genius-39.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-ai-trading-2.preview.emergentagent.com/api"
 WEBSOCKET_URL = "wss://liquidation-oracle.preview.emergentagent.com/api/realtime"
 
 class TradingSystemTester:
@@ -5014,7 +5014,7 @@ async def main():
     print("- Realistische Daten: Bitcoin $3,800→$122,000, Ethereum $140→$4,200 Evolution")
     print("- Alle Timeframes: 1m, 5m, 15m, 1h, 4h, 1d, 1w, 1M mit korrekten Intervallen")
     print()
-    print("Backend URL: https://market-genius-39.preview.emergentagent.com/api")
+    print("Backend URL: https://crypto-ai-trading-2.preview.emergentagent.com/api")
     print("Authentication: demo-token")
     print()
     print("KRITISCHE TESTS:")

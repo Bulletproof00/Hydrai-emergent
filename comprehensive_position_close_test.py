@@ -9,7 +9,7 @@ import aiohttp
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://market-genius-39.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-ai-trading-2.preview.emergentagent.com/api"
 
 async def comprehensive_test():
     """Comprehensive test of position close functionality"""

@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 # Test configuration
-BACKEND_URL = "https://market-genius-39.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-ai-trading-2.preview.emergentagent.com/api"
 
 class CorrelationTester:
     def __init__(self):
@@ -308,7 +308,7 @@ async def main():
     print("1. Korrelations-Endpoint testen: GET /api/correlations")
     print("2. Macro Market Data testen: GET /api/macro-data") 
     print("3. Market Overview testen: GET /api/market-overview")
-    print("Backend URL: https://market-genius-39.preview.emergentagent.com/api")
+    print("Backend URL: https://crypto-ai-trading-2.preview.emergentagent.com/api")
     print("Demo User: demo@example.com/demo123 oder demo-token für Authorization")
     print()
     

@@ -8,7 +8,7 @@ async def focused_test():
     async with aiohttp.ClientSession() as session:
         # Login
         login_data = {'email': 'trader@example.com', 'password': 'password123'}
-        async with session.post('https://market-genius-39.preview.emergentagent.com/api/auth/login', json=login_data) as response:
+        async with session.post('https://crypto-ai-trading-2.preview.emergentagent.com/api/auth/login', json=login_data) as response:
             if response.status == 200:
                 data = await response.json()
                 token = data.get('access_token')
@@ -17,7 +17,7 @@ async def focused_test():
                 print('=== AI TRADING TESTS ===')
                 
                 # Test 1: AI Analysis
-                async with session.post('https://market-genius-39.preview.emergentagent.com/api/ai-trading/analyze?symbol=BTC/USDT&context=comprehensive_test', headers=headers) as ai_response:
+                async with session.post('https://crypto-ai-trading-2.preview.emergentagent.com/api/ai-trading/analyze?symbol=BTC/USDT&context=comprehensive_test', headers=headers) as ai_response:
                     if ai_response.status == 200:
                         ai_data = await ai_response.json()
                         rec = ai_data.get('recommendation', {})
@@ -29,7 +29,7 @@ async def focused_test():
                 
                 # Test 2: Chat Command
                 command = urllib.parse.quote('Analyze BTC trading opportunity')
-                async with session.post(f'https://market-genius-39.preview.emergentagent.com/api/ai-trading/chat-command?command={command}', headers=headers) as chat_response:
+                async with session.post(f'https://crypto-ai-trading-2.preview.emergentagent.com/api/ai-trading/chat-command?command={command}', headers=headers) as chat_response:
                     if chat_response.status == 200:
                         chat_data = await chat_response.json()
                         if chat_data.get('status') == 'success':
@@ -49,7 +49,7 @@ async def focused_test():
                     'quantity': 0.001,
                     'leverage': 1
                 }
-                async with session.post('https://market-genius-39.preview.emergentagent.com/api/trading/order', json=order_data, headers=headers) as order_response:
+                async with session.post('https://crypto-ai-trading-2.preview.emergentagent.com/api/trading/order', json=order_data, headers=headers) as order_response:
                     if order_response.status == 200:
                         order_data_resp = await order_response.json()
                         fill_price = order_data_resp.get('fill_price', 0)
@@ -63,7 +63,7 @@ async def focused_test():
                 print('\n=== REAL-TIME DATA TESTS ===')
                 
                 # Test 4: Real-time data
-                async with session.get('https://market-genius-39.preview.emergentagent.com/api/realtime/latest') as rt_response:
+                async with session.get('https://crypto-ai-trading-2.preview.emergentagent.com/api/realtime/latest') as rt_response:
                     if rt_response.status == 200:
                         rt_data = await rt_response.json()
                         data = rt_data.get('data', {})
