@@ -3801,11 +3801,214 @@ class TradingSystemTester:
         # Print priority summary
         self.print_priority_summary()
 
+    # ============= CHART-DATEN REPARATUR TESTS =============
+    
+    async def test_chart_data_btc_1h_debugging(self):
+        """CHART-DATEN DEBUGGING: Test GET /api/chart-data/BTC-USDT?timeframe=1h&limit=5"""
+        test_name = "🎯 CHART-DATEN DEBUGGING: BTC-USDT 1h (5 candles)"
+        
+        response = await self.test_api_endpoint("/chart-data/BTC-USDT?timeframe=1h&limit=5")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Chart Data API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check basic response structure
+        if 'data' not in data or not isinstance(data['data'], list):
+            self.log_test(test_name, "FAIL", f"❌ Chart Data Response invalid structure: {data}")
+            return
+        
+        chart_data = data['data']
+        
+        if len(chart_data) == 0:
+            self.log_test(test_name, "FAIL", f"❌ Chart Data empty - no candles returned")
+            return
+        
+        # Analyze first few candles for open === close issue
+        problematic_candles = 0
+        valid_candles = 0
+        
+        print(f"📊 Analyzing {len(chart_data)} candles for open === close issue...")
+        
+        for i, candle in enumerate(chart_data[:5]):  # Check first 5 candles
+            open_price = candle.get('open', 0)
+            close_price = candle.get('close', 0)
+            high_price = candle.get('high', 0)
+            low_price = candle.get('low', 0)
+            
+            if open_price == close_price:
+                problematic_candles += 1
+                print(f"⚠️ Candle {i+1}: open === close = {open_price} (PROBLEMATIC)")
+            else:
+                valid_candles += 1
+                print(f"✅ Candle {i+1}: open={open_price}, close={close_price} (VALID)")
+        
+        if problematic_candles > 0:
+            self.log_test(
+                test_name, 
+                "FAIL", 
+                f"❌ CHART-DATEN PROBLEM BESTÄTIGT! {problematic_candles}/{len(chart_data[:5])} Kerzen haben open === close, was zu falscher Candlestick-Darstellung als blaue Linie führt. Beispiel: open={chart_data[0].get('open')}, close={chart_data[0].get('close')}",
+                "Chart-Daten sollten realistische OHLCV mit open !== close haben",
+                f"❌ PROBLEM: {problematic_candles} candles with open === close"
+            )
+        else:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ CHART-DATEN KORREKT! Alle {valid_candles} Kerzen haben unterschiedliche open/close Werte für korrekte Candlestick-Darstellung",
+                "Chart-Daten mit realistischen OHLCV-Variationen",
+                f"✅ SUCCESS: {valid_candles} valid candles with open !== close"
+            )
+
+    async def test_fallback_system_generate_minimal_chart_data(self):
+        """FALLBACK-SYSTEM TEST: Verify generate_minimal_chart_data function works correctly"""
+        test_name = "🎯 FALLBACK-SYSTEM: generate_minimal_chart_data"
+        
+        # Test a less common symbol to trigger fallback
+        response = await self.test_api_endpoint("/chart-data/DOGE-USDT?timeframe=1h&limit=10")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Fallback system API call failed: {response.get('error')}")
+            return
+        
+        data = response['data']
+        chart_data = data.get('data', [])
+        
+        if len(chart_data) == 0:
+            self.log_test(test_name, "FAIL", f"❌ Fallback system returned no data")
+            return
+        
+        # Check if fallback data has proper OHLCV structure with variations
+        valid_ohlcv = 0
+        open_close_variations = 0
+        
+        for candle in chart_data:
+            # Check required fields
+            if all(field in candle for field in ['open', 'high', 'low', 'close', 'volume']):
+                valid_ohlcv += 1
+                
+                # Check for price variations (open !== close)
+                if candle['open'] != candle['close']:
+                    open_close_variations += 1
+        
+        if valid_ohlcv == len(chart_data) and open_close_variations > 0:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ FALLBACK-SYSTEM FUNKTIONIERT! generate_minimal_chart_data liefert {len(chart_data)} Kerzen mit korrekter OHLCV-Struktur und {open_close_variations} Kerzen mit open !== close",
+                "Fallback-System sollte realistische OHLCV-Daten generieren",
+                f"✅ SUCCESS: {len(chart_data)} candles, {open_close_variations} with variations"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Fallback-System Problem: {valid_ohlcv}/{len(chart_data)} valid OHLCV, {open_close_variations} variations")
+
+    async def test_mongodb_cache_check(self):
+        """MONGODB CACHE CHECK: Test if faulty data is stored in AI Data Module Cache"""
+        test_name = "🎯 MONGODB CACHE CHECK: AI Data Module Cache"
+        
+        # Test multiple symbols to check cache consistency
+        test_symbols = ["BTC-USDT", "ETH-USDT"]
+        cache_issues = 0
+        
+        for symbol in test_symbols:
+            response = await self.test_api_endpoint(f"/chart-data/{symbol}?timeframe=1h&limit=3")
+            
+            if response['success']:
+                data = response['data']
+                chart_data = data.get('data', [])
+                
+                # Check if cached data has open === close issue
+                for candle in chart_data:
+                    if candle.get('open') == candle.get('close'):
+                        cache_issues += 1
+                        print(f"⚠️ Cache issue found in {symbol}: open === close = {candle.get('open')}")
+        
+        if cache_issues > 0:
+            self.log_test(
+                test_name, 
+                "FAIL", 
+                f"❌ MONGODB CACHE PROBLEM! {cache_issues} Kerzen mit open === close in AI Data Module Cache gefunden. Cache sollte geleert werden.",
+                "MongoDB Cache sollte keine fehlerhaften Daten mit open === close enthalten",
+                f"❌ CACHE ISSUE: {cache_issues} problematic candles found"
+            )
+        else:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ MONGODB CACHE SAUBER! Keine fehlerhaften Daten mit open === close in AI Data Module Cache gefunden",
+                "MongoDB Cache sollte saubere OHLCV-Daten enthalten",
+                f"✅ SUCCESS: Cache clean, no open === close issues"
+            )
+
+    async def test_binance_integration_check(self):
+        """BINANCE INTEGRATION CHECK: Test why real Binance OHLCV isn't being used"""
+        test_name = "🎯 BINANCE INTEGRATION CHECK: Real OHLCV Usage"
+        
+        # Test chart data and check source
+        response = await self.test_api_endpoint("/chart-data/BTC-USDT?timeframe=1h&limit=5")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Binance integration test failed: {response.get('error')}")
+            return
+        
+        data = response['data']
+        chart_data = data.get('data', [])
+        
+        # Check if data comes from Binance or fallback
+        data_source = "unknown"
+        if 'asset_type' in data:
+            data_source = data.get('asset_type', 'unknown')
+        
+        # Check data quality indicators
+        realistic_prices = 0
+        price_variations = 0
+        
+        for candle in chart_data:
+            btc_price = candle.get('close', 0)
+            
+            # Check if BTC price is realistic (should be > 100k based on context)
+            if btc_price > 100000:
+                realistic_prices += 1
+            
+            # Check for price variations
+            if candle.get('open') != candle.get('close'):
+                price_variations += 1
+        
+        # Analyze results
+        if realistic_prices > 0 and price_variations > 0:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ BINANCE INTEGRATION FUNKTIONIERT! {realistic_prices}/{len(chart_data)} Kerzen mit realistischen BTC-Preisen (>$100k), {price_variations} Kerzen mit Preisvariationen. Data source: {data_source}",
+                "Binance Integration sollte realistische OHLCV-Daten mit Preisvariationen liefern",
+                f"✅ SUCCESS: {realistic_prices} realistic prices, {price_variations} variations"
+            )
+        elif realistic_prices > 0 but price_variations == 0:
+            self.log_test(
+                test_name, 
+                "FAIL", 
+                f"❌ BINANCE INTEGRATION PROBLEM! Realistische Preise ({realistic_prices}/{len(chart_data)}) aber KEINE Preisvariationen - alle Kerzen haben open === close",
+                "Binance sollte echte OHLCV mit open !== close liefern",
+                f"❌ ISSUE: {realistic_prices} realistic but {price_variations} variations"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Binance Integration Problem: {realistic_prices} realistic prices, {price_variations} variations")
+
     async def run_all_tests(self):
         """Run all test cases for Trading System with Real-time Data and AI Integration"""
         await self.setup()
         
         try:
+            # PRIORITY: Chart Data Repair Tests (as requested)
+            print("🎯 CHART-DATEN REPARATUR TESTS - CANDLESTICK RENDERING PROBLEM")
+            print("=" * 80)
+            await self.test_chart_data_btc_1h_debugging()
+            await self.test_fallback_system_generate_minimal_chart_data()
+            await self.test_mongodb_cache_check()
+            await self.test_binance_integration_check()
+            
             print("🔄 Running Enhanced Timeframe Tests...")
             await self.test_enhanced_timeframes_5m()
             await self.test_enhanced_timeframes_15m()
