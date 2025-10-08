@@ -1,21 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import binanceClient from '../utils/binanceClient';
 
-export const useRealTimeData = (selectedSymbol) => {
+export const useRealTimeData = (selectedSymbol = 'BTC/USDT') => {
     const [realTimeData, setRealTimeData] = useState({});
     const [connectionStatus, setConnectionStatus] = useState('disconnected');
     const [isConnectionReady, setIsConnectionReady] = useState(false);
-    const [priceData, setPriceData] = useState({
-        price: 0,
-        change: 0,
-        volume: 0,
-        high: 0,
-        low: 0
-    });
     
-    const wsRef = useRef(null);
-    const reconnectTimeoutRef = useRef(null);
-    const reconnectAttempts = useRef(0);
-    const maxReconnectAttempts = 5;
+    const currentSymbolRef = useRef(selectedSymbol);
 
     // Helper function to safely send WebSocket messages
     const safeSendMessage = (message, description = 'message') => {
