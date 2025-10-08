@@ -2963,6 +2963,28 @@ async def continuous_evolution_loop():
             logger.error(f"Evolution loop error: {e}")
             await asyncio.sleep(1800)  # Wait 30 minutes before retry
 
+async def background_news_fetching():
+    """Background task to fetch news every hour and economic events daily"""
+    while True:
+        try:
+            if news_sentiment_analysis:
+                logger.info("📰 Starting background news and sentiment update...")
+                
+                # Fetch news every hour
+                await news_sentiment_analysis.fetch_news_24h_retrospective()
+                
+                # Calculate real-time sentiment
+                await news_sentiment_analysis.calculate_real_time_sentiment()
+                
+                logger.info("✅ Background news and sentiment update completed")
+            
+            # Wait 1 hour between news updates
+            await asyncio.sleep(3600)  # 1 hour
+            
+        except Exception as e:
+            logger.error(f"Background news fetching error: {e}")
+            await asyncio.sleep(1800)  # Wait 30 minutes before retry
+
 async def update_market_data_background():
     """Background task to update market data every 5 minutes"""
     while True:
