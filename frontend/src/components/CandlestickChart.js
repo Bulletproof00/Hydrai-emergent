@@ -144,10 +144,8 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
       ctx.fillText(price.toFixed(2), 45, y + 4);
     }
 
-    // Draw indicators first (behind candles)
-    drawIndicators(ctx, visibleData, chartHeight, maxPrice, minPrice, padding, candleWidth);
-
-    // Draw candlesticks with improved OHLC visualization for synthetic data
+    // Draw candlesticks FIRST (main chart elements)
+    // CANDLESTICKS - Draw these before indicators to ensure visibility
     visibleData.forEach((candle, i) => {
       const x = 60 + i * candleWidth;
       const centerX = x + candleWidth / 2;
