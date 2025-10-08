@@ -126,14 +126,7 @@ export const useRealTimeData = (selectedSymbol) => {
         }
     };
 
-    // Heartbeat to keep connection alive
-    useEffect(() => {
-        const heartbeat = setInterval(() => {
-            safeSendMessage({ type: 'ping' }, 'heartbeat');
-        }, 30000); // Ping every 30 seconds
-        
-        return () => clearInterval(heartbeat);
-    }, []);
+    // Binance WebSocket doesn't require heartbeat
 
     // Initialize WebSocket connection
     useEffect(() => {
