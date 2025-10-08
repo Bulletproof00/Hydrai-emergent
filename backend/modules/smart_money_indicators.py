@@ -43,16 +43,15 @@ class SmartMoneyIndicators:
         from .binance_data import binance_provider
         self.binance_provider = binance_provider
         
-        # Symbol mapping for different exchanges
+        # Symbol mapping EXCLUSIVELY for Binance (Spot + Futures)
         self.symbol_mapping = {
             'BTC/USDT': {
-                'binance': 'BTCUSDT',
-                'coinglass': 'BTC',
-                'coinank': 'BTCUSDT'
+                'binance_spot': 'BTCUSDT',
+                'binance_futures': 'BTCUSDT'
             },
             'ETH/USDT': {
-                'binance': 'ETHUSDT', 
-                'coinglass': 'ETH',
+                'binance_spot': 'ETHUSDT',
+                'binance_futures': 'ETHUSDT'
                 'coinank': 'ETHUSDT'
             },
             'SOL/USDT': {
