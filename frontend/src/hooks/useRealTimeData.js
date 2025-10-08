@@ -7,10 +7,6 @@ export const useRealTimeData = (selectedSymbol = 'BTC/USDT') => {
     const [isConnectionReady, setIsConnectionReady] = useState(false);
     
     const currentSymbolRef = useRef(selectedSymbol);
-    const wsRef = useRef(null);
-    const reconnectAttempts = useRef(0);
-    const maxReconnectAttempts = 5;
-    const reconnectTimeoutRef = useRef(null);
 
     // Initialize Binance WebSocket connection
     useEffect(() => {
