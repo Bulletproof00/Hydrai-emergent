@@ -38,7 +38,32 @@ const TradingInterface = () => {
     useEffect(() => {
         fetchTradingData();
         fetchSymbols();
+        
+        // Initialize Binance prices for major symbols
+        initializeBinancePrices();
     }, []);
+
+    const initializeBinancePrices = async () => {
+        const majorSymbols = ['BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'ADA/USDT', 'SOL/USDT'];
+        console.log('🔥 BINANCE EXCLUSIVE: Initializing prices for major symbols');
+        
+        try {
+            const binanceClient = (await import('../utils/binanceClient.js')).default;
+            
+            for (const symbol of majorSymbols) {
+                try {
+                    const priceData = await binanceClient.getCurrentPrice(symbol);
+                    if (priceData) {
+                        console.log(`💰 BINANCE EXCLUSIVE: ${symbol} = $${priceData.price.toLocaleString()}`);
+                    }
+                } catch (err) {
+                    console.error(`❌ Failed to fetch ${symbol}:`, err);
+                }
+            }
+        } catch (err) {
+            console.error('❌ Failed to initialize Binance client:', err);
+        }
+    };
 
     // Update positions with real-time prices
     useEffect(() => {
