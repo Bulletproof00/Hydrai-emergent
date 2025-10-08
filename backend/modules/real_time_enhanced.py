@@ -182,6 +182,41 @@ class EnhancedRealTimeStreamer:
             logger.error(f"CoinGecko fetch error: {e} - using fallback")
             await self._use_fallback_crypto_data()
 
+    async def _fetch_binance_data(self):
+        """Fetch crypto data from Binance with fallback to CoinGecko"""
+        try:
+            # Use Binance provider for primary crypto data
+            binance_data = await self.binance_provider.get_multiple_prices(
+                list(self.crypto_symbols.keys())
+            )
+            
+            if binance_data:
+                for symbol, price_info in binance_data.items():
+                    if price_info and 'price' in price_info:
+                        price_data = {
+                            'symbol': symbol,
+                            'price': price_info['price'],
+                            'change_24h': price_info.get('change_24h', 0),
+                            'volume_24h': price_info.get('volume_24h', 0),
+                            'timestamp': datetime.now(timezone.utc).isoformat(),
+                            'source': 'binance',
+                            'asset_type': 'crypto'
+                        }
+                        
+                        self.latest_prices[symbol] = price_data
+                        await self._store_tick_data(price_data)
+                        await self._broadcast_price_update(symbol, price_data)
+                        
+                        logger.info(f"📈 {symbol}: ${price_data['price']:.2f} ({price_data['change_24h']:.2f}%) [Binance]")
+            else:
+                # Fallback to CoinGecko if Binance fails
+                logger.warning("Binance data unavailable, falling back to CoinGecko")
+                await self._fetch_coingecko_data()
+                
+        except Exception as e:
+            logger.error(f"Binance fetch error: {e} - falling back to CoinGecko")
+            await self._fetch_coingecko_data()
+
     async def _use_fallback_crypto_data(self):
         """Provide stable fallback data when APIs fail"""
         import random
