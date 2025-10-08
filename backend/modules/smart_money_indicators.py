@@ -20,23 +20,28 @@ class SmartMoneyIndicators:
         # Focus symbols as requested
         self.focus_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']
         
-        # API endpoints for free smart money data
+        # EXCLUSIVELY Binance APIs for all smart money data
         self.apis = {
-            'coinglass': {
-                'liquidation_map': 'https://open-api.coinglass.com/public/v2/liquidation_map',
-                'open_interest': 'https://open-api.coinglass.com/public/v2/open_interest',
-                'funding_rates': 'https://open-api.coinglass.com/public/v2/funding_rates'
+            'binance_spot': {
+                'ticker_24hr': 'https://api.binance.com/api/v3/ticker/24hr',
+                'order_book': 'https://api.binance.com/api/v3/depth',
+                'klines': 'https://api.binance.com/api/v3/klines'
             },
-            'coinank': {
-                'liquidation_heatmap': 'https://api.coinank.com/api/pro/futures/liquidation_heatmap',
-                'funding_rates': 'https://api.coinank.com/api/pro/futures/funding_rate',
-                'open_interest': 'https://api.coinank.com/api/pro/futures/open_interest'
-            },
-            'alternative': {
-                'binance_futures': 'https://fapi.binance.com/fapi/v1',
-                'bybit_derivatives': 'https://api.bybit.com/derivatives/v3/public'
+            'binance_futures': {
+                'ticker_24hr': 'https://fapi.binance.com/fapi/v1/ticker/24hr',
+                'open_interest': 'https://fapi.binance.com/fapi/v1/openInterest',
+                'funding_rate': 'https://fapi.binance.com/fapi/v1/fundingRate',
+                'order_book': 'https://fapi.binance.com/fapi/v1/depth',
+                'long_short_ratio': 'https://fapi.binance.com/futures/data/globalLongShortAccountRatio',
+                'taker_buy_sell_vol': 'https://fapi.binance.com/futures/data/takerlongshortRatio',
+                'liquidation_orders': 'https://fapi.binance.com/fapi/v1/forceOrders',
+                'top_trader_positions': 'https://fapi.binance.com/futures/data/topLongShortPositionRatio'
             }
         }
+        
+        # Import Binance provider for integrated data
+        from .binance_data import binance_provider
+        self.binance_provider = binance_provider
         
         # Symbol mapping for different exchanges
         self.symbol_mapping = {
