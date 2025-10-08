@@ -548,6 +548,7 @@ test_plan:
     - "Frontend Authentication 401 Errors - ✅ BEHOBEN (demo-token working)"
     - "Binance Price Display Integration - ✅ BEHOBEN ($122,979 target price displayed)"
     - "PHASE 2 - Korrelations-System Backend Testing - ✅ ERFOLGREICH ABGESCHLOSSEN (100% success rate)"
+    - "PHASE 2.1 - Korrelations-Heatmap Frontend Integration - ✅ ERFOLGREICH ABGESCHLOSSEN (Perfect success)"
     - "PHASE 3 - Economic Data & News/Sentiment UI - ⏳ PENDING"
   stuck_tasks: []
   test_all: false
