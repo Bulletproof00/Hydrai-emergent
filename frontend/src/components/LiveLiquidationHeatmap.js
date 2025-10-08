@@ -81,6 +81,16 @@ const LiveLiquidationHeatmap = ({ symbol = 'BTC/USDT', timeframe = '1h' }) => {
             if (liquidationResponse.data.status === 'success') {
                 const data = liquidationResponse.data.data.liquidation_heatmap_2d;
                 setLiquidationData(data);
+                
+                // Generate timeframe-specific clusters
+                const currentTimeframeConfig = timeframes.find(tf => tf.value === selectedTimeframe);
+                if (currentTimeframeConfig) {
+                    const clusters = generateTimeframeClusters(data, currentTimeframeConfig);
+                    setTimeframeClusters(prev => ({
+                        ...prev,
+                        [selectedTimeframe]: clusters
+                    }));
+                }
             }
             
             if (priceResponse.data.status === 'success' && priceResponse.data.data[symbol]) {
