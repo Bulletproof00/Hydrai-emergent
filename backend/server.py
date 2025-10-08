@@ -1449,7 +1449,7 @@ async def get_market_overview():
 async def get_chart_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit: int = 1000):
     """Get OHLCV chart data with Binance integration and fallback"""
     try:
-        from .modules.binance_data import binance_provider
+        from modules.binance_data import binance_provider
         
         # Convert symbol format (BTC-USDT to BTC/USDT)
         symbol = symbol.replace('-', '/')
