@@ -70,7 +70,7 @@ const LiveLiquidationHeatmap = ({ symbol = 'BTC/USDT', timeframe = '1h' }) => {
             
             // Fetch liquidation data
             const liquidationResponse = await axios.get(
-                `${BACKEND_URL}/api/enhanced-smart-money/data?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}`
+                `${BACKEND_URL}/api/enhanced-smart-money/data?symbol=${encodeURIComponent(symbol)}&timeframe=${selectedTimeframe}`
             );
             
             // Fetch current price
