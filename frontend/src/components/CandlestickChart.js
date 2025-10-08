@@ -93,6 +93,8 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
       }
     } catch (error) {
       console.error('Error loading gaps:', error);
+      // Set empty gaps array as fallback
+      setGaps([]);
     }
   };
 
