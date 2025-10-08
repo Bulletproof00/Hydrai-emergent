@@ -20,12 +20,11 @@ class EnhancedRealTimeStreamer:
         self.latest_prices = {}
         self.is_running = False
         
-        # Free API endpoints and keys
+        # Binance provider for crypto data
+        self.binance_provider = binance_provider
+        
+        # Traditional market APIs (fallback for non-crypto)
         self.apis = {
-            'crypto': {
-                'coinbase': 'https://api.coinbase.com/v2/exchange-rates',
-                'coingecko': 'https://api.coingecko.com/api/v3/simple/price'
-            },
             'traditional': {
                 'iex': 'https://cloud.iexapis.com/stable/stock/{symbol}/quote',
                 'finnhub': 'https://finnhub.io/api/v1/quote',
@@ -33,18 +32,23 @@ class EnhancedRealTimeStreamer:
             }
         }
         
-        # Symbol mappings
+        # Primary crypto symbols supported by Binance
         self.crypto_symbols = {
-            'BTC/USDT': {'coinbase': 'BTC', 'coingecko': 'bitcoin'},
-            'ETH/USDT': {'coinbase': 'ETH', 'coingecko': 'ethereum'},
-            'BNB/USDT': {'coinbase': 'BNB', 'coingecko': 'binancecoin'},
-            'XRP/USDT': {'coinbase': 'XRP', 'coingecko': 'ripple'},
-            'ADA/USDT': {'coinbase': 'ADA', 'coingecko': 'cardano'},
-            'SOL/USDT': {'coinbase': 'SOL', 'coingecko': 'solana'},
-            'DOGE/USDT': {'coinbase': 'DOGE', 'coingecko': 'dogecoin'},
-            'DOT/USDT': {'coinbase': 'DOT', 'coingecko': 'polkadot'},
-            'MATIC/USDT': {'coinbase': 'MATIC', 'coingecko': 'matic-network'},
-            'LTC/USDT': {'coinbase': 'LTC', 'coingecko': 'litecoin'}
+            'BTC/USDT': {'binance_spot': 'BTC/USDT', 'binance_futures': 'BTC/USDT'},
+            'ETH/USDT': {'binance_spot': 'ETH/USDT', 'binance_futures': 'ETH/USDT'},
+            'BNB/USDT': {'binance_spot': 'BNB/USDT', 'binance_futures': 'BNB/USDT'},
+            'XRP/USDT': {'binance_spot': 'XRP/USDT', 'binance_futures': 'XRP/USDT'},
+            'ADA/USDT': {'binance_spot': 'ADA/USDT', 'binance_futures': 'ADA/USDT'},
+            'SOL/USDT': {'binance_spot': 'SOL/USDT', 'binance_futures': 'SOL/USDT'},
+            'DOGE/USDT': {'binance_spot': 'DOGE/USDT', 'binance_futures': 'DOGE/USDT'},
+            'DOT/USDT': {'binance_spot': 'DOT/USDT', 'binance_futures': 'DOT/USDT'},
+            'MATIC/USDT': {'binance_spot': 'MATIC/USDT', 'binance_futures': 'MATIC/USDT'},
+            'LTC/USDT': {'binance_spot': 'LTC/USDT', 'binance_futures': 'LTC/USDT'},
+            'AVAX/USDT': {'binance_spot': 'AVAX/USDT', 'binance_futures': 'AVAX/USDT'},
+            'SHIB/USDT': {'binance_spot': 'SHIB/USDT', 'binance_futures': 'SHIB/USDT'},
+            'UNI/USDT': {'binance_spot': 'UNI/USDT', 'binance_futures': 'UNI/USDT'},
+            'ATOM/USDT': {'binance_spot': 'ATOM/USDT', 'binance_futures': 'ATOM/USDT'},
+            'LINK/USDT': {'binance_spot': 'LINK/USDT', 'binance_futures': 'LINK/USDT'}
         }
         
         self.traditional_symbols = {
