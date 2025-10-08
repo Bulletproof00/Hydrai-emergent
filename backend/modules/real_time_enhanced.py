@@ -186,18 +186,20 @@ class EnhancedRealTimeStreamer:
         """Fetch crypto data from Binance with fallback to CoinGecko"""
         try:
             # Use Binance provider for primary crypto data
-            binance_data = await self.binance_provider.get_multiple_prices(
-                list(self.crypto_symbols.keys())
-            )
+            success_count = 0
             
-            if binance_data:
-                for symbol, price_info in binance_data.items():
-                    if price_info and 'price' in price_info:
+            for symbol in self.crypto_symbols.keys():
+                try:
+                    # Get current price and 24h stats from Binance
+                    current_price = await self.binance_provider.get_current_price(symbol)
+                    stats_24h = await self.binance_provider.get_24h_stats(symbol)
+                    
+                    if current_price and stats_24h:
                         price_data = {
                             'symbol': symbol,
-                            'price': price_info['price'],
-                            'change_24h': price_info.get('change_24h', 0),
-                            'volume_24h': price_info.get('volume_24h', 0),
+                            'price': current_price,
+                            'change_24h': stats_24h.get('priceChangePercent', 0),
+                            'volume_24h': stats_24h.get('volume', 0),
                             'timestamp': datetime.now(timezone.utc).isoformat(),
                             'source': 'binance',
                             'asset_type': 'crypto'
@@ -208,9 +210,14 @@ class EnhancedRealTimeStreamer:
                         await self._broadcast_price_update(symbol, price_data)
                         
                         logger.info(f"📈 {symbol}: ${price_data['price']:.2f} ({price_data['change_24h']:.2f}%) [Binance]")
-            else:
-                # Fallback to CoinGecko if Binance fails
-                logger.warning("Binance data unavailable, falling back to CoinGecko")
+                        success_count += 1
+                        
+                except Exception as e:
+                    logger.debug(f"Binance error for {symbol}: {e}")
+            
+            # If no symbols were successfully fetched, fallback to CoinGecko
+            if success_count == 0:
+                logger.warning("No Binance data available, falling back to CoinGecko")
                 await self._fetch_coingecko_data()
                 
         except Exception as e:
