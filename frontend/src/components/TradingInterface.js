@@ -13,14 +13,8 @@ const TradingInterface = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     
-    // Real-time price data
-    const { 
-        realTimeData, 
-        connectionStatus, 
-        getCurrentPrice: getRealTimePrice, 
-        getPriceChange, 
-        isLive 
-    } = useRealTimeData(selectedSymbol);
+    // Real-time data hook - Direct Binance connection
+    const { realTimeData, connectionStatus, priceData, formatPrice, formatChange, isConnected } = useRealTimeData();
     
     // Order form state
     const [orderForm, setOrderForm] = useState({
