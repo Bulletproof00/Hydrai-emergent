@@ -155,7 +155,26 @@ export const useRealTimeData = (selectedSymbol = 'BTC/USDT') => {
             const now = new Date();
             return (now - lastUpdate) < 60000; // Live if updated within last minute
         },
-        reconnect: connectWebSocket,
+        reconnect: () => {
+            // Reconnect WebSocket connection
+            binanceClient.unsubscribe(selectedSymbol);
+            const handlePriceUpdate = (priceData) => {
+                setRealTimeData(prev => ({
+                    ...prev,
+                    [priceData.symbol]: {
+                        price: priceData.price,
+                        change: priceData.change,
+                        change_percent: priceData.changePercent,
+                        volume: priceData.volume,
+                        high: priceData.high,
+                        low: priceData.low,
+                        timestamp: priceData.timestamp
+                    }
+                }));
+                setConnectionStatus('connected');
+            };
+            binanceClient.subscribeToPrice(selectedSymbol, handlePriceUpdate);
+        },
         
         // New utility functions
         getVolume: getVolumeCompat,
