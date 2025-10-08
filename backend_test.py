@@ -4668,20 +4668,28 @@ class TradingSystemTester:
         print("=" * 80)
 
 async def main():
-    """Main test runner - CORRELATION SYSTEM TESTS"""
+    """Main test runner - CRITICAL BUG FIX VERIFICATION"""
     tester = TradingSystemTester()
     
-    # Run CORRELATION SYSTEM TESTS as requested in the review
-    print("📊 RUNNING CORRELATION SYSTEM BACKEND TESTS")
-    print("Teste das Korrelations-System im Backend:")
-    print("1. Korrelations-Endpoint testen: GET /api/correlations")
-    print("2. Macro Market Data testen: GET /api/macro-data") 
-    print("3. Market Overview testen: GET /api/market-overview")
-    print("Backend URL: https://market-genius-39.preview.emergentagent.com/api")
-    print("Demo User: demo@example.com/demo123 oder demo-token für Authorization")
+    # Run CRITICAL BUG FIX TESTS as requested in the review
+    print("🚨 RUNNING CRITICAL BUG FIX VERIFICATION TESTS")
+    print("TRADING-BUG FIX VERIFICATION: Position Close Funktionalität nach CoinGecko Fallback")
     print()
+    print("KRITISCHE REPARATUR GETESTET:")
+    print("- Implementiert CoinGecko API Fallback für _get_current_price()")
+    print("- Emergency Price Fallback für alle major Cryptos")
+    print("- Entfernt 'EXCLUSIVELY Binance - NO fallbacks' Beschränkung")
+    print()
+    print("Backend URL: https://market-genius-39.preview.emergentagent.com/api")
+    print("Demo User: demo@example.com/demo123")
+    print()
+    print("ZU TESTENDE FUNKTIONEN:")
+    print("1. Position Close API: POST /api/trading/position/close")
+    print("2. Price Fallback System: CoinGecko Fallback funktioniert")
+    print("3. Account Balance Update: Nach Position Close")
+    print("=" * 80)
     
-    await tester.run_correlation_system_tests()
+    await tester.run_critical_bug_fix_tests()
 
 if __name__ == "__main__":
     asyncio.run(main())
