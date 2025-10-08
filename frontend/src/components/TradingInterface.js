@@ -50,7 +50,7 @@ const TradingInterface = () => {
                 }))
             );
         }
-    }, [realTimeData, getCurrentPrice]);
+    }, [realTimeData, getRealtimePrice]);
 
     const fetchTradingData = async () => {
         try {
