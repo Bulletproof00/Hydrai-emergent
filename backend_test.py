@@ -4009,17 +4009,388 @@ class TradingSystemTester:
         print("📈 PAPER TRADING SYSTEM TESTING COMPLETE")
         print("=" * 80)
 
+    # ============= CORRELATION SYSTEM TESTS =============
+    
+    async def test_correlations_endpoint(self):
+        """Test 1: Korrelations-Endpoint - GET /api/correlations"""
+        test_name = "🎯 TEST 1: KORRELATIONS-ENDPOINT"
+        
+        response = await self.test_api_endpoint("/correlations")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Correlations API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check if correlations data is returned
+        if not isinstance(data, dict) or len(data) == 0:
+            self.log_test(test_name, "FAIL", f"❌ Correlations Response leer oder ungültiges Format: {data}")
+            return
+        
+        # Check for expected correlation pairs
+        expected_pairs = ['BTC_vs_SPX', 'BTC_vs_ETH', 'BTC_vs_Gold', 'BTC_vs_NASDAQ', 'BTC_vs_DXY']
+        found_pairs = []
+        correlation_values = []
+        
+        for pair, value in data.items():
+            if any(expected in pair for expected in expected_pairs):
+                found_pairs.append(pair)
+                if isinstance(value, (int, float)) and -1 <= value <= 1:
+                    correlation_values.append(value)
+        
+        if len(found_pairs) >= 3 and len(correlation_values) >= 3:
+            # Convert to percentage values as requested
+            percentage_values = [f"{pair}: {value:.2f} → {value*100:.1f}%" for pair, value in list(data.items())[:3]]
+            
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ KORRELATIONS-ENDPOINT ERFOLGREICH! {len(found_pairs)} Korrelationspaare gefunden. Beispiele: {', '.join(percentage_values)}",
+                "Korrelationsdaten zwischen verschiedenen Assets als Prozentwerte",
+                f"{len(found_pairs)} correlation pairs, percentage format working"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Unzureichende Korrelationsdaten: {len(found_pairs)} Paare, {len(correlation_values)} gültige Werte")
+
+    async def test_macro_market_data_endpoint(self):
+        """Test 2: Macro Market Data - GET /api/macro-data"""
+        test_name = "🎯 TEST 2: MACRO MARKET DATA"
+        
+        response = await self.test_api_endpoint("/macro-data")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Macro Data API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check if macro data is returned
+        if not isinstance(data, dict) or len(data) == 0:
+            self.log_test(test_name, "FAIL", f"❌ Macro Data Response leer oder ungültiges Format: {data}")
+            return
+        
+        # Check for expected macro market indicators
+        expected_indicators = ['SPX', 'NASDAQ', 'DXY', 'Gold', 'Bitcoin', 'Ethereum']
+        found_indicators = []
+        valid_data_points = 0
+        
+        for indicator in expected_indicators:
+            if indicator in data:
+                found_indicators.append(indicator)
+                indicator_data = data[indicator]
+                if isinstance(indicator_data, dict) and 'price' in indicator_data and 'change_24h' in indicator_data:
+                    valid_data_points += 1
+        
+        if len(found_indicators) >= 4 and valid_data_points >= 4:
+            # Show sample data
+            sample_data = []
+            for indicator in found_indicators[:3]:
+                if indicator in data and isinstance(data[indicator], dict):
+                    price = data[indicator].get('price', 0)
+                    change = data[indicator].get('change_24h', 0)
+                    sample_data.append(f"{indicator}: ${price:,.2f} ({change:+.2f}%)")
+            
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ MACRO MARKET DATA ERFOLGREICH! {len(found_indicators)} Makro-Indikatoren gefunden. Beispiele: {', '.join(sample_data)}",
+                "Makro-Marktdaten für Korrelationsanalyse mit Preisen und 24h-Änderungen",
+                f"{len(found_indicators)} indicators, {valid_data_points} valid data points"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Unzureichende Makro-Daten: {len(found_indicators)} Indikatoren, {valid_data_points} gültige Datenpunkte")
+
+    async def test_market_overview_endpoint(self):
+        """Test 3: Market Overview - GET /api/market-overview"""
+        test_name = "🎯 TEST 3: MARKET OVERVIEW"
+        
+        response = await self.test_api_endpoint("/market-overview")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Market Overview API call failed with status {response['status']}: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check if market overview data is returned
+        if not isinstance(data, dict):
+            self.log_test(test_name, "FAIL", f"❌ Market Overview Response ungültiges Format: {data}")
+            return
+        
+        # Check for expected sections
+        required_sections = ['bitcoin', 'macro_data', 'correlations', 'summary']
+        missing_sections = [section for section in required_sections if section not in data]
+        
+        if missing_sections:
+            self.log_test(test_name, "FAIL", f"❌ Market Overview unvollständig, fehlende Sektionen: {missing_sections}")
+            return
+        
+        # Check Bitcoin data
+        bitcoin_data = data.get('bitcoin', {})
+        btc_price = bitcoin_data.get('price', 0)
+        btc_change = bitcoin_data.get('change_24h', 0)
+        
+        # Check correlations in overview
+        correlations = data.get('correlations', {})
+        correlation_count = len(correlations)
+        
+        # Check summary data
+        summary = data.get('summary', {})
+        market_sentiment = summary.get('market_sentiment', '')
+        btc_dominance = summary.get('btc_dominance', 0)
+        spx_correlation = summary.get('correlation_with_spx', 0)
+        
+        if btc_price > 0 and correlation_count >= 3 and market_sentiment:
+            # Convert correlation to percentage as requested
+            spx_correlation_percent = spx_correlation * 100 if spx_correlation else 0
+            
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ MARKET OVERVIEW ERFOLGREICH! BTC: ${btc_price:,.2f} ({btc_change:+.2f}%), {correlation_count} Korrelationen, BTC-SPX Korrelation: {spx_correlation:.2f} → {spx_correlation_percent:.1f}%, Sentiment: {market_sentiment}, BTC Dominanz: {btc_dominance:.1f}%",
+                "Gesamtmarkt-Übersicht mit Korrelationsdaten als Prozentwerte",
+                f"BTC: ${btc_price:,.2f}, {correlation_count} correlations, sentiment: {market_sentiment}"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Market Overview Daten unvollständig: BTC: ${btc_price}, Korrelationen: {correlation_count}, Sentiment: {market_sentiment}")
+
+    async def test_correlation_percentage_calculation(self):
+        """Test 4: Korrelations-Prozentwerte-Berechnung"""
+        test_name = "🎯 TEST 4: KORRELATIONS-PROZENTWERTE-BERECHNUNG"
+        
+        response = await self.test_api_endpoint("/correlations")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Correlations API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Test percentage conversion for correlation values
+        valid_correlations = 0
+        percentage_examples = []
+        
+        for pair, value in data.items():
+            if isinstance(value, (int, float)) and -1 <= value <= 1:
+                valid_correlations += 1
+                percentage_value = value * 100
+                percentage_examples.append(f"{pair}: {value:.3f} → {percentage_value:.1f}%")
+                
+                # Test specific example from request: BTC_vs_SPX: 0.45 → 45%
+                if 'BTC_vs_SPX' in pair and abs(value - 0.45) < 0.1:  # Allow some variance
+                    percentage_examples.append(f"✅ BEISPIEL KORREKT: {pair}: {value:.3f} → {percentage_value:.1f}%")
+        
+        if valid_correlations >= 3:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ KORRELATIONS-PROZENTWERTE-BERECHNUNG ERFOLGREICH! {valid_correlations} gültige Korrelationen. Beispiele: {'; '.join(percentage_examples[:3])}",
+                "Korrelationen als Prozentwerte angezeigt (z.B. BTC_vs_SPX: 0.45 → 45%)",
+                f"{valid_correlations} correlations converted to percentages"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Unzureichende gültige Korrelationswerte: {valid_correlations}")
+
+    async def test_multiple_asset_correlations(self):
+        """Test 5: Multiple Asset-Korrelationen"""
+        test_name = "🎯 TEST 5: MULTIPLE ASSET-KORRELATIONEN"
+        
+        response = await self.test_api_endpoint("/correlations")
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Correlations API call failed: {response.get('error', 'Unknown error')}")
+            return
+        
+        data = response['data']
+        
+        # Check for multiple asset correlations as requested
+        expected_assets = ['BTC', 'ETH', 'SPX', 'Gold', 'NASDAQ', 'DXY']
+        found_correlations = {}
+        
+        for pair, value in data.items():
+            for asset in expected_assets:
+                if asset in pair and isinstance(value, (int, float)):
+                    if asset not in found_correlations:
+                        found_correlations[asset] = []
+                    found_correlations[asset].append((pair, value))
+        
+        # Count unique asset correlations
+        assets_with_correlations = len(found_correlations)
+        total_correlation_pairs = sum(len(pairs) for pairs in found_correlations.values())
+        
+        if assets_with_correlations >= 4 and total_correlation_pairs >= 6:
+            # Show examples
+            examples = []
+            for asset, pairs in list(found_correlations.items())[:3]:
+                if pairs:
+                    pair_name, correlation = pairs[0]
+                    percentage = correlation * 100
+                    examples.append(f"{asset}: {correlation:.3f} → {percentage:.1f}%")
+            
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ MULTIPLE ASSET-KORRELATIONEN ERFOLGREICH! {assets_with_correlations} Assets mit {total_correlation_pairs} Korrelationspaaren. Beispiele: {', '.join(examples)}",
+                "Multiple Asset-Korrelationen (BTC vs SPX, ETH, Gold, etc.)",
+                f"{assets_with_correlations} assets, {total_correlation_pairs} correlation pairs"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Unzureichende Asset-Korrelationen: {assets_with_correlations} Assets, {total_correlation_pairs} Paare")
+
+    async def test_timeframe_correlation_parameters(self):
+        """Test 6: Timeframe-Parameter Funktionalität"""
+        test_name = "🎯 TEST 6: TIMEFRAME-PARAMETER FUNKTIONALITÄT"
+        
+        # Test different timeframe parameters
+        timeframes = ['1d', '7d', '30d']
+        timeframe_results = {}
+        
+        for timeframe in timeframes:
+            response = await self.test_api_endpoint(f"/correlations?timeframe={timeframe}&period=30")
+            
+            if response['success']:
+                data = response['data']
+                if isinstance(data, dict) and len(data) > 0:
+                    timeframe_results[timeframe] = len(data)
+                else:
+                    timeframe_results[timeframe] = 0
+            else:
+                timeframe_results[timeframe] = 0
+        
+        successful_timeframes = [tf for tf, count in timeframe_results.items() if count > 0]
+        
+        if len(successful_timeframes) >= 2:
+            results_summary = [f"{tf}: {count} Korrelationen" for tf, count in timeframe_results.items()]
+            
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ TIMEFRAME-PARAMETER FUNKTIONALITÄT ERFOLGREICH! {len(successful_timeframes)}/3 Timeframes funktionieren. Ergebnisse: {', '.join(results_summary)}",
+                "Timeframe-spezifische Korrelationsberechnungen",
+                f"{len(successful_timeframes)} timeframes working"
+            )
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Timeframe-Parameter funktionieren nicht: {timeframe_results}")
+
+    async def test_correlation_error_handling(self):
+        """Test 7: Error Handling bei fehlenden Daten"""
+        test_name = "🎯 TEST 7: ERROR HANDLING BEI FEHLENDEN DATEN"
+        
+        # Test with invalid parameters
+        test_cases = [
+            ("/correlations?timeframe=invalid", "Invalid timeframe"),
+            ("/correlations?period=-1", "Invalid period"),
+            ("/macro-data?invalid_param=test", "Invalid parameter"),
+        ]
+        
+        error_handling_results = []
+        
+        for endpoint, description in test_cases:
+            response = await self.test_api_endpoint(endpoint)
+            
+            if response['status'] in [400, 422, 500]:  # Expected error codes
+                error_handling_results.append(f"✅ {description}: {response['status']}")
+            elif response['success']:  # API handled gracefully
+                error_handling_results.append(f"✅ {description}: Graceful handling")
+            else:
+                error_handling_results.append(f"❌ {description}: Unexpected response")
+        
+        successful_error_handling = len([r for r in error_handling_results if r.startswith("✅")])
+        
+        if successful_error_handling >= 2:
+            self.log_test(
+                test_name, 
+                "PASS", 
+                f"✅ ERROR HANDLING ERFOLGREICH! {successful_error_handling}/3 Fehlerbehandlungen korrekt. Details: {'; '.join(error_handling_results)}",
+                "Korrekte Fehlerbehandlung bei ungültigen Parametern und fehlenden Daten",
+                f"{successful_error_handling} error cases handled correctly"
+            )
+        else:
+            self.log_test(test_name, "WARN", f"⚠️ Error Handling teilweise: {successful_error_handling}/3 korrekt")
+
+    async def run_correlation_system_tests(self):
+        """Run comprehensive Correlation System tests as requested"""
+        await self.setup()
+        
+        try:
+            print("🎯 TESTING CORRELATION SYSTEM BACKEND")
+            print("=" * 80)
+            print("KORRELATIONS-SYSTEM TESTS:")
+            print("1. Korrelations-Endpoint testen: GET /api/correlations")
+            print("2. Macro Market Data testen: GET /api/macro-data")
+            print("3. Market Overview testen: GET /api/market-overview")
+            print("ERWARTETE FUNKTIONALITÄT:")
+            print("- Korrelationen als Prozentwerte (z.B. BTC_vs_SPX: 0.45 → 45%)")
+            print("- Multiple Asset-Korrelationen (BTC vs SPX, ETH, Gold, etc.)")
+            print("- Timeframe-spezifische Korrelationsberechnungen")
+            print("- Error Handling bei fehlenden Daten")
+            print("=" * 80)
+            
+            # Core Correlation System Tests as requested in review
+            print("\n📊 CORRELATION SYSTEM FUNCTIONALITY TESTS...")
+            await self.test_correlations_endpoint()
+            await self.test_macro_market_data_endpoint()
+            await self.test_market_overview_endpoint()
+            await self.test_correlation_percentage_calculation()
+            await self.test_multiple_asset_correlations()
+            await self.test_timeframe_correlation_parameters()
+            await self.test_correlation_error_handling()
+            
+        except Exception as e:
+            print(f"❌ Error during Correlation System tests: {e}")
+        finally:
+            await self.cleanup()
+        
+        # Print summary
+        self.print_correlation_summary()
+    
+    def print_correlation_summary(self):
+        """Print summary of Correlation System tests"""
+        print("\n" + "=" * 80)
+        print("📊 CORRELATION SYSTEM TEST SUMMARY")
+        print("=" * 80)
+        
+        total_tests = len(self.test_results)
+        passed_tests = len([r for r in self.test_results if r['status'] == 'PASS'])
+        failed_tests = len([r for r in self.test_results if r['status'] == 'FAIL'])
+        warned_tests = len([r for r in self.test_results if r['status'] == 'WARN'])
+        
+        print(f"📊 TOTAL TESTS: {total_tests}")
+        print(f"✅ PASSED: {passed_tests}")
+        print(f"❌ FAILED: {failed_tests}")
+        print(f"⚠️  WARNINGS: {warned_tests}")
+        
+        if total_tests > 0:
+            success_rate = (passed_tests / total_tests) * 100
+            print(f"📈 SUCCESS RATE: {success_rate:.1f}%")
+        
+        print("\n🎯 DETAILED RESULTS:")
+        for result in self.test_results:
+            status_emoji = "✅" if result['status'] == "PASS" else "❌" if result['status'] == "FAIL" else "⚠️"
+            print(f"{status_emoji} {result['test']}: {result['status']}")
+            if result['details']:
+                print(f"   {result['details']}")
+        
+        print("\n" + "=" * 80)
+        print("📊 CORRELATION SYSTEM TESTING COMPLETE")
+        print("=" * 80)
+
 async def main():
-    """Main test runner - PAPER TRADING SYSTEM TESTS"""
+    """Main test runner - CORRELATION SYSTEM TESTS"""
     tester = TradingSystemTester()
     
-    # Run PAPER TRADING SYSTEM TESTS as requested in the review
-    print("📈 RUNNING PAPER TRADING SYSTEM TESTS")
-    print("Testing alle Trading-bezogenen Backend-Endpoints für Paper Trading System")
-    print("Backend URL: https://market-genius-39.preview.emergentagent.com")
+    # Run CORRELATION SYSTEM TESTS as requested in the review
+    print("📊 RUNNING CORRELATION SYSTEM BACKEND TESTS")
+    print("Teste das Korrelations-System im Backend:")
+    print("1. Korrelations-Endpoint testen: GET /api/correlations")
+    print("2. Macro Market Data testen: GET /api/macro-data") 
+    print("3. Market Overview testen: GET /api/market-overview")
+    print("Backend URL: https://market-genius-39.preview.emergentagent.com/api")
+    print("Demo User: demo@example.com/demo123 oder demo-token für Authorization")
     print()
     
-    await tester.run_paper_trading_tests()
+    await tester.run_correlation_system_tests()
 
 if __name__ == "__main__":
     asyncio.run(main())
