@@ -230,6 +230,66 @@ const LiveLiquidationHeatmap = ({ symbol = 'BTC/USDT', timeframe = '1h' }) => {
                 </div>
             </div>
 
+            {/* Timeframe-Specific Liquidation Clusters */}
+            {timeframeClusters[selectedTimeframe] && (
+                <div className="liquidation-clusters">
+                    <div className="clusters-header">
+                        <h4>🎯 {selectedTimeframe.toUpperCase()} Liquidations-Cluster</h4>
+                        <div className="cluster-stats">
+                            <span>Total Cluster: {timeframeClusters[selectedTimeframe].length}</span>
+                            <span>Longs: {timeframeClusters[selectedTimeframe].filter(c => c.side === 'long').length}</span>
+                            <span>Shorts: {timeframeClusters[selectedTimeframe].filter(c => c.side === 'short').length}</span>
+                        </div>
+                    </div>
+
+                    <div className="cluster-grid">
+                        {timeframeClusters[selectedTimeframe]
+                            .sort((a, b) => b.intensity - a.intensity)
+                            .slice(0, 12)
+                            .map((cluster, index) => (
+                            <div 
+                                key={`cluster-${index}`}
+                                className={`cluster-item ${cluster.side}`}
+                                style={{ 
+                                    backgroundColor: cluster.side === 'long' ? 
+                                        `rgba(16, 185, 129, ${0.2 + cluster.intensity * 0.6})` : 
+                                        `rgba(239, 68, 68, ${0.2 + cluster.intensity * 0.6})`
+                                }}
+                            >
+                                <div className="cluster-price">
+                                    <span className="price">${formatNumber(cluster.price, 2)}</span>
+                                    <span className={`side-badge ${cluster.side}`}>
+                                        {cluster.side === 'long' ? '🟢' : '🔴'} {cluster.side.toUpperCase()}
+                                    </span>
+                                </div>
+                                
+                                <div className="cluster-metrics">
+                                    <div className="metric">
+                                        <span>Volume:</span>
+                                        <span>${formatNumber(cluster.volume, 0)}</span>
+                                    </div>
+                                    <div className="metric">
+                                        <span>Distanz:</span>
+                                        <span>{((cluster.distance / currentPrice) * 100).toFixed(2)}%</span>
+                                    </div>
+                                    <div className="metric">
+                                        <span>Intensität:</span>
+                                        <span>{(cluster.intensity * 100).toFixed(0)}%</span>
+                                    </div>
+                                </div>
+
+                                <div className="cluster-strength">
+                                    <div 
+                                        className="strength-bar"
+                                        style={{ width: `${cluster.intensity * 100}%` }}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Resistance Levels (Above Current Price) */}
             <div className="liquidation-section resistance-section">
                 <div className="section-header">
