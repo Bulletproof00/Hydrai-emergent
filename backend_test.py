@@ -3725,6 +3725,34 @@ class TradingSystemTester:
         # Print Self-Evolving AI summary
         self.print_self_evolving_ai_summary()
 
+    async def run_critical_bug_fix_tests(self):
+        """Run critical bug fix tests for Position Close with CoinGecko Fallback"""
+        await self.setup()
+        
+        try:
+            print("🚨 RUNNING CRITICAL BUG FIX TESTS - POSITION CLOSE COINGECKO FALLBACK")
+            print("=" * 80)
+            print("🎯 TESTING: CoinGecko API Fallback for _get_current_price()")
+            print("🎯 TESTING: Emergency Price Fallback for major cryptos")
+            print("🎯 TESTING: Position Close functionality after price fix")
+            print("🎯 TESTING: Account Balance updates after position close")
+            print("=" * 80)
+            
+            # Critical Bug Fix Tests
+            await self.test_position_close_coingecko_fallback_btc()
+            await self.test_position_close_emergency_price_fallback()
+            await self.test_account_balance_update_after_close()
+            
+            print("=" * 80)
+            print("🚨 CRITICAL BUG FIX TESTS COMPLETED")
+            print("=" * 80)
+            
+        finally:
+            await self.cleanup()
+        
+        # Print summary
+        self.print_test_summary()
+
     async def run_priority_tests(self):
         """Run PRIORITY tests for VERBESSERTE SELF-CODING AI SYSTEM mit Retry-Logic"""
         await self.setup()
