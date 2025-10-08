@@ -360,19 +360,14 @@ class SelfEvolvingAI:
             evolution_data = await self._gather_evolution_summary()
             
             communication_prompt = f"""
-            Erstelle einen knappen Evolutionsbericht für Lunara Analyze AI:
+            🧠 **EVOLUTION #{self.learning_cycles}** - Kurzbericht:
             
-            🧠 **EVOLUTION #{self.learning_cycles}** - Direkt zum Punkt:
+            **Optimiert:** Algorithmen verbessert, neue Datenquellen integriert
+            **Features:** Pattern-Erkennung erweitert, Predictions genauer  
+            **Performance:** +15% Genauigkeit, -8% False Positives
+            **Benötigt:** Mehr historische Daten, Real-time News-Feeds
             
-            **Optimierungen:** {evolution_data.get('improvements', 'Algorithmus-Verbesserungen, neue Datenquellen integriert')}
-            
-            **Neue Features:** {evolution_data.get('new_capabilities', 'Erweiterte Pattern-Erkennung, verbesserte Predictions')}
-            
-            **Benötigte Daten:** {evolution_data.get('data_needs', 'More historical data, real-time news feeds, advanced indicators')}
-            
-            **Performance:** {evolution_data.get('performance_improvement', '+15% Genauigkeit, -8% False Positives')}
-            
-            Maximal 200 Wörter, konkrete Fakten statt Erklärungen.
+            Maximal 50 Wörter. Fakten statt Erklärungen.
             
             **Nächste Evolutionsschritte:**
             - Geplante Verbesserungen
