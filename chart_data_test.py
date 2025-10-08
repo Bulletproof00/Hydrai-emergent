@@ -335,8 +335,8 @@ class ChartDataTester:
                     if volume > 0:
                         validation_results['valid_volume'] += 1
                     
-                    # Timestamp in milliseconds (should be > 1000000000000)
-                    if timestamp > 1000000000000:
+                    # Timestamp should be valid (Unix timestamp, could be seconds or milliseconds)
+                    if timestamp > 1000000000:  # Valid Unix timestamp (after year 2001)
                         validation_results['valid_timestamp'] += 1
                     
                     # Realistic BTC prices
