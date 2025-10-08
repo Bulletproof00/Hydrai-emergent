@@ -83,8 +83,8 @@ class EnhancedRealTimeStreamer:
         """Poll crypto data from free APIs"""
         while self.is_running:
             try:
-                # Crypto data from Binance (primary) with fallback
-                await self._fetch_binance_data()
+                # Crypto data EXCLUSIVELY from Binance - NO fallbacks
+                await self._fetch_binance_data_only()
                 await asyncio.sleep(10)  # Poll every 10 seconds
             except Exception as e:
                 logger.error(f"Crypto polling error: {e}")
