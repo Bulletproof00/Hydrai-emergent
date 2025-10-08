@@ -42,9 +42,9 @@ class PaperTradingEngine:
         self.maker_fee = 0.0002  # 0.02%
         self.taker_fee = 0.0004  # 0.04%
         
-        # Slippage configuration
-        self.base_slippage = 0.001  # 0.1% base slippage
-        self.max_slippage = 0.005   # 0.5% max slippage
+        # Slippage configuration - Realistic for crypto
+        self.base_slippage = 0.0001  # 0.01% base slippage (much more realistic)
+        self.max_slippage = 0.0005   # 0.05% max slippage (realistic for BTC)
         
         # Leverage limits
         self.min_leverage = 1
