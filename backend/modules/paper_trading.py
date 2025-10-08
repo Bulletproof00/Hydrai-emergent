@@ -511,12 +511,12 @@ class PaperTradingEngine:
 
     def _calculate_slippage(self, order_value: float) -> float:
         """Calculate realistic slippage based on order size"""
-        # Larger orders have more slippage
-        size_factor = min(order_value / 100000, 1.0)  # Max at $100k orders
+        # Realistic slippage for crypto markets
+        size_factor = min(order_value / 1000000, 1.0)  # Max at $1M orders
         slippage = self.base_slippage + (size_factor * (self.max_slippage - self.base_slippage))
         
-        # Add random component
-        random_factor = random.uniform(0.5, 1.5)
+        # Minimal random component for more predictable execution
+        random_factor = random.uniform(0.8, 1.2)  # Much smaller range
         return slippage * random_factor
 
     def _calculate_liquidation_price(self, entry_price: float, leverage: float, side: str) -> float:
