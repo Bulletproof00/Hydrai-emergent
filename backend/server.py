@@ -1447,33 +1447,62 @@ async def get_market_overview():
 
 @api_router.get("/chart-data/{symbol}")
 async def get_chart_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit: int = 1000):
-    """Get OHLCV chart data with historical data up to 1000 bars"""
+    """Get OHLCV chart data with Binance integration and fallback"""
     try:
-        from modules.market_data import MarketDataFetcher
+        from .modules.binance_data import binance_provider
         
         # Convert symbol format (BTC-USDT to BTC/USDT)
         symbol = symbol.replace('-', '/')
-        
-        # Initialize data fetcher
-        fetcher = MarketDataFetcher(exchange, db)
         
         # Check if it's crypto or traditional market
         asset_type = 'crypto'
         if symbol in ['SPX', 'NASDAQ', 'DXY', 'GOLD', 'EURUSD', 'US2000', 'US10Y', 'DAX', 'NIKKEI']:
             asset_type = 'traditional'
         
-        # Try to get from database first
-        stored_data = await fetcher.get_stored_ohlcv(symbol, timeframe, limit)
+        stored_data = []
         
-        # If not enough data in DB, fetch fresh data
-        if len(stored_data) < limit * 0.9:  # If less than 90% of requested data
-            if asset_type == 'crypto':
-                fresh_data = await fetcher.fetch_and_store_crypto(symbol, timeframe, limit)
-            else:
-                fresh_data = await fetcher.fetch_and_store_traditional(symbol, timeframe, limit)
-            
-            # Get from DB again to ensure consistency
+        # For crypto, try Binance first
+        if asset_type == 'crypto':
+            try:
+                # Get OHLCV data directly from Binance
+                binance_ohlcv = await binance_provider.get_ohlcv_data(symbol, timeframe, limit, 'spot')
+                
+                if binance_ohlcv:
+                    # Convert Binance OHLCV format to our format
+                    for candle in binance_ohlcv:
+                        stored_data.append({
+                            'timestamp': candle[0],
+                            'open': candle[1],
+                            'high': candle[2], 
+                            'low': candle[3],
+                            'close': candle[4],
+                            'volume': candle[5]
+                        })
+                    
+                    logger.info(f"📊 Binance chart data: {symbol} {timeframe} - {len(stored_data)} candles")
+                else:
+                    raise Exception("No Binance data available")
+                    
+            except Exception as e:
+                logger.warning(f"⚠️ Binance chart data failed for {symbol}: {e}, using fallback")
+                # Fallback to old system
+                from modules.market_data import MarketDataFetcher
+                fetcher = MarketDataFetcher(exchange, db)
+                stored_data = await fetcher.get_stored_ohlcv(symbol, timeframe, limit)
+                
+                if len(stored_data) < limit * 0.9:
+                    fresh_data = await fetcher.fetch_and_store_crypto(symbol, timeframe, limit)
+                    stored_data = await fetcher.get_stored_ohlcv(symbol, timeframe, limit)
+        
+        else:
+            # Traditional markets still use old system
+            from modules.market_data import MarketDataFetcher
+            fetcher = MarketDataFetcher(exchange, db)
             stored_data = await fetcher.get_stored_ohlcv(symbol, timeframe, limit)
+            
+            if len(stored_data) < limit * 0.9:
+                fresh_data = await fetcher.fetch_and_store_traditional(symbol, timeframe, limit)
+                stored_data = await fetcher.get_stored_ohlcv(symbol, timeframe, limit)
         
         # Convert to chart-friendly format
         chart_data = []
