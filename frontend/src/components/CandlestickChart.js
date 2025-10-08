@@ -154,11 +154,13 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
       let displayOpen = candle.open;
       let displayClose = candle.close;
       
-      // If open equals close (synthetic data), create small artificial spread based on high-low range
+      // If open equals close (synthetic data), create artificial spread for visibility
       if (candle.open === candle.close) {
-        const spread = (candle.high - candle.low) * 0.05; // 5% of the high-low range
-        displayOpen = candle.close - spread / 2;
-        displayClose = candle.close + spread / 2;
+        const spread = (candle.high - candle.low) * 0.2; // 20% of the high-low range for better visibility
+        // Alternate between green and red candles for variety
+        const isEvenIndex = i % 2 === 0;
+        displayOpen = candle.close - (isEvenIndex ? spread / 3 : -spread / 3);
+        displayClose = candle.close + (isEvenIndex ? spread / 3 : -spread / 3);
       }
       
       const isGreen = displayClose >= displayOpen;
