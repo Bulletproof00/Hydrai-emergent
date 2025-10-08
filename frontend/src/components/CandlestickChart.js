@@ -561,7 +561,7 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
       {currentPrice && (
         <div className="chart-price-info">
           <span className="price-label">{symbol}</span>
-          <span className="price-value">${currentPrice.toLocaleString('de-DE', {minimumFractionDigits: 2})}</span>
+          <span className="price-value">${currentPrice.toFixed(2)}</span>
           <span className="bars-count">{data.length} Bars geladen</span>
         </div>
       )}
