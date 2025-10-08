@@ -936,6 +936,13 @@ function App() {
               </div>
             )}
 
+            {analysisTab === 'correlations' && (
+              <div className="correlations-content">
+                <h2 className="section-title">Asset Korrelationen</h2>
+                <CorrelationHeatmap globalTimeframe={globalTimeframe} />
+              </div>
+            )}
+
             {analysisTab === 'news' && (
               <div className="news-content">
                 <h2 className="section-title">Wirtschaftsdaten & News</h2>
