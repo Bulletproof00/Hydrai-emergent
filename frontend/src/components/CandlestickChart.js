@@ -144,31 +144,65 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
       ctx.fillText(price.toFixed(2), 45, y + 4);
     }
 
-    // Draw candlesticks
+    // Draw indicators first (behind candles)
+    drawIndicators(ctx, visibleData, chartHeight, maxPrice, minPrice, padding, candleWidth);
+
+    // Draw candlesticks with corrected OHLC visualization  
     visibleData.forEach((candle, i) => {
       const x = 60 + i * candleWidth;
+      const centerX = x + candleWidth / 2;
       const isGreen = candle.close >= candle.open;
       
-      // Calculate y positions
-      const highY = ((maxPrice + padding - candle.high) / (maxPrice + padding - (minPrice - padding))) * chartHeight;
-      const lowY = ((maxPrice + padding - candle.low) / (maxPrice + padding - (minPrice - padding))) * chartHeight;
-      const openY = ((maxPrice + padding - candle.open) / (maxPrice + padding - (minPrice - padding))) * chartHeight;
-      const closeY = ((maxPrice + padding - candle.close) / (maxPrice + padding - (minPrice - padding))) * chartHeight;
+      // CORRECTED Y-position calculation 
+      const priceRange = maxPrice + padding - (minPrice - padding);
+      const highY = ((maxPrice + padding - candle.high) / priceRange) * chartHeight;
+      const lowY = ((maxPrice + padding - candle.low) / priceRange) * chartHeight;
+      const openY = ((maxPrice + padding - candle.open) / priceRange) * chartHeight;
+      const closeY = ((maxPrice + padding - candle.close) / priceRange) * chartHeight;
       
-      // Draw wick
+      // Draw wick from high to low (CORRECT OHLC representation)
       ctx.strokeStyle = isGreen ? '#10b981' : '#ef4444';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(x + candleWidth / 2, highY);
-      ctx.lineTo(x + candleWidth / 2, lowY);
+      ctx.moveTo(centerX, highY);
+      ctx.lineTo(centerX, lowY);
       ctx.stroke();
       
-      // Draw body
+      // Draw body from open to close with correct proportions
       ctx.fillStyle = isGreen ? '#10b981' : '#ef4444';
-      const bodyHeight = Math.abs(closeY - openY);
-      const bodyY = Math.min(openY, closeY);
-      ctx.fillRect(x + candleSpacing, bodyY, candleWidth - candleSpacing * 2, Math.max(bodyHeight, 1));
+      const bodyTop = Math.min(openY, closeY);
+      const bodyBottom = Math.max(openY, closeY);
+      const bodyHeight = Math.max(bodyBottom - bodyTop, 1); // Minimum 1px height
+      const bodyWidth = candleWidth - candleSpacing * 2;
+      
+      // Hollow candle for very small moves
+      if (Math.abs(candle.close - candle.open) < (maxPrice - minPrice) * 0.001) {
+        ctx.strokeStyle = isGreen ? '#10b981' : '#ef4444';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + candleSpacing, bodyTop, bodyWidth, bodyHeight);
+      } else {
+        ctx.fillRect(x + candleSpacing, bodyTop, bodyWidth, bodyHeight);
+      }
+      
+      // Draw open/close markers for better visibility
+      if (candleWidth > 8) {
+        ctx.strokeStyle = isGreen ? '#10b981' : '#ef4444';
+        ctx.lineWidth = 2;
+        // Open marker (left)
+        ctx.beginPath();
+        ctx.moveTo(x, openY);
+        ctx.lineTo(centerX - 1, openY);
+        ctx.stroke();
+        // Close marker (right)
+        ctx.beginPath();
+        ctx.moveTo(centerX + 1, closeY);
+        ctx.lineTo(x + candleWidth, closeY);
+        ctx.stroke();
+      }
     });
+
+    // Draw price patterns and alerts
+    drawPatterns(ctx, visibleData, chartHeight, maxPrice, minPrice, padding, candleWidth);
 
     // Draw volume bars
     const volumeHeight = 120;
