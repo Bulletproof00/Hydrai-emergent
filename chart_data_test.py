@@ -321,7 +321,7 @@ class ChartDataTester:
                     low_price = float(candle['low'])
                     close_price = float(candle['close'])
                     volume = float(candle['volume'])
-                    timestamp = candle['timestamp']
+                    timestamp = candle['time']
                     
                     # High >= max(Open, Close)
                     if high_price >= max(open_price, close_price):
