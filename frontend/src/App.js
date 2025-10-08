@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import AdvancedChart from "./components/AdvancedChart";
 import SmartMoneyPanel from "./components/SmartMoneyPanel";
 import EnhancedSmartMoneyPanel from "./components/EnhancedSmartMoneyPanel";
+import CorrelationHeatmap from "./components/CorrelationHeatmap";
 import TradingInterface from "./components/TradingInterface";
 import SelfEvolvingAI from "./components/SelfEvolvingAI";
 
