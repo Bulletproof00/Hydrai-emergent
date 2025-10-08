@@ -34,7 +34,35 @@ const LiveLiquidationHeatmap = ({ symbol = 'BTC/USDT', timeframe = '1h' }) => {
                 clearInterval(intervalRef.current);
             }
         };
-    }, [symbol, timeframe, autoRefresh]);
+    }, [symbol, selectedTimeframe, autoRefresh]);
+
+    // Generate timeframe-specific liquidation clusters
+    const generateTimeframeClusters = (baseData, timeframeConfig) => {
+        if (!baseData || !Array.isArray(baseData)) return [];
+        
+        const clusters = [];
+        const { clusterSize, maxClusters } = timeframeConfig;
+        const priceRange = currentPrice * 0.2; // ±20% from current price
+        
+        // Generate realistic clusters based on timeframe
+        for (let i = 0; i < maxClusters; i++) {
+            const distanceFromPrice = (Math.random() - 0.5) * 2 * priceRange;
+            const price = currentPrice + distanceFromPrice;
+            const intensity = Math.random() * 0.8 + 0.2; // 0.2 to 1.0
+            const volume = clusterSize * (1 + Math.random() * 2); // Variable volume
+            
+            clusters.push({
+                price: price,
+                volume: volume,
+                intensity: intensity,
+                side: distanceFromPrice > 0 ? 'long' : 'short',
+                distance: Math.abs(distanceFromPrice),
+                timeframe: selectedTimeframe
+            });
+        }
+        
+        return clusters.sort((a, b) => b.price - a.price);
+    };
 
     const fetchLiquidationData = async () => {
         try {
