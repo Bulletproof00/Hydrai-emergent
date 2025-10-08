@@ -7,6 +7,7 @@ import asyncio
 import aiohttp
 import pandas as pd
 import numpy as np
+from scipy import stats
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Tuple, Any
 import logging
