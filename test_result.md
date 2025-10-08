@@ -483,14 +483,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Paper Trading Account Status - GET /api/trading/account - ✅ ERFOLGREICH ABGESCHLOSSEN"
-    - "Paper Trading Order Placement - POST /api/trading/order (BTC/USDT Long) - ✅ ERFOLGREICH ABGESCHLOSSEN"
-    - "Paper Trading Open Positions - GET /api/trading/positions - ✅ ERFOLGREICH ABGESCHLOSSEN"
-    - "Paper Trading Account Reset - POST /api/trading/account/reset - ✅ ERFOLGREICH ABGESCHLOSSEN"
-    - "Paper Trading History - GET /api/trading/history - ✅ ERFOLGREICH ABGESCHLOSSEN"
-    - "Paper Trading Position Close - POST /api/trading/position/close - ✅ ERFOLGREICH ABGESCHLOSSEN"
-    - "Paper Trading Portfolio Check - GET /api/trading/portfolio - ✅ ERFOLGREICH ABGESCHLOSSEN"
-    - "Real-time Price Integration - GET /api/realtime/latest - ✅ ERFOLGREICH ABGESCHLOSSEN"
+    - "PHASE 1 - Binance Integration & Authentication - ✅ ERFOLGREICH ABGESCHLOSSEN"
+    - "Frontend Trading Interface JavaScript Runtime Error - ✅ BEHOBEN (connectWebSocket error)"
+    - "Frontend Authentication 401 Errors - ✅ BEHOBEN (demo-token working)"
+    - "Binance Price Display Integration - ✅ BEHOBEN ($122,979 target price displayed)"
+    - "PHASE 2 - Heatmap Correlation Enhancement - 🔄 IN PROGRESS"
+    - "PHASE 3 - Economic Data & News/Sentiment UI - ⏳ PENDING"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
