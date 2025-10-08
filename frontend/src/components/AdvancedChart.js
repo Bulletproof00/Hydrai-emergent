@@ -151,7 +151,7 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange, globalTimeframe, s
         
         <div className="price-info">
           <span className="current-price">
-            ${getCurrentPrice(selectedSymbol).toLocaleString(undefined, { 
+            ${(getCurrentPrice(selectedSymbol) || 0).toLocaleString(undefined, { 
               minimumFractionDigits: 2, 
               maximumFractionDigits: 2 
             })}
