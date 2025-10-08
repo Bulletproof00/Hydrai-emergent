@@ -435,6 +435,54 @@ backend:
           agent: "testing"
           comment: "✅ PLUGIN CREATION & TESTING PIPELINE ERFOLGREICH! Syntaktisch korrekter Code führt zu erfolgreichem Plugin. DynamicPlugin.execute() wird für automatische Plugin-Tests verwendet. Pipeline: Code Generation → Safety Check → Plugin Creation → Testing → Backtesting funktioniert. Trading-Plugins erhalten automatische Backtests."
 
+  - task: "Korrelations-System - GET /api/correlations"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ KORRELATIONS-ENDPOINT ERFOLGREICH GETESTET (2025-01-27): Korrelations-API funktioniert perfekt mit vollständiger Datenstruktur. ✅ 3 Korrelationspaare gefunden: BTC_vs_ETH (70.6%), BTC_vs_SPX (36.7%), BTC_vs_NASDAQ (31.8%) ✅ Prozentwerte-Berechnung funktioniert korrekt (z.B. BTC_vs_SPX: 0.367 → 36.7%) ✅ Multiple Asset-Korrelationen zwischen verschiedenen Assets ✅ Korrelationsdaten zwischen -1 und 1 gültig ✅ JSON Response korrekt strukturiert. Das Korrelations-System liefert Korrelationsdaten zwischen verschiedenen Assets als Prozentwerte wie angefordert."
+
+  - task: "Macro Market Data - GET /api/macro-data"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ MACRO MARKET DATA ERFOLGREICH GETESTET (2025-01-27): Makro-Marktdaten API funktioniert perfekt für Korrelationsanalyse. ✅ 6 Makro-Indikatoren gefunden: SPX ($6,714.59, -0.47%), NASDAQ ($22,788.36, -0.80%), DXY ($98.83, +0.23%), Gold, Bitcoin, Ethereum ✅ Vollständige Datenstruktur mit Preisen und 24h-Änderungen ✅ Traditionelle Märkte (SPX, NASDAQ, DXY, Gold) und Krypto-Märkte (Bitcoin, Ethereum) ✅ JSON Response mit korrekten Preis- und Änderungsdaten. Das Macro Market Data System liefert Makro-Marktdaten für Korrelationsanalyse mit Preisen und 24h-Änderungen."
+
+  - task: "Market Overview - GET /api/market-overview"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ MARKET OVERVIEW ERFOLGREICH GETESTET (2025-01-27): Gesamtmarkt-Übersicht mit Korrelationsdaten funktioniert perfekt. ✅ BTC: $122,980.40 (+1.32%) korrekt angezeigt ✅ 3 Korrelationen enthalten ✅ BTC-SPX Korrelation: 0.367 → 36.7% (Prozentwerte-Berechnung) ✅ Market Sentiment: bullish (basierend auf BTC +1.32%) ✅ BTC Dominanz: 74.8% ✅ Vollständige Sektionen: bitcoin, macro_data, correlations, summary ✅ JSON Response vollständig strukturiert. Das Market Overview System bietet Gesamtmarkt-Übersicht mit Korrelationsdaten als Prozentwerte."
+
+  - task: "Korrelations-Prozentwerte-Berechnung"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ KORRELATIONS-PROZENTWERTE-BERECHNUNG ERFOLGREICH GETESTET (2025-01-27): Prozentwerte-Berechnung funktioniert perfekt wie angefordert. ✅ 3 gültige Korrelationen konvertiert: BTC_vs_ETH (0.706 → 70.6%), BTC_vs_SPX (0.367 → 36.7%), BTC_vs_NASDAQ (0.318 → 31.8%) ✅ Korrelationswerte zwischen -1 und 1 gültig ✅ Prozentwerte-Formel: correlation * 100 ✅ Beispiel aus Anfrage bestätigt: BTC_vs_SPX: 0.367 → 36.7% (ähnlich zu 0.45 → 45% Beispiel) ✅ Multiple Asset-Korrelationen als Prozentwerte angezeigt. Die Korrelations-Prozentwerte-Berechnung zeigt Korrelationen als Prozentwerte an (z.B. BTC_vs_SPX: 0.45 → 45%)."
+
 frontend:
   - task: "Display Smart Money Indicators in frontend UI"
     implemented: true
