@@ -3008,6 +3008,71 @@ async def background_news_fetching():
             logger.error(f"Background news fetching error: {e}")
             await asyncio.sleep(1800)  # Wait 30 minutes before retry
 
+async def generate_minimal_chart_data(symbol: str, timeframe: str, limit: int) -> List[Dict]:
+    """Generate minimal chart data for testing when all APIs fail"""
+    logger.info(f"🔄 Generating minimal chart data for {symbol} {timeframe}")
+    
+    import time
+    from datetime import timedelta
+    
+    # Base prices for different symbols
+    base_prices = {
+        'BTC/USDT': 122000.0,
+        'ETH/USDT': 4200.0,
+        'BNB/USDT': 650.0,
+        'ADA/USDT': 1.2,
+        'SOL/USDT': 250.0
+    }
+    
+    base_price = base_prices.get(symbol, 1000.0)
+    
+    # Calculate interval in minutes
+    intervals = {
+        '1m': 1, '5m': 5, '15m': 15, '1h': 60, 
+        '4h': 240, '1d': 1440, '1w': 10080, '1M': 43200
+    }
+    interval_minutes = intervals.get(timeframe, 60)
+    
+    # Generate recent data
+    now = datetime.now(timezone.utc)
+    data = []
+    
+    for i in range(limit):
+        # Go backwards in time
+        timestamp = now - timedelta(minutes=interval_minutes * (limit - i))
+        
+        # Generate realistic price movement
+        volatility = 0.02  # 2% volatility
+        price_change = np.random.normal(0, volatility) * base_price
+        
+        open_price = base_price + price_change
+        close_price = open_price + np.random.normal(0, volatility * 0.5) * base_price
+        
+        high_price = max(open_price, close_price) + abs(np.random.normal(0, volatility * 0.3) * base_price)
+        low_price = min(open_price, close_price) - abs(np.random.normal(0, volatility * 0.3) * base_price)
+        
+        # Ensure positive prices and logical OHLC
+        high_price = max(high_price, open_price, close_price, low_price)
+        low_price = min(low_price, open_price, close_price, high_price)
+        
+        volume = np.random.uniform(500000, 2000000)  # Random volume
+        
+        candle_data = {
+            'timestamp': int(timestamp.timestamp() * 1000),
+            'open': max(0.01, open_price),
+            'high': max(0.01, high_price),
+            'low': max(0.01, low_price),
+            'close': max(0.01, close_price),
+            'volume': volume,
+            'source': 'minimal_fallback'
+        }
+        
+        data.append(candle_data)
+        base_price = close_price  # Use close as next base
+    
+    logger.info(f"✅ Generated {len(data)} minimal chart candles for {symbol}")
+    return data
+
 async def update_market_data_background():
     """Background task to update market data every 5 minutes"""
     while True:
