@@ -42,16 +42,22 @@ export const useRealTimeData = (selectedSymbol) => {
     };
 
     const connectWebSocket = () => {
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+            return;
+        }
+
         try {
-            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://ai-trade-hub-4.preview.emergentagent.com';
-            const wsUrl = backendUrl.replace('https://', 'wss://').replace('http://', 'ws://') + '/api/realtime';
+            // Direct Binance WebSocket connection (bypassing slow backend)
+            const binanceSymbol = selectedSymbol.replace('/', '').toLowerCase(); // BTC/USDT -> btcusdt
+            const wsUrl = `wss://stream.binance.com:9443/ws/${binanceSymbol}@ticker`;
             
-            console.log('Connecting to WebSocket:', wsUrl);
-            
+            console.log('🔄 Connecting to Binance WebSocket:', binanceSymbol);
+            setConnectionStatus('connecting');
+
             wsRef.current = new WebSocket(wsUrl);
-            
+
             wsRef.current.onopen = () => {
-                console.log('✅ Real-time WebSocket connected');
+                console.log('✅ Binance WebSocket connected successfully for', selectedSymbol);
                 setConnectionStatus('connected');
                 setIsConnectionReady(true);
                 reconnectAttempts.current = 0;
