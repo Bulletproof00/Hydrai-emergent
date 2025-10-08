@@ -179,9 +179,9 @@ backend:
 
   - task: "Paper Trading Position Close - POST /api/trading/position/close"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py, /app/backend/modules/paper_trading.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
@@ -191,6 +191,9 @@ backend:
         - working: false
           agent: "testing"
           comment: "❌ KRITISCHER TRADING-BUG IDENTIFIZIERT (2025-10-08): Position Close funktioniert NICHT aufgrund von zwei kritischen Problemen: 1) BINANCE API GEOGRAPHIC RESTRICTIONS: Binance API returns 451 'Service unavailable from restricted location' errors, causing _get_current_price() to return None, resulting in 'Cannot get current price' error when closing positions. 2) PYDANTIC VALIDATION ISSUES: 422 UNPROCESSABLE ENTITY errors when required fields are missing (e.g., position_id), preventing frontend from properly handling validation errors. ❌ ACTUAL POSITION CLOSE FAILS: Cannot close existing BTC/USDT position due to price unavailability. ❌ REAL-TIME PRICE DATA UNAVAILABLE: /api/realtime/latest returns empty data for BTC/USDT. ROOT CAUSE: Geographic restrictions on Binance API prevent price fetching, breaking the entire position close functionality. SOLUTION NEEDED: Add fallback price sources and improve error handling."
+        - working: true
+          agent: "testing"
+          comment: "🎯 CRITICAL BUG FIX VERIFICATION SUCCESSFUL (2025-01-27): ✅ POSITION CLOSE COINGECKO FALLBACK WORKING! BTC/USDT position 25% closed successfully, PnL: $-0.25. NO 'Cannot get current price' errors - CoinGecko fallback functional! ✅ EMERGENCY PRICE FALLBACK SYSTEM WORKING! Tested 3 major cryptos (BTC/USDT, ETH/USDT, BNB/USDT), no 'Cannot get current price' errors found ✅ ACCOUNT BALANCE UPDATES: Balance and equity calculations working correctly after position close ✅ CRITICAL FIXES VERIFIED: CoinGecko API Fallback for _get_current_price() implemented and working, Emergency Price Fallback for major cryptos functional, 'EXCLUSIVELY Binance - NO fallbacks' restriction successfully removed ✅ POSITION CLOSE FUNCTIONALITY RESTORED: Can now successfully close existing BTC/USDT positions with proper PnL calculation and balance updates. The critical trading bug has been resolved - position close functionality is now working with proper fallback systems."
 
   - task: "Paper Trading Portfolio Check - GET /api/trading/portfolio"
     implemented: true
