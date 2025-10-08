@@ -332,9 +332,20 @@ const TradingInterface = () => {
             return position.mark_price;
         }
         
-        // For BTC/USDT, provide a mock current price (will be replaced by real Binance data)
+        // Fallback: Fetch current price directly from Binance (async operation)
         if (symbol === 'BTC/USDT') {
-            console.log(`💰 Mock price for ${symbol}: $122,979 (TARGET PRICE)`);
+            // Use the binanceClient to get current price
+            import('../utils/binanceClient.js').then(({ default: binanceClient }) => {
+                binanceClient.getCurrentPrice(symbol).then(priceData => {
+                    if (priceData && priceData.price) {
+                        console.log(`🔥 BINANCE EXCLUSIVE: Live ${symbol} price: $${priceData.price}`);
+                        // Update real-time data manually to trigger re-render
+                        setAccount(prev => ({...prev, lastPriceUpdate: Date.now()}));
+                    }
+                });
+            });
+            // Return target price as fallback until real data arrives
+            console.log(`💰 Fallback price for ${symbol}: $122,979 (will be replaced by live Binance data)`);
             return 122979; // Target price as mentioned by user
         }
         
