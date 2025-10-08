@@ -2751,7 +2751,7 @@ async def get_economic_calendar():
 async def get_unified_price(symbol: str = "BTC/USDT"):
     """Get unified current price from Binance for all app components"""
     try:
-        from .modules.binance_data import binance_provider
+        from modules.binance_data import binance_provider
         
         # Get comprehensive price data from Binance
         stats_24h = await binance_provider.get_24h_stats(symbol, 'spot')
