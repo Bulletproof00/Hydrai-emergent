@@ -450,17 +450,29 @@ plugin_manager = PluginManager()
 
 # ============= DATA SOURCES =============
 async def get_market_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit: int = 100):
-    """Fetch OHLCV data from Binance"""
+    """Fetch OHLCV data from Binance using new provider"""
     try:
-        if exchange is None:
-            raise HTTPException(status_code=500, detail="Exchange not initialized")
+        from .modules.binance_data import binance_provider
         
-        ohlcv = await exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+        # Use Binance provider for OHLCV data
+        ohlcv = await binance_provider.get_ohlcv_data(symbol, timeframe, limit, 'spot')
         
-        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-        
-        return df
+        if ohlcv:
+            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            logger.info(f"📊 Binance OHLCV: {symbol} {timeframe} - {len(df)} candles")
+            return df
+        else:
+            # Fallback to old exchange if Binance fails
+            if exchange is None:
+                raise HTTPException(status_code=500, detail="No exchange available")
+            
+            ohlcv = await exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            logger.warning(f"⚠️ Fallback to Kraken for {symbol}")
+            return df
+            
     except Exception as e:
         logging.error(f"Error fetching market data: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
