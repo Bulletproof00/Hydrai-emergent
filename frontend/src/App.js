@@ -794,6 +794,13 @@ function App() {
                 <span>Heatmaps</span>
               </button>
               <button 
+                className={`analysis-tab ${analysisTab === 'correlations' ? 'active' : ''}`}
+                onClick={() => setAnalysisTab('correlations')}
+              >
+                <BarChart3 size={18} />
+                <span>Korrelationen</span>
+              </button>
+              <button 
                 className={`analysis-tab ${analysisTab === 'news' ? 'active' : ''}`}
                 onClick={() => setAnalysisTab('news')}
               >
