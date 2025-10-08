@@ -276,17 +276,26 @@ class BinanceClient {
         this.websockets.set(streamName, { type: 'polling', interval: pollInterval });
     }
 
-    // Unsubscribe from WebSocket
+    // Unsubscribe from WebSocket or polling
     unsubscribe(symbol) {
         const binanceSymbol = this.formatSymbol(symbol).toLowerCase();
         const streamName = `${binanceSymbol}@ticker`;
         
-        const ws = this.websockets.get(streamName);
-        if (ws) {
-            ws.close();
+        const connection = this.websockets.get(streamName);
+        if (connection) {
+            // Handle real WebSocket connection
+            if (connection && typeof connection.close === 'function') {
+                connection.close();
+                console.log(`🛑 WebSocket unsubscribed from ${symbol}`);
+            }
+            // Handle polling fallback
+            else if (connection && connection.type === 'polling' && connection.interval) {
+                clearInterval(connection.interval);
+                console.log(`🛑 Polling unsubscribed from ${symbol}`);
+            }
+            
             this.websockets.delete(streamName);
             this.subscribers.delete(streamName);
-            console.log(`🛑 Unsubscribed from ${symbol}`);
         }
     }
 
