@@ -183,10 +183,26 @@ const LiveLiquidationHeatmap = ({ symbol = 'BTC/USDT', timeframe = '1h' }) => {
                 </div>
             )}
 
+            {/* Timeframe Selector */}
+            <div className="timeframe-selector">
+                <h3>📊 Liquidations-Cluster - {symbol}</h3>
+                <div className="timeframe-buttons">
+                    {timeframes.map(tf => (
+                        <button
+                            key={tf.value}
+                            className={`timeframe-btn ${selectedTimeframe === tf.value ? 'active' : ''}`}
+                            onClick={() => setSelectedTimeframe(tf.value)}
+                        >
+                            {tf.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {/* Live Price Ticker */}
             <div className="live-price-ticker">
                 <div className="ticker-header">
-                    <h3>{liquidationData.display_name} Live-Ticker</h3>
+                    <h4>{liquidationData?.display_name || symbol} Live-Ticker ({selectedTimeframe})</h4>
                     <div className="ticker-controls">
                         <button 
                             onClick={() => setAutoRefresh(!autoRefresh)}
