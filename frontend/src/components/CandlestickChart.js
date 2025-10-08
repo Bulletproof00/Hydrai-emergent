@@ -245,13 +245,13 @@ const CandlestickChart = ({ symbol, timeframe, height = 600 }) => {
 
     const priceRange = maxPrice + padding - (minPrice - padding);
     
-    // Calculate and draw SMA20
+    // Calculate and draw SMA20 (thinner, more transparent)
     const sma20 = calculateSMA(data, 20);
-    drawLine(ctx, sma20, data, chartHeight, maxPrice, minPrice, padding, candleWidth, '#3b82f6', 2);
+    drawLine(ctx, sma20, data, chartHeight, maxPrice, minPrice, padding, candleWidth, 'rgba(59, 130, 246, 0.7)', 1);
     
-    // Calculate and draw EMA50
+    // Calculate and draw EMA50 (thinner, more transparent)
     const ema50 = calculateEMA(data, 50);
-    drawLine(ctx, ema50, data, chartHeight, maxPrice, minPrice, padding, candleWidth, '#f59e0b', 2);
+    drawLine(ctx, ema50, data, chartHeight, maxPrice, minPrice, padding, candleWidth, 'rgba(245, 158, 11, 0.7)', 1);
     
     // Calculate and draw Bollinger Bands
     const bb = calculateBollingerBands(data, 20, 2);
