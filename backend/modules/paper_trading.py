@@ -530,44 +530,31 @@ class PaperTradingEngine:
             return entry_price * (1 + (1/leverage) - maintenance_margin_ratio)
 
     async def _get_current_price(self, symbol: str) -> Optional[float]:
-        """Get current LIVE price for symbol from real-time system"""
+        """Get current LIVE price EXCLUSIVELY from Binance - NO fallbacks"""
         try:
-            # Import here to avoid circular imports
-            import aiohttp
+            # Import Binance provider directly
+            from .binance_data import binance_provider
             
-            # Get live price from real-time API
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f'http://localhost:8001/api/realtime/latest?symbols={symbol}') as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        if data.get('status') == 'success' and symbol in data.get('data', {}):
-                            return data['data'][symbol]['price']
+            # Get LIVE price directly from Binance 24h stats
+            stats_24h = await binance_provider.get_24h_stats(symbol, 'spot')
             
-            # Fallback to enhanced smart money system for base prices
-            from .enhanced_smart_money import EnhancedSmartMoneyIndicators
-            if hasattr(self, '_enhanced_smart_money') and self._enhanced_smart_money:
-                supported_symbols = self._enhanced_smart_money.supported_symbols
-                if symbol in supported_symbols:
-                    base_price = supported_symbols[symbol]['base_price']
-                    # Add small realistic variation for live feel
-                    return base_price * random.uniform(0.999, 1.001)
+            if stats_24h and stats_24h['price'] > 0:
+                logger.debug(f"💰 Binance live price for trading: {symbol} = ${stats_24h['price']:,.2f}")
+                return stats_24h['price']
             
-            # Final fallback for any symbol
-            return 50000 * random.uniform(0.999, 1.001)
+            # If Spot fails, try Futures
+            futures_stats = await binance_provider.get_24h_stats(symbol, 'futures')
+            if futures_stats and futures_stats['price'] > 0:
+                logger.debug(f"💰 Binance futures price for trading: {symbol} = ${futures_stats['price']:,.2f}")
+                return futures_stats['price']
+            
+            # If both fail, this is a critical error
+            logger.error(f"❌ CRITICAL: No Binance price available for {symbol} - Trading cannot proceed!")
+            return None
             
         except Exception as e:
-            logger.error(f"Error getting current price for {symbol}: {e}")
-            # Fallback prices for all Top 30
-            fallback_prices = {
-                'BTC/USDT': 62000, 'ETH/USDT': 2400, 'BNB/USDT': 580, 'SOL/USDT': 140, 'XRP/USDT': 0.52,
-                'DOGE/USDT': 0.08, 'ADA/USDT': 0.35, 'MATIC/USDT': 0.42, 'AVAX/USDT': 28.5, 'LINK/USDT': 11.2,
-                'DOT/USDT': 4.8, 'UNI/USDT': 6.7, 'LTC/USDT': 68.5, 'ATOM/USDT': 4.2, 'FIL/USDT': 3.8,
-                'ICP/USDT': 8.9, 'NEAR/USDT': 3.6, 'ALGO/USDT': 0.14, 'VET/USDT': 0.025, 'MANA/USDT': 0.32,
-                'SAND/USDT': 0.28, 'APE/USDT': 1.12, 'THETA/USDT': 1.48, 'AAVE/USDT': 95.2, 'AXS/USDT': 4.85,
-                'FTM/USDT': 0.42, 'GRT/USDT': 0.095, 'ENJ/USDT': 0.18, 'CRV/USDT': 0.28, 'SUSHI/USDT': 0.72
-            }
-            base_price = fallback_prices.get(symbol, 100)
-            return base_price * random.uniform(0.999, 1.001)
+            logger.error(f"❌ CRITICAL Binance price error for {symbol}: {e}")
+            return None  # NO fallback prices - force Binance only
 
     async def _update_unrealized_pnl(self, account: Dict):
         """Update unrealized PnL for all open positions"""
