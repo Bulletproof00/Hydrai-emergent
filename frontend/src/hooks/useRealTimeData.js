@@ -7,6 +7,10 @@ export const useRealTimeData = (selectedSymbol = 'BTC/USDT') => {
     const [isConnectionReady, setIsConnectionReady] = useState(false);
     
     const currentSymbolRef = useRef(selectedSymbol);
+    const wsRef = useRef(null);
+    const reconnectAttempts = useRef(0);
+    const maxReconnectAttempts = 5;
+    const reconnectTimeoutRef = useRef(null);
 
     // Helper function to safely send WebSocket messages
     const safeSendMessage = (message, description = 'message') => {
