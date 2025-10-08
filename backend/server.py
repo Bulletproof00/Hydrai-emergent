@@ -2737,6 +2737,41 @@ async def get_economic_calendar():
         logger.error(f"Economic calendar endpoint error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/unified-price/{symbol}")
+async def get_unified_price(symbol: str = "BTC/USDT"):
+    """Get unified current price from Binance for all app components"""
+    try:
+        from .modules.binance_data import binance_provider
+        
+        # Get comprehensive price data from Binance
+        stats_24h = await binance_provider.get_24h_stats(symbol, 'spot')
+        
+        if stats_24h:
+            return {
+                'status': 'success',
+                'symbol': symbol,
+                'price': stats_24h['price'],
+                'change_24h': stats_24h['change_24h'],
+                'volume_24h': stats_24h['volume_24h'],
+                'high_24h': stats_24h['high_24h'],
+                'low_24h': stats_24h['low_24h'],
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'source': 'binance_spot',
+                'market_type': 'spot'
+            }
+        else:
+            # Fallback to old system
+            fallback_price = await get_live_price(symbol)
+            return {
+                'status': 'success',
+                'source': 'fallback',
+                **fallback_price
+            }
+            
+    except Exception as e:
+        logger.error(f"Unified price error for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Include the router in the main app after all endpoints are defined
 app.include_router(api_router)
 
