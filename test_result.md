@@ -581,7 +581,9 @@ test_plan:
     - "PHASE 2.1 - Korrelations-Heatmap Frontend Integration - ✅ ERFOLGREICH ABGESCHLOSSEN (Perfect success)"
     - "PHASE 3 - Economic Data & News/Sentiment UI - ✅ ERFOLGREICH ABGESCHLOSSEN (Comprehensive success)"
     - "🚨 KRITISCHER TRADING-BUG: Position Close Funktionalität - ✅ BEHOBEN (CoinGecko Fallback + Emergency Price System)"
-  stuck_tasks: []
+    - "🎯 NEUE PHASE 4 - KI-DATENMODUL UMFASSENDE MARKTANALYSE - ❌ KRITISCHE MÄNGEL IDENTIFIZIERT"
+  stuck_tasks:
+    - "KI-DATENMODUL - Umfassendes System für historische und Echtzeit-Marktanalyse"
   test_all: false
   test_priority: "high_first"
 
