@@ -145,7 +145,7 @@ export const useRealTimeData = (selectedSymbol = 'BTC/USDT') => {
         realTimeData,
         connectionStatus,
         isConnectionReady,
-        priceData: realTimeData[selectedSymbol] || priceData,
+        priceData: realTimeData[selectedSymbol] || {},
         
         // Original functions (keeping existing behavior)
         getCurrentPrice: getCurrentPriceCompat,
