@@ -482,19 +482,18 @@ async def get_live_price(symbol: str = "BTC/USDT"):
     try:
         from .modules.binance_data import binance_provider
         
-        # Use Binance provider for live price
-        price = await binance_provider.get_current_price(symbol, 'spot')
+        # Use Binance provider for live price and 24h stats
+        stats_24h = await binance_provider.get_24h_stats(symbol, 'spot')
         
-        if price:
-            logging.debug(f"💰 Binance live price {symbol}: ${price:,.2f}")
-            # Return in the same format as before for compatibility
+        if stats_24h:
+            logging.debug(f"💰 Binance live price {symbol}: ${stats_24h['price']:,.2f}")
             return {
                 'symbol': symbol,
-                'price': price,
-                'change_24h': 0,  # Would need additional API call for 24h change
-                'volume_24h': 0,  # Would need additional API call for volume
-                'high_24h': 0,    # Would need additional API call for high
-                'low_24h': 0,     # Would need additional API call for low
+                'price': stats_24h['price'],
+                'change_24h': stats_24h['change_24h'],
+                'volume_24h': stats_24h['volume_24h'],
+                'high_24h': stats_24h['high_24h'],
+                'low_24h': stats_24h['low_24h'],
                 'timestamp': datetime.now(timezone.utc).isoformat()
             }
         else:
