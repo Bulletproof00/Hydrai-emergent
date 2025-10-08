@@ -159,9 +159,12 @@ const AdvancedChart = ({ symbol = "BTC/USDT", onSymbolChange, globalTimeframe, s
           
           {(() => {
             const priceChange = getPriceChange(selectedSymbol);
+            const changePercent = priceChange?.changePercent || 0;
+            const isPositive = priceChange?.isPositive ?? (changePercent >= 0);
+            
             return (
-              <span className={`price-change ${priceChange.isPositive ? 'positive' : 'negative'}`}>
-                {priceChange.isPositive ? '+' : ''}{priceChange.changePercent.toFixed(2)}%
+              <span className={`price-change ${isPositive ? 'positive' : 'negative'}`}>
+                {isPositive ? '+' : ''}{changePercent.toFixed(2)}%
                 {isLive(selectedSymbol) && <span className="live-indicator">●</span>}
               </span>
             );
