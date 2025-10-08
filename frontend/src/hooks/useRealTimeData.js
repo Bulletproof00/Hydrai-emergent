@@ -215,14 +215,47 @@ export const useRealTimeData = (selectedSymbol) => {
         return (now - lastUpdate) < 60000; // Live if updated within last minute
     };
 
+    // Helper functions for backward compatibility
+    const getCurrentPriceCompat = (symbol = selectedSymbol) => realTimeData[symbol]?.price || 0;
+    const getPriceChangeCompat = (symbol = selectedSymbol) => realTimeData[symbol]?.change_percent || 0;
+    const getVolumeCompat = (symbol = selectedSymbol) => realTimeData[symbol]?.volume || 0;
+    const isConnected = () => connectionStatus === 'connected';
+    
+    const formatPrice = (decimals = 2, symbol = selectedSymbol) => {
+        const price = getCurrentPriceCompat(symbol);
+        return price.toLocaleString('de-DE', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        });
+    };
+    
+    const formatChange = (symbol = selectedSymbol) => {
+        const change = getPriceChangeCompat(symbol);
+        return `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+    };
+
     return {
         realTimeData,
         connectionStatus,
         isConnectionReady,
+        priceData: realTimeData[selectedSymbol] || priceData,
+        
+        // Existing functions
         getCurrentPrice,
         getPriceChange,
         getLastUpdate,
         isLive,
-        reconnect: connectWebSocket
+        reconnect: connectWebSocket,
+        
+        // New utility functions
+        getCurrentPrice: getCurrentPriceCompat,
+        getPriceChange: getPriceChangeCompat,
+        getVolume: getVolumeCompat,
+        isConnected,
+        formatPrice,
+        formatChange,
+        
+        // Backward compatibility
+        isLive: connectionStatus === 'connected'
     };
 };
