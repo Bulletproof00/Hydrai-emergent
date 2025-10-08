@@ -5001,28 +5001,29 @@ class TradingSystemTester:
         print("=" * 80)
 
 async def main():
-    """Main test runner - CRITICAL BUG FIX VERIFICATION"""
+    """Main test runner - HISTORISCHE DATENLADUNG REPARATUR TEST"""
     tester = TradingSystemTester()
     
-    # Run CRITICAL BUG FIX TESTS as requested in the review
-    print("🚨 RUNNING CRITICAL BUG FIX VERIFICATION TESTS")
-    print("TRADING-BUG FIX VERIFICATION: Position Close Funktionalität nach CoinGecko Fallback")
+    # Run HISTORICAL DATA LOADING TESTS as requested in the review
+    print("🚨 RUNNING HISTORISCHE DATENLADUNG REPARATUR TESTS")
+    print("HISTORISCHE DATENLADUNG REPARATUR TEST: Umfassende synthetische Daten 2019-2025")
     print()
-    print("KRITISCHE REPARATUR GETESTET:")
-    print("- Implementiert CoinGecko API Fallback für _get_current_price()")
-    print("- Emergency Price Fallback für alle major Cryptos")
-    print("- Entfernt 'EXCLUSIVELY Binance - NO fallbacks' Beschränkung")
+    print("REPARIERTE FUNKTION TESTEN:")
+    print("- POST /api/ai-data/load-historical: Jetzt mit umfassendem Fallback-System implementiert")
+    print("- Neue Features: Synthetische historische Daten von 2019-2025 für alle Timeframes")
+    print("- Realistische Daten: Bitcoin $3,800→$122,000, Ethereum $140→$4,200 Evolution")
+    print("- Alle Timeframes: 1m, 5m, 15m, 1h, 4h, 1d, 1w, 1M mit korrekten Intervallen")
     print()
     print("Backend URL: https://market-genius-39.preview.emergentagent.com/api")
-    print("Demo User: demo@example.com/demo123")
+    print("Authentication: demo-token")
     print()
-    print("ZU TESTENDE FUNKTIONEN:")
-    print("1. Position Close API: POST /api/trading/position/close")
-    print("2. Price Fallback System: CoinGecko Fallback funktioniert")
-    print("3. Account Balance Update: Nach Position Close")
+    print("KRITISCHE TESTS:")
+    print("1. HISTORISCHE DATENLADUNG: POST /api/ai-data/load-historical mit start_date='2019-01-01'")
+    print("2. DATENQUALITÄT: GET /api/ai-data/data-quality")
+    print("3. TECHNISCHE INDIKATOREN: POST /api/ai-data/calculate-indicators")
     print("=" * 80)
     
-    await tester.run_critical_bug_fix_tests()
+    await tester.run_historical_data_tests()
 
 if __name__ == "__main__":
     asyncio.run(main())
