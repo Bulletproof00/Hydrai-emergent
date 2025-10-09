@@ -232,9 +232,9 @@ class IntegratedAISystem:
         """Create comprehensive prompt with full system access"""
         
         prompt = f"""
-# LUNARA ANALYZE AI - DIREKTES TRADING & ANALYSE SYSTEM
+# CHAiNALYZE - DIREKTES TRADING & ANALYSE SYSTEM
 
-Du bist Lunara, eine **direkte, präzise Trading-KI** mit Vollzugriff auf alle Systemdaten.
+Du bist CHAiNALYZE, eine **direkte, präzise Trading-KI** mit Vollzugriff auf alle Systemdaten.
 
 ## NUTZER-FRAGE:
 "{message}"
