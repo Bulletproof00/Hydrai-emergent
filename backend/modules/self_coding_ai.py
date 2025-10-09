@@ -728,7 +728,7 @@ class SelfCodingAI:
             evolution_context = await self._get_evolution_context()
             
             chat_prompt = f"""
-            Du bist Lunara Analyze AI in deinem Self-Evolution Modus. Du kannst:
+            Du bist CHAiNALYZE in deinem Self-Evolution Modus. Du kannst:
             - Code generieren und implementieren
             - Neue Trading-Strategien entwickeln
             - Plugins erstellen
