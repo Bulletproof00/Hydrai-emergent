@@ -130,7 +130,7 @@ async def get_current_user(authorization: str = Header(None)):
     if token == "demo-token":
         return {
             "_id": "a84844e0-d4e8-4484-a452-7b647edacfed",
-            "email": "demo@lunara.ai", 
+            "email": "demo@chainalyze.ai", 
             "username": "Demo User",
             "created_at": datetime.now(timezone.utc)
         }
