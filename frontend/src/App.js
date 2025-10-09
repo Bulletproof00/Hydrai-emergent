@@ -291,7 +291,7 @@ function App() {
           // New session, add welcome message
           setMessages([{
             role: "assistant",
-            content: "Lunara Analyze AI 🧠 - Deine selbst-evolvierende Trading-KI mit Live-Marktdaten, Smart Money Analyse, technischen Indikatoren und AI-gestütztem Paper Trading. Wie kann ich dir helfen?",
+            content: "CHAiNALYZE 🧠 - Deine selbst-evolvierende Trading-KI mit Live-Marktdaten, Smart Money Analyse, technischen Indikatoren und AI-gestütztem Paper Trading. Wie kann ich dir helfen?",
             timestamp: new Date().toISOString()
           }]);
         }
@@ -300,7 +300,7 @@ function App() {
         // If loading fails, show welcome message
         setMessages([{
           role: "assistant",
-          content: "Lunara Analyze AI 🧠 - Deine selbst-evolvierende Trading-KI mit Live-Marktdaten, Smart Money Analyse, technischen Indikatoren und AI-gestütztem Paper Trading. Wie kann ich dir helfen?",
+          content: "CHAiNALYZE 🧠 - Deine selbst-evolvierende Trading-KI mit Live-Marktdaten, Smart Money Analyse, technischen Indikatoren und AI-gestütztem Paper Trading. Wie kann ich dir helfen?",
           timestamp: new Date().toISOString()
         }]);
       }
