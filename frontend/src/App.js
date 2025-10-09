@@ -582,7 +582,7 @@ function App() {
             <div className="mobile-nav-header">
               <div className="logo">
                 <Brain className="logo-icon" />
-                <span>LUNARA AiNALYZE</span>
+                <span>CHAiNALYZE</span>
               </div>
             </div>
             <div className="mobile-nav-items">
