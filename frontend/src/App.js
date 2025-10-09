@@ -708,7 +708,7 @@ function App() {
                 <div className="welcome-content">
                   <div className="welcome-header">
                     <Brain className="welcome-icon" />
-                    <h1>Willkommen bei LUNARA AiNALYZE</h1>
+                    <h1>Willkommen bei CHAiNALYZE</h1>
                     <p>Ihr intelligenter Trading-Assistent für professionelle Marktanalyse</p>
                   </div>
                   <SamplePrompts onPromptClick={handlePromptClick} />
