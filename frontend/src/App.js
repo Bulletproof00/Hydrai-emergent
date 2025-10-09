@@ -636,7 +636,7 @@ function App() {
         {activeView === 'chat' && (
           <>
             <div className="chat-header">
-              <h1 data-testid="chat-title">Lunara Analyze AI Assistant</h1>
+              <h1 data-testid="chat-title">CHAiNALYZE Assistant</h1>
               <div className="chat-header-actions">
                 <button 
                   className="chat-history-btn" 
