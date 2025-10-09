@@ -510,7 +510,7 @@ function App() {
         <div className="header-left">
           <div className="logo">
             <Brain className="logo-icon" />
-            <span>LUNARA AiNALYZE</span>
+            <span>CHAiNALYZE</span>
           </div>
         </div>
 
