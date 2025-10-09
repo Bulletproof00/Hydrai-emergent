@@ -173,7 +173,7 @@ function App() {
   // Authentication disabled - direct access
   const [user, setUser] = useState({
     _id: 'a84844e0-d4e8-4484-a452-7b647edacfed',
-    email: 'demo@lunara.ai',
+    email: 'demo@chainalyze.ai',
     username: 'Demo User'
   });
   const [token, setToken] = useState('demo-token');
