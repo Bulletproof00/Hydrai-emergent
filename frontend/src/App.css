@@ -6667,7 +6667,8 @@ body {
 .indicators-content,
 .heatmaps-content,
 .news-content,
-.sentiment-content {
+.sentiment-content,
+.forecast-content {
   animation: fadeIn 0.5s ease;
 }
 
@@ -6704,6 +6705,248 @@ body {
   border: 1px dashed rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   font-style: italic;
+}
+
+/* Bitcoin News Forecast */
+.bitcoin-forecast {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bitcoin-forecast__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.section-subtitle {
+  font-size: 14px;
+  color: #94a3b8;
+  max-width: 640px;
+}
+
+.bitcoin-forecast__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.bitcoin-forecast__controls label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e4e4e7;
+}
+
+.bitcoin-forecast__controls select {
+  padding: 10px 14px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #e4e4e7;
+  font-size: 14px;
+}
+
+.bitcoin-forecast__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.forecast-panel {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.forecast-panel--wide {
+  grid-column: span 2;
+}
+
+.forecast-panel--insights {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.forecast-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.forecast-panel__header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e4e4e7;
+}
+
+.forecast-tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.forecast-probability {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.forecast-probability__value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #e4e4e7;
+}
+
+.forecast-probability__bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.forecast-probability__bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #38bdf8);
+  border-radius: inherit;
+}
+
+.forecast-probability__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.forecast-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.forecast-summary span {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.forecast-summary strong {
+  font-size: 18px;
+  color: #e4e4e7;
+}
+
+.headline-list {
+  display: grid;
+  gap: 12px;
+}
+
+.headline-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.headline-card__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.headline-card__content h4 {
+  font-size: 14px;
+  color: #e4e4e7;
+  margin-bottom: 4px;
+}
+
+.headline-card__content p {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.headline-card__meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.headline-impact {
+  align-self: flex-start;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.insight-list {
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  color: #94a3b8;
+  font-size: 13px;
+  margin: 0;
+  padding: 0;
+}
+
+.insight-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+@media (max-width: 1024px) {
+  .forecast-panel--wide {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .forecast-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .headline-card {
+    grid-template-columns: auto 1fr;
+  }
+
+  .headline-impact {
+    grid-column: 1 / -1;
+  }
 }
 
 /* Mobile Responsive Adjustments for Analysis Tabs */

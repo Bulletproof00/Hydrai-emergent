@@ -11,6 +11,7 @@ import EconomicDataPanel from "./components/EconomicDataPanel";
 import SentimentAnalysis from "./components/SentimentAnalysis";
 import TradingInterface from "./components/TradingInterface";
 import SelfEvolvingAI from "./components/SelfEvolvingAI";
+import BitcoinNewsForecast from "./components/BitcoinNewsForecast";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -816,6 +817,13 @@ function App() {
                 <BarChart3 size={18} />
                 <span>Sentiment</span>
               </button>
+              <button 
+                className={`analysis-tab ${analysisTab === 'forecast' ? 'active' : ''}`}
+                onClick={() => setAnalysisTab('forecast')}
+              >
+                <TrendingUp size={18} />
+                <span>Bitcoin Forecast</span>
+              </button>
             </div>
 
             {/* Timeframe Selector - Global for all tabs */}
@@ -956,6 +964,12 @@ function App() {
               <div className="sentiment-content">
                 <h2 className="section-title">Market Sentiment Analyse</h2>
                 <SentimentAnalysis globalTimeframe={globalTimeframe} />
+              </div>
+            )}
+
+            {analysisTab === 'forecast' && (
+              <div className="forecast-content">
+                <BitcoinNewsForecast news={news} sentiment={sentiment} />
               </div>
             )}
           </div>
