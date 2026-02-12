@@ -11,7 +11,7 @@ import uuid
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from fastapi import Header
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from dataclasses import asdict
 import ccxt.async_support as ccxt
 import redis.asyncio as redis
