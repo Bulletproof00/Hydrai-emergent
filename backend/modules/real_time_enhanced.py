@@ -678,34 +678,52 @@ class EnhancedRealTimeStreamer:
         return binance_prices
 
     def _generate_synthetic_prices(self) -> Dict[str, Dict]:
-        """Generate realistic synthetic price data as last resort"""
-        import random
+        """Generate realistic synthetic crypto prices as last resort"""
+        synthetic_prices = {}
         
+        # Base prices for major cryptocurrencies (approximate current levels)
         base_prices = {
-            'BTC/USDT': 65000, 'ETH/USDT': 3200, 'BNB/USDT': 590, 'SOL/USDT': 150,
-            'XRP/USDT': 0.52, 'DOGE/USDT': 0.08, 'ADA/USDT': 0.35, 'MATIC/USDT': 0.42,
-            'AVAX/USDT': 30, 'LINK/USDT': 12, 'DOT/USDT': 5, 'UNI/USDT': 7,
-            'LTC/USDT': 70, 'ATOM/USDT': 4.5, 'SHIB/USDT': 0.000025
+            'BTC/USDT': 123000,
+            'ETH/USDT': 4200,
+            'BNB/USDT': 680,
+            'XRP/USDT': 3.1,
+            'ADA/USDT': 1.05,
+            'SOL/USDT': 210,
+            'DOGE/USDT': 0.38,
+            'DOT/USDT': 9.5,
+            'MATIC/USDT': 1.1,
+            'LTC/USDT': 115,
+            'AVAX/USDT': 45,
+            'SHIB/USDT': 0.000029,
+            'UNI/USDT': 16.5,
+            'ATOM/USDT': 8.2,
+            'LINK/USDT': 22.5
         }
         
-        prices = {}
-        for symbol in self.crypto_symbols.keys():
-            if symbol in base_prices:
-                base_price = base_prices[symbol]
-                # Add realistic variation
-                price_variation = random.uniform(0.98, 1.02)
-                current_price = base_price * price_variation
-                change_24h = random.uniform(-5, 5)
-                
-                prices[symbol] = {
-                    'price': current_price,
-                    'change_24h': change_24h,
-                    'volume_24h': current_price * random.uniform(1000000, 10000000),
-                    'timestamp': datetime.now(timezone.utc).isoformat(),
-                    'source': 'synthetic'
-                }
+        import random
         
-        return prices
+        for symbol, base_price in base_prices.items():
+            # Add some realistic variation (±5%)
+            variation = random.uniform(-0.05, 0.05)
+            current_price = base_price * (1 + variation)
+            
+            # Generate realistic 24h change
+            change_24h = random.uniform(-8.0, 12.0)
+            
+            # Generate volume
+            volume_base = base_price * random.uniform(50000000, 500000000)
+            
+            synthetic_prices[symbol] = {
+                'price': round(current_price, 8 if current_price < 1 else 2),
+                'change_24h': round(change_24h, 2),
+                'volume_24h': round(volume_base, 0),
+                'high_24h': round(current_price * 1.08, 8 if current_price < 1 else 2),
+                'low_24h': round(current_price * 0.92, 8 if current_price < 1 else 2),
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'source': 'synthetic_fallback'
+            }
+            
+        return synthetic_prices
 
     async def stop_streams(self):
         """Stop all streams"""
