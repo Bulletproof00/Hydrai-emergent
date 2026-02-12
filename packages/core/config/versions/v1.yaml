@@ -1,0 +1,10 @@
+version: v1
+signal_weights:
+  MarketStructureAgent: 1.0
+  RegimeDetectionAgent: 1.0
+  DerivativesStressAgent: 0.8
+  AnomalyDetectionAgent: 0.7
+  CorrelationMacroAgent: 0.2
+risk:
+  max_confidence: 0.95
+  hold_on_high_uncertainty: true
