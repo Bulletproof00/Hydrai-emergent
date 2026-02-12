@@ -1464,7 +1464,7 @@ async def get_chart_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit:
         
         stored_data = []
         
-        # For crypto, try Binance first then use AI Data Module as comprehensive fallback
+        # For crypto, try Binance first then use CoinGecko as comprehensive fallback
         if asset_type == 'crypto':
             try:
                 # Try Binance first
@@ -1489,11 +1489,37 @@ async def get_chart_data(symbol: str = "BTC/USDT", timeframe: str = "1h", limit:
                     raise Exception("Binance data insufficient or blocked")
                     
             except Exception as e:
-                logger.warning(f"⚠️ Binance blocked for {symbol}, using enhanced minimal fallback: {e}")
+                logger.warning(f"⚠️ Binance blocked for {symbol}, trying CoinGecko fallback: {e}")
                 
-                # ENHANCED FALLBACK: Generate high-quality minimal data directly
-                logger.info(f"🎯 CHART FIX: Generating enhanced minimal chart data for {symbol} {timeframe}")
-                stored_data = await generate_minimal_chart_data(symbol, timeframe, limit)
+                # FALLBACK 1: CoinGecko (geographic restriction bypass)
+                try:
+                    from modules.coingecko_provider import coingecko_provider
+                    
+                    coingecko_ohlcv = await coingecko_provider.get_ohlcv_data(symbol, timeframe, limit)
+                    
+                    if coingecko_ohlcv and len(coingecko_ohlcv) > 5:
+                        for candle in coingecko_ohlcv:
+                            candle_data = {
+                                'timestamp': candle[0],
+                                'open': candle[1],
+                                'high': candle[2],
+                                'low': candle[3], 
+                                'close': candle[4],
+                                'volume': candle[5] if len(candle) > 5 else 1000000,  # Default volume
+                                'source': 'coingecko'
+                            }
+                            stored_data.append(candle_data)
+                        
+                        logger.info(f"🎯 CoinGecko fallback success: {symbol} {timeframe} - {len(stored_data)} candles")
+                    else:
+                        raise Exception("CoinGecko also insufficient")
+                        
+                except Exception as coingecko_error:
+                    logger.warning(f"⚠️ CoinGecko also failed: {coingecko_error}")
+                    
+                    # FALLBACK 2: Generate enhanced minimal data
+                    logger.info(f"🎯 Using enhanced minimal chart data for {symbol} {timeframe}")
+                    stored_data = await generate_minimal_chart_data(symbol, timeframe, limit)
         
         else:
             # Traditional markets still use old system
