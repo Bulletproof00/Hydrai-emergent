@@ -2978,7 +2978,6 @@ async def generate_minimal_chart_data(symbol: str, timeframe: str, limit: int) -
     logger.info(f"🔄 Generating minimal chart data for {symbol} {timeframe}")
     
     import time
-    from datetime import timedelta
     
     # Base prices for different symbols
     base_prices = {
