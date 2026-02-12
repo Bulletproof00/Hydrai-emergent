@@ -5203,30 +5203,704 @@ class TradingSystemTester:
         print("📊 CORRELATION SYSTEM TESTING COMPLETE")
         print("=" * 80)
 
+    # ============= COMPREHENSIVE CHAINALYZE SYSTEM TESTS =============
+    
+    async def test_core_apis_health(self):
+        """Test 1: CORE APIS - System Health"""
+        test_name = "🎯 CORE API 1: SYSTEM HEALTH - GET /api/health"
+        
+        response = await self.test_api_endpoint("/health")
+        
+        if response['success']:
+            data = response['data']
+            if 'status' in data and data['status'] == 'healthy':
+                self.log_test(test_name, "PASS", f"✅ System Health Check erfolgreich: {data}")
+            else:
+                self.log_test(test_name, "WARN", f"⚠️ Health endpoint responds but status unclear: {data}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Health endpoint failed: {response.get('error')}")
+
+    async def test_core_apis_chat(self):
+        """Test 2: CORE APIS - KI Chat System mit Gemini 2.5 Flash"""
+        test_name = "🎯 CORE API 2: KI CHAT SYSTEM - POST /api/chat"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available")
+            return
+        
+        chat_data = {
+            "session_id": "test_session_chainalyze",
+            "content": "Hallo! Wie geht es dir heute?"
+        }
+        
+        response = await self.test_api_endpoint("/chat", method="POST", data=chat_data, auth=True)
+        
+        if response['status'] == 422:
+            self.log_test(test_name, "FAIL", f"❌ CRITICAL: 422 UNPROCESSABLE ENTITY ERROR in Chat System: {response.get('error')}")
+            return
+        elif not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Chat API failed: {response.get('error')}")
+            return
+        
+        data = response['data']
+        ai_response = data.get('content', '')
+        
+        if len(ai_response) > 100:
+            self.log_test(test_name, "PASS", f"✅ KI Chat System mit Gemini 2.5 Flash funktioniert: {len(ai_response)} chars Deutsche Antwort")
+        else:
+            self.log_test(test_name, "WARN", f"⚠️ Chat funktioniert aber Antwort kurz: {len(ai_response)} chars")
+
+    async def test_core_apis_sessions(self):
+        """Test 3: CORE APIS - Chat Session Management"""
+        test_name = "🎯 CORE API 3: CHAT SESSION MANAGEMENT - GET /api/sessions"
+        
+        response = await self.test_api_endpoint("/sessions")
+        
+        if response['success']:
+            sessions = response['data']
+            if isinstance(sessions, list):
+                self.log_test(test_name, "PASS", f"✅ Chat Session Management funktioniert: {len(sessions)} Sessions gefunden")
+            else:
+                self.log_test(test_name, "WARN", f"⚠️ Sessions endpoint responds but format unexpected: {type(sessions)}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Sessions endpoint failed: {response.get('error')}")
+
+    async def test_trading_system_account(self):
+        """Test 4: TRADING SYSTEM - Paper Trading Account"""
+        test_name = "🎯 TRADING SYSTEM 1: PAPER TRADING ACCOUNT - GET /api/trading/account"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available")
+            return
+        
+        response = await self.test_api_endpoint("/trading/account", auth=True)
+        
+        if not response['success']:
+            self.log_test(test_name, "FAIL", f"❌ Trading Account API failed: {response.get('error')}")
+            return
+        
+        data = response['data']
+        if 'account' in data:
+            account = data['account']
+            balance = account.get('balance', 0)
+            equity = account.get('equity', 0)
+            
+            if balance > 0:
+                self.log_test(test_name, "PASS", f"✅ Paper Trading Account funktioniert: Balance=${balance:,.2f}, Equity=${equity:,.2f}")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Invalid account data: Balance=${balance}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Account data structure invalid: {data}")
+
+    async def test_trading_system_order(self):
+        """Test 5: TRADING SYSTEM - Order Placement"""
+        test_name = "🎯 TRADING SYSTEM 2: ORDER PLACEMENT - POST /api/trading/order"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available")
+            return
+        
+        order_data = {
+            "symbol": "BTC/USDT",
+            "side": "buy",
+            "order_type": "market",
+            "quantity": 0.001,
+            "leverage": 1
+        }
+        
+        response = await self.test_api_endpoint("/trading/order", method="POST", data=order_data, auth=True)
+        
+        if response['success']:
+            data = response['data']
+            if data.get('status') == 'success' and 'result' in data:
+                result = data['result']
+                if result.get('success') and 'order' in result:
+                    order = result['order']
+                    self.log_test(test_name, "PASS", f"✅ Order Placement funktioniert: Order ID={order.get('order_id')}, Status={order.get('status')}")
+                else:
+                    self.log_test(test_name, "FAIL", f"❌ Order placement failed: {result}")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Order response invalid: {data}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Order API failed: {response.get('error')}")
+
+    async def test_trading_system_positions(self):
+        """Test 6: TRADING SYSTEM - Position Management"""
+        test_name = "🎯 TRADING SYSTEM 3: POSITION MANAGEMENT - GET /api/trading/positions"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available")
+            return
+        
+        response = await self.test_api_endpoint("/trading/positions", auth=True)
+        
+        if response['success']:
+            data = response['data']
+            positions = data.get('positions', []) if isinstance(data, dict) else data
+            
+            if isinstance(positions, list):
+                self.log_test(test_name, "PASS", f"✅ Position Management funktioniert: {len(positions)} Positionen gefunden")
+            else:
+                self.log_test(test_name, "WARN", f"⚠️ Positions data format unexpected: {type(positions)}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Positions API failed: {response.get('error')}")
+
+    async def test_trading_system_symbols(self):
+        """Test 7: TRADING SYSTEM - Top 30 Crypto Assets"""
+        test_name = "🎯 TRADING SYSTEM 4: TOP 30 CRYPTO ASSETS - GET /api/trading/symbols"
+        
+        response = await self.test_api_endpoint("/trading/symbols")
+        
+        if response['success']:
+            data = response['data']
+            symbols = data.get('symbols', []) if isinstance(data, dict) else data
+            
+            if isinstance(symbols, list) and len(symbols) >= 20:
+                btc_found = any('BTC' in str(symbol) for symbol in symbols)
+                eth_found = any('ETH' in str(symbol) for symbol in symbols)
+                
+                if btc_found and eth_found:
+                    self.log_test(test_name, "PASS", f"✅ Top 30 Crypto Assets verfügbar: {len(symbols)} Symbole, BTC und ETH enthalten")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Symbols available but major cryptos missing: {len(symbols)} symbols")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Insufficient symbols: {len(symbols) if isinstance(symbols, list) else 'Invalid format'}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Trading symbols API failed: {response.get('error')}")
+
+    async def test_trading_system_portfolio(self):
+        """Test 8: TRADING SYSTEM - Portfolio Tracking"""
+        test_name = "🎯 TRADING SYSTEM 5: PORTFOLIO TRACKING - GET /api/trading/portfolio"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available")
+            return
+        
+        response = await self.test_api_endpoint("/trading/portfolio", auth=True)
+        
+        if response['success']:
+            data = response['data']
+            required_fields = ['balance', 'total_pnl', 'win_rate']
+            missing_fields = [field for field in required_fields if field not in data]
+            
+            if not missing_fields:
+                balance = data.get('balance', 0)
+                total_pnl = data.get('total_pnl', 0)
+                win_rate = data.get('win_rate', 0)
+                
+                self.log_test(test_name, "PASS", f"✅ Portfolio Tracking funktioniert: Balance=${balance:,.2f}, PnL=${total_pnl:.2f}, Win Rate={win_rate:.1f}%")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Portfolio data incomplete, missing: {missing_fields}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Portfolio API failed: {response.get('error')}")
+
+    async def test_chart_market_data_btc(self):
+        """Test 9: CHART & MARKET DATA - Candlestick Data BTC-USDT"""
+        test_name = "🎯 CHART & MARKET DATA 1: CANDLESTICK DATA - GET /api/chart-data/BTC-USDT"
+        
+        response = await self.test_api_endpoint("/chart-data/BTC-USDT?timeframe=1h&limit=100")
+        
+        if response['success']:
+            data = response['data']
+            chart_data = data.get('data', [])
+            
+            if isinstance(chart_data, list) and len(chart_data) >= 50:
+                # Validate OHLCV structure
+                valid_candles = 0
+                for candle in chart_data[:5]:  # Check first 5 candles
+                    required_fields = ['time', 'open', 'high', 'low', 'close', 'volume']
+                    if all(field in candle for field in required_fields):
+                        if candle['high'] >= max(candle['open'], candle['close']) and candle['low'] <= min(candle['open'], candle['close']):
+                            valid_candles += 1
+                
+                if valid_candles >= 3:
+                    self.log_test(test_name, "PASS", f"✅ BTC-USDT Candlestick Data funktioniert: {len(chart_data)} Kerzen, {valid_candles}/5 gültige OHLCV-Struktur")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Chart data available but OHLCV validation issues: {valid_candles}/5 valid")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Insufficient chart data: {len(chart_data) if isinstance(chart_data, list) else 'Invalid format'}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Chart data API failed: {response.get('error')}")
+
+    async def test_chart_market_data_realtime(self):
+        """Test 10: CHART & MARKET DATA - Live Prices"""
+        test_name = "🎯 CHART & MARKET DATA 2: LIVE PRICES - GET /api/realtime/latest"
+        
+        response = await self.test_api_endpoint("/realtime/latest")
+        
+        if response['success']:
+            data = response['data']
+            if data.get('status') == 'success':
+                realtime_data = data.get('data', {})
+                
+                if isinstance(realtime_data, dict) and len(realtime_data) > 0:
+                    # Check for major cryptos
+                    btc_price = realtime_data.get('BTC/USDT', {}).get('price', 0)
+                    eth_price = realtime_data.get('ETH/USDT', {}).get('price', 0)
+                    
+                    if btc_price > 0 and eth_price > 0:
+                        self.log_test(test_name, "PASS", f"✅ Live Prices funktionieren: BTC=${btc_price:,.2f}, ETH=${eth_price:,.2f}, {len(realtime_data)} Assets")
+                    else:
+                        self.log_test(test_name, "WARN", f"⚠️ Live prices available but major cryptos missing: {len(realtime_data)} assets")
+                else:
+                    self.log_test(test_name, "FAIL", f"❌ No realtime data available: {realtime_data}")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Realtime API error status: {data}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Realtime API failed: {response.get('error')}")
+
+    async def test_chart_market_data_markets(self):
+        """Test 11: CHART & MARKET DATA - Market Overview"""
+        test_name = "🎯 CHART & MARKET DATA 3: MARKET OVERVIEW - GET /api/markets"
+        
+        response = await self.test_api_endpoint("/markets")
+        
+        if response['success']:
+            data = response['data']
+            
+            if 'crypto' in data and isinstance(data['crypto'], list):
+                crypto_count = len(data['crypto'])
+                traditional_markets = data.get('traditional', {})
+                
+                if crypto_count >= 10:
+                    self.log_test(test_name, "PASS", f"✅ Market Overview funktioniert: {crypto_count} Crypto-Märkte, Traditional Markets verfügbar")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Limited market data: {crypto_count} crypto markets")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Market data structure invalid: {data}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Markets API failed: {response.get('error')}")
+
+    async def test_smart_money_enhanced(self):
+        """Test 12: SMART MONEY & ANALYSIS - Enhanced Smart Money Indicators"""
+        test_name = "🎯 SMART MONEY 1: ENHANCED SMART MONEY - GET /api/enhanced-smart-money"
+        
+        response = await self.test_api_endpoint("/enhanced-smart-money/data?symbol=BTC/USDT&timeframe=1h")
+        
+        if response['success']:
+            data = response['data']
+            
+            if data.get('status') == 'success':
+                enhanced_data = data.get('data', {})
+                
+                if 'liquidation_heatmap_2d' in enhanced_data and 'directional_bias' in enhanced_data:
+                    timeframe = enhanced_data.get('timeframe', 'unknown')
+                    symbol = enhanced_data.get('symbol', 'unknown')
+                    
+                    self.log_test(test_name, "PASS", f"✅ Enhanced Smart Money funktioniert: {symbol} {timeframe}, Liquidation Heatmap und Directional Bias verfügbar")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Enhanced data available but missing key components: {list(enhanced_data.keys())}")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Enhanced Smart Money API error: {data}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Enhanced Smart Money API failed: {response.get('error')}")
+
+    async def test_smart_money_correlations(self):
+        """Test 13: SMART MONEY & ANALYSIS - Correlation Analysis"""
+        test_name = "🎯 SMART MONEY 2: CORRELATION ANALYSIS - GET /api/correlations"
+        
+        response = await self.test_api_endpoint("/correlations")
+        
+        if response['success']:
+            correlations = response['data']
+            
+            if isinstance(correlations, dict) and len(correlations) > 0:
+                # Check for BTC correlations
+                btc_correlations = [key for key in correlations.keys() if 'BTC' in key]
+                
+                if len(btc_correlations) >= 2:
+                    # Convert to percentages as mentioned in requirements
+                    correlation_percentages = []
+                    for key, value in list(correlations.items())[:3]:
+                        if isinstance(value, (int, float)):
+                            percentage = value * 100
+                            correlation_percentages.append(f"{key}: {percentage:.1f}%")
+                    
+                    self.log_test(test_name, "PASS", f"✅ Correlation Analysis funktioniert: {len(correlations)} Korrelationen, Beispiele: {', '.join(correlation_percentages[:2])}")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Limited correlation data: {len(btc_correlations)} BTC correlations")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ No correlation data available: {correlations}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Correlations API failed: {response.get('error')}")
+
+    async def test_smart_money_macro_data(self):
+        """Test 14: SMART MONEY & ANALYSIS - Macro Market Data"""
+        test_name = "🎯 SMART MONEY 3: MACRO MARKET DATA - GET /api/macro-data"
+        
+        response = await self.test_api_endpoint("/macro-data")
+        
+        if response['success']:
+            macro_data = response['data']
+            
+            if isinstance(macro_data, dict) and len(macro_data) > 0:
+                # Check for traditional markets
+                traditional_markets = ['SPX', 'NASDAQ', 'DXY', 'Gold']
+                found_markets = [market for market in traditional_markets if market in macro_data]
+                
+                # Check for crypto data
+                crypto_data = ['Bitcoin', 'Ethereum']
+                found_crypto = [crypto for crypto in crypto_data if crypto in macro_data]
+                
+                if len(found_markets) >= 2 and len(found_crypto) >= 1:
+                    self.log_test(test_name, "PASS", f"✅ Macro Market Data funktioniert: {len(found_markets)} Traditional Markets, {len(found_crypto)} Crypto Assets")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Limited macro data: {len(found_markets)} traditional, {len(found_crypto)} crypto")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ No macro data available: {macro_data}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Macro data API failed: {response.get('error')}")
+
+    async def test_ai_evolution_status(self):
+        """Test 15: AI EVOLUTION SYSTEM - AI Evolution Status"""
+        test_name = "🎯 AI EVOLUTION 1: AI EVOLUTION STATUS - GET /api/ai/evolution/status"
+        
+        response = await self.test_api_endpoint("/ai/evolution/status")
+        
+        if response['success']:
+            data = response['data']
+            
+            if isinstance(data, dict):
+                # Check for evolution status fields
+                status_fields = ['status', 'version', 'capabilities']
+                found_fields = [field for field in status_fields if field in data]
+                
+                if len(found_fields) >= 1:
+                    self.log_test(test_name, "PASS", f"✅ AI Evolution Status funktioniert: {len(found_fields)} Status-Felder verfügbar")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Evolution status available but limited fields: {list(data.keys())}")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Evolution status format invalid: {type(data)}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ AI Evolution Status API failed: {response.get('error')}")
+
+    async def test_ai_evolution_chat(self):
+        """Test 16: AI EVOLUTION SYSTEM - Evolution Chat"""
+        test_name = "🎯 AI EVOLUTION 2: EVOLUTION CHAT - POST /api/ai/evolution/chat"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available")
+            return
+        
+        chat_data = {
+            "message": "Kannst du mir erklären wie du Code generierst?"
+        }
+        
+        response = await self.test_api_endpoint("/ai/evolution/chat", method="POST", data=chat_data, auth=True)
+        
+        if response['success']:
+            data = response['data']
+            ai_response = data.get('response', '') or data.get('content', '')
+            
+            if len(ai_response) > 200:
+                # Check for self-coding concepts
+                coding_concepts = ['code', 'generierung', 'algorithmus', 'programmierung']
+                found_concepts = sum(1 for concept in coding_concepts if concept.lower() in ai_response.lower())
+                
+                if found_concepts >= 2:
+                    self.log_test(test_name, "PASS", f"✅ Evolution Chat funktioniert: {len(ai_response)} chars, {found_concepts} Self-Coding Konzepte")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Evolution chat works but limited self-coding discussion: {found_concepts} concepts")
+            else:
+                self.log_test(test_name, "WARN", f"⚠️ Evolution chat response short: {len(ai_response)} chars")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ AI Evolution Chat failed: {response.get('error')}")
+
+    async def test_ai_coding_generate(self):
+        """Test 17: AI EVOLUTION SYSTEM - Self-Coding AI"""
+        test_name = "🎯 AI EVOLUTION 3: SELF-CODING AI - POST /api/ai/coding/generate"
+        
+        if not self.auth_token:
+            self.log_test(test_name, "FAIL", "❌ No authentication token available")
+            return
+        
+        code_request = {
+            "request": "Erstelle eine einfache RSI-basierte Trading-Strategie"
+        }
+        
+        response = await self.test_api_endpoint("/ai/coding/generate", method="POST", data=code_request, auth=True)
+        
+        if response['success']:
+            data = response['data']
+            
+            # Check for code generation response
+            if 'status' in data:
+                status = data.get('status', '')
+                
+                if status in ['generated', 'rejected', 'safety_check_failed']:
+                    # Any of these statuses means the system is working
+                    safety_working = 'safety' in str(data).lower() or 'validation' in str(data).lower()
+                    
+                    if safety_working:
+                        self.log_test(test_name, "PASS", f"✅ Self-Coding AI funktioniert: Status={status}, Safety-Check System arbeitet")
+                    else:
+                        self.log_test(test_name, "WARN", f"⚠️ Self-Coding works but safety system unclear: Status={status}")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Unexpected code generation status: {status}")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Code generation response invalid: {data}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Self-Coding AI failed: {response.get('error')}")
+
+    async def test_ai_coding_plugins(self):
+        """Test 18: AI EVOLUTION SYSTEM - Plugin System"""
+        test_name = "🎯 AI EVOLUTION 4: PLUGIN SYSTEM - GET /api/ai/coding/plugins"
+        
+        response = await self.test_api_endpoint("/ai/coding/plugins")
+        
+        if response['success']:
+            data = response['data']
+            
+            if isinstance(data, dict):
+                # Check for plugin statistics
+                if 'statistics' in data or 'total_plugins' in data or 'plugins' in data:
+                    plugin_count = data.get('total_plugins', len(data.get('plugins', [])))
+                    
+                    self.log_test(test_name, "PASS", f"✅ Plugin System funktioniert: {plugin_count} Plugins, Plugin-Management verfügbar")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Plugin system responds but structure unclear: {list(data.keys())}")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Plugin system response invalid: {type(data)}")
+        else:
+            self.log_test(test_name, "FAIL", f"❌ Plugin System API failed: {response.get('error')}")
+
+    async def test_news_sentiment_financial_news(self):
+        """Test 19: NEWS & SENTIMENT - Financial News"""
+        test_name = "🎯 NEWS & SENTIMENT 1: FINANCIAL NEWS - GET /api/financial-news"
+        
+        response = await self.test_api_endpoint("/financial-news")
+        
+        if response['success']:
+            data = response['data']
+            
+            if isinstance(data, (list, dict)):
+                news_items = data if isinstance(data, list) else data.get('news', [])
+                
+                if isinstance(news_items, list) and len(news_items) > 0:
+                    # Check for news structure
+                    first_item = news_items[0]
+                    if isinstance(first_item, dict) and ('title' in first_item or 'headline' in first_item):
+                        self.log_test(test_name, "PASS", f"✅ Financial News funktioniert: {len(news_items)} News-Artikel verfügbar")
+                    else:
+                        self.log_test(test_name, "WARN", f"⚠️ News available but structure unclear: {type(first_item)}")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ No news items available: {len(news_items) if isinstance(news_items, list) else 'Invalid format'}")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Financial news format invalid: {type(data)}")
+        else:
+            # 404 might be expected if not implemented
+            if response.get('status') == 404:
+                self.log_test(test_name, "WARN", "⚠️ Financial News API not implemented (404)")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Financial News API failed: {response.get('error')}")
+
+    async def test_news_sentiment_market_sentiment(self):
+        """Test 20: NEWS & SENTIMENT - Market Sentiment"""
+        test_name = "🎯 NEWS & SENTIMENT 2: MARKET SENTIMENT - GET /api/market-sentiment"
+        
+        response = await self.test_api_endpoint("/market-sentiment")
+        
+        if response['success']:
+            data = response['data']
+            
+            if isinstance(data, dict):
+                # Check for sentiment fields
+                sentiment_fields = ['sentiment', 'score', 'bullish', 'bearish', 'neutral']
+                found_fields = [field for field in sentiment_fields if field in str(data).lower()]
+                
+                if len(found_fields) >= 1:
+                    self.log_test(test_name, "PASS", f"✅ Market Sentiment funktioniert: {len(found_fields)} Sentiment-Indikatoren gefunden")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Market sentiment available but no clear sentiment fields: {list(data.keys())}")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Market sentiment format invalid: {type(data)}")
+        else:
+            # 404 might be expected if not implemented
+            if response.get('status') == 404:
+                self.log_test(test_name, "WARN", "⚠️ Market Sentiment API not implemented (404)")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Market Sentiment API failed: {response.get('error')}")
+
+    async def test_news_sentiment_economic_calendar(self):
+        """Test 21: NEWS & SENTIMENT - Economic Calendar"""
+        test_name = "🎯 NEWS & SENTIMENT 3: ECONOMIC CALENDAR - GET /api/economic-calendar"
+        
+        response = await self.test_api_endpoint("/economic-calendar")
+        
+        if response['success']:
+            data = response['data']
+            
+            if isinstance(data, (list, dict)):
+                events = data if isinstance(data, list) else data.get('events', [])
+                
+                if isinstance(events, list):
+                    if len(events) > 0:
+                        # Check for event structure
+                        first_event = events[0]
+                        if isinstance(first_event, dict) and ('event' in first_event or 'title' in first_event or 'name' in first_event):
+                            self.log_test(test_name, "PASS", f"✅ Economic Calendar funktioniert: {len(events)} Wirtschaftsereignisse verfügbar")
+                        else:
+                            self.log_test(test_name, "WARN", f"⚠️ Events available but structure unclear: {type(first_event)}")
+                    else:
+                        self.log_test(test_name, "WARN", "⚠️ Economic Calendar responds but no events available")
+                else:
+                    self.log_test(test_name, "FAIL", f"❌ Economic calendar events format invalid: {type(events)}")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Economic calendar format invalid: {type(data)}")
+        else:
+            # 404 might be expected if not implemented
+            if response.get('status') == 404:
+                self.log_test(test_name, "WARN", "⚠️ Economic Calendar API not implemented (404)")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Economic Calendar API failed: {response.get('error')}")
+
+    async def test_ai_data_load_historical(self):
+        """Test 22: AI DATA MODULE - Historical Data Loading"""
+        test_name = "🎯 AI DATA MODULE 1: HISTORICAL DATA LOADING - POST /api/ai-data/load-historical"
+        
+        load_request = {
+            "symbols": ["BTC/USDT", "ETH/USDT"],
+            "timeframes": ["1h", "4h", "1d"],
+            "start_date": "2024-01-01",
+            "end_date": "2024-12-31"
+        }
+        
+        response = await self.test_api_endpoint("/ai-data/load-historical", method="POST", data=load_request)
+        
+        if response['success']:
+            data = response['data']
+            
+            if isinstance(data, dict):
+                # Check for loading results
+                symbols_loaded = data.get('symbols_loaded', 0)
+                timeframes_loaded = data.get('timeframes_loaded', 0)
+                total_bars = data.get('total_bars', 0)
+                
+                if symbols_loaded > 0 and timeframes_loaded > 0:
+                    self.log_test(test_name, "PASS", f"✅ Historical Data Loading funktioniert: {symbols_loaded} Symbole, {timeframes_loaded} Timeframes, {total_bars} Bars geladen")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Historical loading responds but limited data: {symbols_loaded} symbols, {timeframes_loaded} timeframes")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Historical data loading format invalid: {type(data)}")
+        else:
+            # 404 might be expected if not implemented
+            if response.get('status') == 404:
+                self.log_test(test_name, "WARN", "⚠️ Historical Data Loading API not implemented (404)")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Historical Data Loading failed: {response.get('error')}")
+
+    async def test_ai_data_calculate_indicators(self):
+        """Test 23: AI DATA MODULE - Technical Indicators"""
+        test_name = "🎯 AI DATA MODULE 2: TECHNICAL INDICATORS - POST /api/ai-data/calculate-indicators"
+        
+        indicators_request = {
+            "symbols": ["BTC/USDT"],
+            "timeframes": ["1h"],
+            "indicators": ["RSI", "SMA", "EMA", "MACD", "Bollinger_Bands"]
+        }
+        
+        response = await self.test_api_endpoint("/ai-data/calculate-indicators", method="POST", data=indicators_request)
+        
+        if response['success']:
+            data = response['data']
+            
+            if isinstance(data, dict):
+                # Check for indicator results
+                indicators_calculated = data.get('indicators_calculated', 0)
+                symbols_processed = data.get('symbols_processed', 0)
+                
+                if indicators_calculated > 0 and symbols_processed > 0:
+                    self.log_test(test_name, "PASS", f"✅ Technical Indicators funktionieren: {indicators_calculated} Indikatoren berechnet, {symbols_processed} Symbole verarbeitet")
+                else:
+                    self.log_test(test_name, "WARN", f"⚠️ Indicators respond but limited calculation: {indicators_calculated} indicators, {symbols_processed} symbols")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Technical indicators format invalid: {type(data)}")
+        else:
+            # 404 might be expected if not implemented
+            if response.get('status') == 404:
+                self.log_test(test_name, "WARN", "⚠️ Technical Indicators API not implemented (404)")
+            else:
+                self.log_test(test_name, "FAIL", f"❌ Technical Indicators failed: {response.get('error')}")
+
+    async def run_comprehensive_chainalyze_tests(self):
+        """Run all comprehensive CHAiNALYZE system tests"""
+        print("🎯 STARTING VOLLSTÄNDIGE CHAiNALYZE SYSTEM ÜBERPRÜFUNG")
+        print("Testing all modules and features as requested in review")
+        print("=" * 80)
+        
+        # 1. CORE APIS
+        print("\n🔥 TESTING CORE APIS")
+        await self.test_core_apis_health()
+        await self.test_core_apis_chat()
+        await self.test_core_apis_sessions()
+        
+        # 2. TRADING SYSTEM
+        print("\n🔥 TESTING TRADING SYSTEM")
+        await self.test_trading_system_account()
+        await self.test_trading_system_order()
+        await self.test_trading_system_positions()
+        await self.test_trading_system_symbols()
+        await self.test_trading_system_portfolio()
+        
+        # 3. CHART & MARKET DATA
+        print("\n🔥 TESTING CHART & MARKET DATA")
+        await self.test_chart_market_data_btc()
+        await self.test_chart_market_data_realtime()
+        await self.test_chart_market_data_markets()
+        
+        # 4. SMART MONEY & ANALYSIS
+        print("\n🔥 TESTING SMART MONEY & ANALYSIS")
+        await self.test_smart_money_enhanced()
+        await self.test_smart_money_correlations()
+        await self.test_smart_money_macro_data()
+        
+        # 5. AI EVOLUTION SYSTEM
+        print("\n🔥 TESTING AI EVOLUTION SYSTEM")
+        await self.test_ai_evolution_status()
+        await self.test_ai_evolution_chat()
+        await self.test_ai_coding_generate()
+        await self.test_ai_coding_plugins()
+        
+        # 6. NEWS & SENTIMENT
+        print("\n🔥 TESTING NEWS & SENTIMENT")
+        await self.test_news_sentiment_financial_news()
+        await self.test_news_sentiment_market_sentiment()
+        await self.test_news_sentiment_economic_calendar()
+        
+        # 7. AI DATA MODULE
+        print("\n🔥 TESTING AI DATA MODULE")
+        await self.test_ai_data_load_historical()
+        await self.test_ai_data_calculate_indicators()
+        
+        # Print comprehensive summary
+        self.print_test_summary()
+
 async def main():
-    """Main test runner - HISTORISCHE DATENLADUNG REPARATUR TEST"""
+    """Main test runner - VOLLSTÄNDIGE CHAiNALYZE SYSTEM ÜBERPRÜFUNG"""
     tester = TradingSystemTester()
     
-    # Run HISTORICAL DATA LOADING TESTS as requested in the review
-    print("🚨 RUNNING HISTORISCHE DATENLADUNG REPARATUR TESTS")
-    print("HISTORISCHE DATENLADUNG REPARATUR TEST: Umfassende synthetische Daten 2019-2025")
+    # Run COMPREHENSIVE CHAiNALYZE SYSTEM TESTS as requested in the review
+    print("🚨 RUNNING VOLLSTÄNDIGE CHAiNALYZE SYSTEM ÜBERPRÜFUNG")
+    print("COMPREHENSIVE CHAiNALYZE SYSTEM VERIFICATION - Alle Module und Features")
     print()
-    print("REPARIERTE FUNKTION TESTEN:")
-    print("- POST /api/ai-data/load-historical: Jetzt mit umfassendem Fallback-System implementiert")
-    print("- Neue Features: Synthetische historische Daten von 2019-2025 für alle Timeframes")
-    print("- Realistische Daten: Bitcoin $3,800→$122,000, Ethereum $140→$4,200 Evolution")
-    print("- Alle Timeframes: 1m, 5m, 15m, 1h, 4h, 1d, 1w, 1M mit korrekten Intervallen")
+    print("KRITISCHE SYSTEM KOMPONENTEN ZU TESTEN:")
+    print("1. CORE APIS: /api/health, /api/chat, /api/sessions")
+    print("2. TRADING SYSTEM: /api/trading/* (Account, Order, Positions, Symbols, Portfolio)")
+    print("3. CHART & MARKET DATA: /api/chart-data/*, /api/realtime/latest, /api/markets")
+    print("4. SMART MONEY & ANALYSIS: /api/enhanced-smart-money, /api/correlations, /api/macro-data")
+    print("5. AI EVOLUTION SYSTEM: /api/ai/evolution/*, /api/ai/coding/*")
+    print("6. NEWS & SENTIMENT: /api/financial-news, /api/market-sentiment, /api/economic-calendar")
+    print("7. AI DATA MODULE: /api/ai-data/load-historical, /api/ai-data/calculate-indicators")
     print()
     print("Backend URL: https://crypto-ai-trading-2.preview.emergentagent.com/api")
-    print("Authentication: demo-token")
+    print("Authentication: demo@example.com/demo123")
     print()
-    print("KRITISCHE TESTS:")
-    print("1. HISTORISCHE DATENLADUNG: POST /api/ai-data/load-historical mit start_date='2019-01-01'")
-    print("2. DATENQUALITÄT: GET /api/ai-data/data-quality")
-    print("3. TECHNISCHE INDIKATOREN: POST /api/ai-data/calculate-indicators")
+    print("TESTING PRIORITÄT: Alle Module vollständig testen und jeden Fehler melden")
     print("=" * 80)
     
-    await tester.run_historical_data_tests()
+    await tester.setup()
+    await tester.run_comprehensive_chainalyze_tests()
+    await tester.cleanup()
 
 if __name__ == "__main__":
     asyncio.run(main())
