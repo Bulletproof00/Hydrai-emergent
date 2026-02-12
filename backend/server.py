@@ -110,7 +110,6 @@ def get_password_hash(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 def create_access_token(data: dict):
-    from datetime import timedelta
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(days=30)
     to_encode.update({"exp": expire})
