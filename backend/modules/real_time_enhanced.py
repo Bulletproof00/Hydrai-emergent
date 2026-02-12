@@ -654,7 +654,30 @@ class EnhancedRealTimeStreamer:
         
         return prices
 
-    def _generate_synthetic_prices(self) -> Dict[str, Any]:
+    async def _fetch_binance_prices(self) -> Dict[str, Dict]:
+        """Fetch prices from Binance provider"""
+        binance_prices = {}
+        
+        for symbol in list(self.crypto_symbols.keys())[:10]:  # Limit for rate limiting
+            try:
+                ticker = await self.binance_provider.get_24h_stats(symbol, 'spot')
+                if ticker:
+                    binance_prices[symbol] = {
+                        'price': ticker['price'],
+                        'change_24h': ticker['change_24h'],
+                        'volume_24h': ticker['volume_24h'],
+                        'high_24h': ticker.get('high_24h', ticker['price'] * 1.05),
+                        'low_24h': ticker.get('low_24h', ticker['price'] * 0.95),
+                        'timestamp': datetime.now(timezone.utc).isoformat(),
+                        'source': 'binance_spot'
+                    }
+            except Exception as e:
+                logger.warning(f"Binance fetch error for {symbol}: {e}")
+                continue
+                
+        return binance_prices
+
+    def _generate_synthetic_prices(self) -> Dict[str, Dict]:
         """Generate realistic synthetic price data as last resort"""
         import random
         
