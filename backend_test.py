@@ -5873,7 +5873,7 @@ class TradingSystemTester:
         await self.test_ai_data_calculate_indicators()
         
         # Print comprehensive summary
-        self.print_test_summary()
+        self.print_summary()
 
 async def main():
     """Main test runner - VOLLSTÄNDIGE CHAiNALYZE SYSTEM ÜBERPRÜFUNG"""
