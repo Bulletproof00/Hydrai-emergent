@@ -581,6 +581,109 @@ class EnhancedRealTimeStreamer:
             logger.error(f"Error getting price history for {symbol}: {e}")
             return []
     
+    async def fetch_crypto_prices(self) -> Dict[str, Any]:
+        """Fetch comprehensive crypto prices with multi-tier fallback system"""
+        prices = {}
+        
+        # TIER 1: Try Binance (fastest, most accurate)
+        try:
+            binance_prices = await self._fetch_binance_prices()
+            if binance_prices:
+                prices.update(binance_prices)
+                logger.info(f"✅ Binance prices fetched: {len(binance_prices)} symbols")
+                return prices
+        except Exception as e:
+            logger.warning(f"⚠️ Binance prices failed (geographic restriction?): {e}")
+        
+        # TIER 2: CoinGecko fallback (free, reliable, no geographic restrictions)
+        try:
+            from .coingecko_provider import coingecko_provider
+            
+            # Get prices for our supported symbols
+            symbols_list = list(self.crypto_symbols.keys())[:15]  # Rate limit friendly
+            coingecko_prices = await coingecko_provider.get_multiple_prices(symbols_list)
+            
+            if coingecko_prices:
+                for symbol, data in coingecko_prices.items():
+                    prices[symbol] = {
+                        'price': data['price'],
+                        'change_24h': data['change_24h'],
+                        'volume_24h': data['volume_24h'],
+                        'timestamp': datetime.now(timezone.utc).isoformat(),
+                        'source': 'coingecko'
+                    }
+                
+                logger.info(f"✅ CoinGecko fallback prices fetched: {len(coingecko_prices)} symbols")
+                return prices
+                
+        except Exception as e:
+            logger.warning(f"⚠️ CoinGecko fallback failed: {e}")
+        
+        # TIER 3: Generate realistic synthetic data (last resort)
+        try:
+            synthetic_prices = self._generate_synthetic_prices()
+            prices.update(synthetic_prices)
+            logger.info(f"⚠️ Using synthetic price data: {len(synthetic_prices)} symbols")
+        except Exception as e:
+            logger.error(f"❌ Even synthetic price generation failed: {e}")
+        
+        return prices
+
+    async def _fetch_binance_prices(self) -> Dict[str, Any]:
+        """Fetch prices from Binance provider"""
+        prices = {}
+        
+        for symbol in self.crypto_symbols.keys():
+            try:
+                # Get 24h ticker stats from Binance (spot)
+                ticker = await self.binance_provider.get_24h_stats(symbol, 'spot')
+                
+                if ticker:
+                    prices[symbol] = {
+                        'price': ticker['price'],
+                        'change_24h': ticker['change_24h'],
+                        'volume_24h': ticker['volume_24h'],
+                        'high_24h': ticker.get('high_24h', ticker['price'] * 1.05),
+                        'low_24h': ticker.get('low_24h', ticker['price'] * 0.95),
+                        'timestamp': datetime.now(timezone.utc).isoformat(),
+                        'source': 'binance_spot'
+                    }
+                    
+            except Exception as e:
+                logger.error(f"Error fetching Binance data for {symbol}: {e}")
+        
+        return prices
+
+    def _generate_synthetic_prices(self) -> Dict[str, Any]:
+        """Generate realistic synthetic price data as last resort"""
+        import random
+        
+        base_prices = {
+            'BTC/USDT': 65000, 'ETH/USDT': 3200, 'BNB/USDT': 590, 'SOL/USDT': 150,
+            'XRP/USDT': 0.52, 'DOGE/USDT': 0.08, 'ADA/USDT': 0.35, 'MATIC/USDT': 0.42,
+            'AVAX/USDT': 30, 'LINK/USDT': 12, 'DOT/USDT': 5, 'UNI/USDT': 7,
+            'LTC/USDT': 70, 'ATOM/USDT': 4.5, 'SHIB/USDT': 0.000025
+        }
+        
+        prices = {}
+        for symbol in self.crypto_symbols.keys():
+            if symbol in base_prices:
+                base_price = base_prices[symbol]
+                # Add realistic variation
+                price_variation = random.uniform(0.98, 1.02)
+                current_price = base_price * price_variation
+                change_24h = random.uniform(-5, 5)
+                
+                prices[symbol] = {
+                    'price': current_price,
+                    'change_24h': change_24h,
+                    'volume_24h': current_price * random.uniform(1000000, 10000000),
+                    'timestamp': datetime.now(timezone.utc).isoformat(),
+                    'source': 'synthetic'
+                }
+        
+        return prices
+
     async def stop_streams(self):
         """Stop all streams"""
         self.is_running = False
