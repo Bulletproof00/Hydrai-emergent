@@ -25,6 +25,7 @@ from packages.core.db.models import (
 )
 from packages.strategies.synthesis import synthesize_signal
 from packages.supervisors import DataQualitySupervisor, DriftSupervisor, OverfitRiskSupervisor, RiskCoherenceSupervisor
+from packages.agents.feature_access import get_feature_series
 
 
 async def _build_snapshot(session: AsyncSession) -> dict:
@@ -126,13 +127,23 @@ async def run_analysis_for_symbol(session: AsyncSession, symbol: str, timeframe:
                 severity=min(100, max(0, int(f.confidence * 100))),
                 confidence=f.confidence,
                 tags=f.tags,
-                payload_jsonb=f.payload,
+                payload_jsonb={**f.payload, "feature_refs": ["rsi_14", "ema_200"]},
                 llm_status="disabled",
                 created_at=now,
             )
         )
 
+    rsi_series = await get_feature_series(session, "rsi_14", inst.id, timeframe)
+    ema_series = await get_feature_series(session, "ema_200", inst.id, timeframe)
+    feature_score = 0.0
+    if not rsi_series.empty and rsi_series.iloc[-1] < 30:
+        feature_score += 0.15
+    if not ema_series.empty and not df.empty and float(df["close"].iloc[-1]) > float(ema_series.iloc[-1]):
+        feature_score += 0.1
+
     signal = synthesize_signal(symbol=symbol, findings=findings)
+    signal["confidence"] = max(0.0, min(1.0, signal["confidence"] + feature_score))
+    signal["metadata"]["feature_score"] = feature_score
     session.add(
         Signal(
             run_id=run_id,

@@ -3,7 +3,8 @@ from datetime import UTC, datetime
 
 from sqlalchemy import select
 
-from packages.core.db.models import AgentConfig, AppSetting, Instrument, ProviderConfig, Timeframe
+from packages.core.config_hash import compute_config_hash
+from packages.core.db.models import AgentConfig, AppSetting, FeatureDefinition, Instrument, ProviderConfig, Timeframe
 from packages.core.db.session import SessionLocal
 
 
@@ -47,6 +48,48 @@ async def main() -> None:
             cfg = await session.scalar(select(AgentConfig).where(AgentConfig.agent_name == a))
             if not cfg:
                 session.add(AgentConfig(agent_name=a, enabled=True, mode="deterministic", provider="gemini", model="gemini-1.5-flash", system_prompt=f"You are {a}. Return concise JSON.", user_prompt_template="Analyze {{symbol}} with deterministic context.", temperature=0.2, max_tokens=400, timeout_s=20, tools_allowed_jsonb={}, updated_at=now))
+
+
+
+        # default feature definitions
+        feature_templates = [
+            ("ema_50", "indicator", "ema", {"length": 50, "source": "close"}),
+            ("ema_200", "indicator", "ema", {"length": 200, "source": "close"}),
+            ("rsi_14", "indicator", "rsi", {"length": 14, "source": "close"}),
+            ("atr_14", "indicator", "atr", {"length": 14}),
+            ("macd_12_26_9", "indicator", "macd", {"fast": 12, "slow": 26, "signal": 9, "source": "close"}),
+            ("bbands_20_2", "indicator", "bbands", {"length": 20, "stddev": 2.0, "source": "close"}),
+            ("oversold_bool", "formula", None, {"expr": "rsi_14 < 30"}),
+            ("trend_filter_bool", "formula", None, {"expr": "close > ema_200"}),
+        ]
+
+        for inst in (await session.execute(select(Instrument))).scalars().all():
+            tfs = ["1h", "4h"] if inst.asset_class == "crypto" else ["1h", "1d"]
+            for tf in tfs:
+                for key, ftype, ind, p in feature_templates:
+                    name = f"{inst.symbol}_{key}_{tf}"
+                    fd = await session.scalar(select(FeatureDefinition).where(FeatureDefinition.name == name))
+                    if fd:
+                        continue
+                    payload = {
+                        "name": name,
+                        "enabled": True,
+                        "instrument_id": inst.id,
+                        "timeframe": tf,
+                        "feature_key": key,
+                        "type": ftype,
+                        "indicator_type": ind,
+                        "params_jsonb": p if ftype == "indicator" else {},
+                        "formula_expr": p.get("expr") if ftype == "formula" else None,
+                        "output_schema_jsonb": {"kind": "bool" if key.endswith("_bool") else "num"},
+                    }
+                    session.add(FeatureDefinition(
+                        **payload,
+                        version=1,
+                        config_hash=compute_config_hash(payload),
+                        created_at=now,
+                        updated_at=now,
+                    ))
 
         defaults = {
             "schedule.ingest_crypto_s": {"value": 60},

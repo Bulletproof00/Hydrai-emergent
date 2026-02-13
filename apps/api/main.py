@@ -21,6 +21,9 @@ from packages.core.db.models import (
     ProviderConfig,
     Signal,
     SupervisorReport,
+    FeatureDefinition,
+    FeatureDefinitionVersion,
+    FeatureValue,
 )
 from packages.core.db.session import get_db_session
 from packages.observability.logging import configure_logging
@@ -363,3 +366,113 @@ async def upsert_alerts(payload: dict, session: AsyncSession = Depends(get_db_se
 @app.post("/alerts/test")
 async def test_alert() -> dict:
     return {"ok": True, "note": "alert test stub"}
+
+
+@app.get("/features/registry")
+async def features_registry() -> dict:
+    from packages.features.registry import INDICATOR_REGISTRY
+
+    return {k: {"params": v["params"]} for k, v in INDICATOR_REGISTRY.items()}
+
+
+@app.get("/features/definitions")
+async def list_feature_definitions(session: AsyncSession = Depends(get_db_session)) -> list[dict]:
+    rows = (await session.execute(select(FeatureDefinition).order_by(FeatureDefinition.updated_at.desc()))).scalars().all()
+    return [
+        {
+            "id": r.id,
+            "name": r.name,
+            "enabled": r.enabled,
+            "instrument_id": r.instrument_id,
+            "timeframe": r.timeframe,
+            "feature_key": r.feature_key,
+            "type": r.type,
+            "indicator_type": r.indicator_type,
+            "params_jsonb": r.params_jsonb,
+            "formula_expr": r.formula_expr,
+            "version": r.version,
+            "config_hash": r.config_hash,
+        }
+        for r in rows
+    ]
+
+
+@app.post("/features/definitions")
+async def create_feature_definition(payload: dict, session: AsyncSession = Depends(get_db_session)) -> dict:
+    from packages.features.store import upsert_feature_definition
+
+    row = await upsert_feature_definition(session, payload)
+    return {"id": row.id, "version": row.version, "config_hash": row.config_hash}
+
+
+@app.put("/features/definitions/{feature_id}")
+async def update_feature_definition(feature_id: int, payload: dict, session: AsyncSession = Depends(get_db_session)) -> dict:
+    from packages.features.store import upsert_feature_definition
+
+    obj = await session.scalar(select(FeatureDefinition).where(FeatureDefinition.id == feature_id))
+    if not obj:
+        raise HTTPException(status_code=404, detail="feature definition not found")
+    payload["name"] = payload.get("name", obj.name)
+    row = await upsert_feature_definition(session, payload)
+    return {"id": row.id, "version": row.version, "config_hash": row.config_hash}
+
+
+@app.get("/features/definitions/{feature_id}/versions")
+async def feature_versions(feature_id: int, session: AsyncSession = Depends(get_db_session)) -> list[dict]:
+    rows = (await session.execute(select(FeatureDefinitionVersion).where(FeatureDefinitionVersion.feature_definition_id == feature_id).order_by(FeatureDefinitionVersion.version.desc()))).scalars().all()
+    return [{"version": r.version, "created_at": r.created_at, "created_by": r.created_by} for r in rows]
+
+
+@app.post("/features/definitions/{feature_id}/rollback")
+async def rollback_feature(feature_id: int, version: int = Query(...), session: AsyncSession = Depends(get_db_session)) -> dict:
+    from packages.features.store import upsert_feature_definition
+
+    snap = await session.scalar(select(FeatureDefinitionVersion).where(FeatureDefinitionVersion.feature_definition_id == feature_id, FeatureDefinitionVersion.version == version))
+    if not snap:
+        raise HTTPException(status_code=404, detail="version not found")
+    row = await upsert_feature_definition(session, snap.snapshot_jsonb)
+    return {"ok": True, "id": row.id, "version": row.version}
+
+
+@app.post("/features/definitions/{feature_id}/backfill")
+async def backfill_feature(feature_id: int, payload: dict, session: AsyncSession = Depends(get_db_session)) -> dict:
+    from packages.features.engine import compute_feature_definition
+
+    feature = await session.scalar(select(FeatureDefinition).where(FeatureDefinition.id == feature_id))
+    if not feature:
+        raise HTTPException(status_code=404, detail="feature not found")
+    instrument_id = payload.get("instrument_id") or feature.instrument_id
+    if not instrument_id:
+        raise HTTPException(status_code=400, detail="instrument_id required")
+    days = int(payload.get("days", 30))
+    out = await compute_feature_definition(session, feature, instrument_id=instrument_id, days=days)
+    return out
+
+
+@app.get("/features/values")
+async def get_feature_values(
+    instrument: str,
+    tf: str,
+    feature_key: str,
+    session: AsyncSession = Depends(get_db_session),
+) -> list[dict]:
+    inst = await session.scalar(select(Instrument).where(Instrument.symbol == instrument))
+    if not inst:
+        return []
+    fdef = await session.scalar(select(FeatureDefinition).where(FeatureDefinition.feature_key == feature_key, FeatureDefinition.timeframe == tf))
+    if not fdef:
+        return []
+    rows = (await session.execute(select(FeatureValue).where(FeatureValue.feature_definition_id == fdef.id, FeatureValue.instrument_id == inst.id, FeatureValue.timeframe == tf).order_by(FeatureValue.ts.desc()).limit(1000))).scalars().all()
+    return [{"ts": r.ts, "value_num": r.value_num, "value_bool": r.value_bool, "value_jsonb": r.value_jsonb} for r in reversed(rows)]
+
+
+@app.post("/features/validate-formula")
+async def validate_formula(payload: dict) -> dict:
+    from packages.features.formulas import validate_formula
+
+    expr = payload.get("expression", "")
+    try:
+        validate_formula(expr)
+        return {"valid": True, "error": None}
+    except Exception as e:
+        return {"valid": False, "error": str(e)}

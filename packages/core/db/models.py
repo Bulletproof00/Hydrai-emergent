@@ -161,5 +161,65 @@ class AppSetting(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
+
+
+class FeatureDefinition(Base):
+    __tablename__ = "feature_definitions"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    instrument_id: Mapped[int | None] = mapped_column(ForeignKey("instruments.id"), nullable=True)
+    timeframe: Mapped[str] = mapped_column(String(8), nullable=False)
+    feature_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    type: Mapped[str] = mapped_column(String(16), nullable=False)
+    indicator_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    params_jsonb: Mapped[dict] = mapped_column(JSONB().with_variant(JSON, "sqlite"), nullable=False, default=dict)
+    formula_expr: Mapped[str | None] = mapped_column(Text, nullable=True)
+    output_schema_jsonb: Mapped[dict] = mapped_column(JSONB().with_variant(JSON, "sqlite"), nullable=False, default=dict)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    config_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class FeatureDefinitionVersion(Base):
+    __tablename__ = "feature_definition_versions"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    feature_definition_id: Mapped[int] = mapped_column(ForeignKey("feature_definitions.id"), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    snapshot_jsonb: Mapped[dict] = mapped_column(JSONB().with_variant(JSON, "sqlite"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_by: Mapped[str] = mapped_column(String(64), nullable=False, default="system")
+
+
+class FeatureValue(Base):
+    __tablename__ = "feature_values"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    feature_definition_id: Mapped[int] = mapped_column(ForeignKey("feature_definitions.id"), nullable=False)
+    instrument_id: Mapped[int] = mapped_column(ForeignKey("instruments.id"), nullable=False)
+    timeframe: Mapped[str] = mapped_column(String(8), nullable=False)
+    ts: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    value_num: Mapped[float | None] = mapped_column(Float, nullable=True)
+    value_bool: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    value_jsonb: Mapped[dict | None] = mapped_column(JSONB().with_variant(JSON, "sqlite"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    __table_args__ = (UniqueConstraint("feature_definition_id", "instrument_id", "timeframe", "ts", name="uq_feature_value"),)
+
+
+class FeatureComputeRun(Base):
+    __tablename__ = "feature_compute_runs"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    run_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    feature_definition_id: Mapped[int] = mapped_column(ForeignKey("feature_definitions.id"), nullable=False)
+    instrument_id: Mapped[int] = mapped_column(ForeignKey("instruments.id"), nullable=False)
+    timeframe: Mapped[str] = mapped_column(String(8), nullable=False)
+    window_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    window_end: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
 Index("ix_candles_lookup", Candle.instrument_id, Candle.timeframe, Candle.ts)
 Index("ix_findings_payload_gin", Finding.payload_jsonb, postgresql_using="gin")
+
+Index("ix_feature_values_lookup", FeatureValue.feature_definition_id, FeatureValue.instrument_id, FeatureValue.timeframe, FeatureValue.ts)

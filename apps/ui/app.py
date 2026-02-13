@@ -10,7 +10,7 @@ st.set_page_config(page_title="CHAiNALYZE Baukasten", layout="wide")
 st.title("CHAiNALYZE / Hydra AI")
 page = st.sidebar.selectbox(
     "Page",
-    ["Overview", "Instruments", "Providers", "LLM", "Agents", "Runs", "Alerts", "Ops/Health"],
+    ["Overview", "Instruments", "Providers", "LLM", "Agents", "Features", "Feature Backfill", "Feature Explorer", "Runs", "Alerts", "Ops/Health"],
 )
 
 
@@ -82,6 +82,63 @@ elif page == "Agents":
         st.json(api_post(f"/agents/{agent_name}/version", {}))
     st.write("Versions")
     st.dataframe(pd.DataFrame(api_get(f"/agents/{agent_name}/versions")))
+
+
+elif page == "Features":
+    st.subheader("Feature Definitions")
+    st.dataframe(pd.DataFrame(api_get("/features/definitions")))
+    registry = api_get("/features/registry")
+    st.write("Available indicators", registry)
+    with st.form("feature_def"):
+        mode = st.selectbox("type", ["indicator", "formula"])
+        name = st.text_input("name", value="BTCUSDT_rsi_14_1h")
+        instrument_id = st.number_input("instrument_id", min_value=1, value=1)
+        timeframe = st.selectbox("timeframe", ["1m", "5m", "15m", "1h", "4h", "1d"], index=3)
+        feature_key = st.text_input("feature_key", value="rsi_14")
+        indicator_type = st.selectbox("indicator_type", ["rsi", "ema", "atr", "macd", "bbands", "sma", "vwap", "roc", "volume_sma"])
+        formula_expr = st.text_input("formula_expr", value="rsi_14 < 30")
+        submitted = st.form_submit_button("Save Feature")
+        if submitted:
+            payload = {
+                "name": name,
+                "enabled": True,
+                "instrument_id": int(instrument_id),
+                "timeframe": timeframe,
+                "feature_key": feature_key,
+                "type": mode,
+                "indicator_type": indicator_type if mode == "indicator" else None,
+                "params_jsonb": {"length": 14, "source": "close"} if mode == "indicator" else {},
+                "formula_expr": formula_expr if mode == "formula" else None,
+                "output_schema_jsonb": {"kind": "bool" if feature_key.endswith("_bool") else "num"},
+            }
+            st.json(api_post("/features/definitions", payload))
+
+    expr = st.text_input("Validate formula", value="close > ema_200")
+    if st.button("Validate"):
+        st.json(api_post("/features/validate-formula", {"expression": expr}))
+
+elif page == "Feature Backfill":
+    st.subheader("Feature Backfill")
+    defs = api_get("/features/definitions")
+    st.dataframe(pd.DataFrame(defs))
+    with st.form("backfill"):
+        feature_id = st.number_input("feature_definition_id", min_value=1, value=1)
+        instrument_id = st.number_input("instrument_id", min_value=1, value=1)
+        days = st.slider("days", 1, 365, 30)
+        submitted = st.form_submit_button("Run Backfill")
+        if submitted:
+            st.json(api_post(f"/features/definitions/{int(feature_id)}/backfill", {"instrument_id": int(instrument_id), "days": int(days)}))
+
+elif page == "Feature Explorer":
+    st.subheader("Feature Explorer")
+    symbol = st.text_input("instrument symbol", value="BTCUSDT")
+    tf = st.selectbox("tf", ["1h", "4h", "1d"])
+    feature_key = st.text_input("feature_key", value="rsi_14")
+    values = api_get("/features/values", params={"instrument": symbol, "tf": tf, "feature_key": feature_key})
+    df = pd.DataFrame(values)
+    st.dataframe(df)
+    if not df.empty and "value_num" in df.columns:
+        st.line_chart(df.set_index("ts")["value_num"])
 
 elif page == "Runs":
     st.subheader("Runs")
