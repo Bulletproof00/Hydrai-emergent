@@ -17,14 +17,20 @@ services:
 
   api:
     build: .
-    command: uvicorn apps.api.main:app --host 0.0.0.0 --port 8001 --reload
+    command: uvicorn apps.api.main:app --host 0.0.0.0 --port 8001
     env_file: .env.example
     depends_on: [db, redis]
     ports: ["8001:8001"]
 
   worker:
     build: .
-    command: celery -A apps.worker.celery_app.celery_app worker -B --loglevel=INFO
+    command: celery -A apps.worker.celery_app.celery_app worker --loglevel=INFO
+    env_file: .env.example
+    depends_on: [db, redis]
+
+  beat:
+    build: .
+    command: celery -A apps.worker.celery_app.celery_app beat --loglevel=INFO
     env_file: .env.example
     depends_on: [db, redis]
 

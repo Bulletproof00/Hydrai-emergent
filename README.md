@@ -1,28 +1,30 @@
-# CHAiNALYZE (Hydra AI) MVP
+# CHAiNALYZE (Hydra AI) – Baukasten MVP
 
-Institutional-style crypto market intelligence stack with modular agents, supervisors, reproducible runs, and a Streamlit dashboard.
+Production-style, self-hostable market intelligence system (no live trading) with configurable providers, agent prompts, schedules, and encrypted secrets managed from UI.
 
-## Architecture
-- **API**: FastAPI (`apps/api`)
-- **Worker**: Celery + Redis scheduler/queue (`apps/worker`)
-- **UI**: Streamlit (`apps/ui`)
-- **Core**: Settings, DB models, ingestion/analysis services (`packages/core`)
-- **Agents**: Market structure, regime, derivatives stress, anomaly, macro stub (`packages/agents`)
-- **Strategies**: Signal synthesis + supervisor checks (`packages/strategies`)
-- **Observability**: structured logging, Prometheus endpoint (`packages/observability`)
+## Stack
+- Python 3.12, FastAPI, Streamlit
+- PostgreSQL + Redis
+- Celery Worker + Beat
+- SQLAlchemy + Alembic
+- Structlog + Prometheus metrics
 
-## Why Celery?
-Celery provides robust periodic scheduling (beat), retries, and scalable worker concurrency while fitting Redis-based MVP operations.
+## Milestones delivered
+- **M1**: scaffold, docker, `/health`, Streamlit shell
+- **M2**: DB models + migrations + seed defaults
+- **M3**: provider plugin system (Binance, DemoCSV, GenericHTTP stub), ingestion service
+- **M4/M5**: deterministic agents, findings/signals, supervisors
+- **M6**: API/UI Baukasten CRUD for providers, llm, agents, instruments, app-settings, alerts
+- **M7 (MVP stub)**: Gemini client interface + schema validator + write-only secret flows
 
-## Data flow
-`MarketEvent (candles/funding/OI)` -> `Findings` -> `SupervisorReports` -> `Signals`
+## Security model
+Only these env values are required post-boot:
+- `CHAINALYZE_MASTER_KEY`
+- DB/Redis URLs
 
-Each analysis run stores:
-- `run_id` (uuid4)
-- `config_hash`
-- status transitions (`running -> completed/failed`)
+All provider/LLM/alert secrets are encrypted in DB and never returned via API/UI (only `secret_is_set`).
 
-## Quick start
+## Run
 ```bash
 cp .env.example .env
 make up
@@ -35,32 +37,21 @@ Services:
 - Metrics: http://localhost:8001/metrics
 - UI: http://localhost:8501
 
-## Core endpoints
+## Key API endpoints
 - `GET /health`
-- `GET /instruments`
-- `GET /candles?symbol=BTC/USDT&tf=5m`
-- `GET /latest/findings?symbol=BTC/USDT`
-- `GET /latest/signals?symbol=BTC/USDT`
-- `GET /runs/{run_id}`
-- `GET /metrics`
+- `GET/POST /app-settings`
+- `GET/POST/PUT /providers`, `POST /providers/{id}/test`
+- `GET/POST /llm`, `POST /llm/test`
+- `GET /agents`, `PUT /agents/{name}`, `GET /agents/{name}/versions`, `POST /agents/{name}/version`, `POST /agents/{name}/rollback`
+- `GET/POST /instruments`, `POST /instruments/{id}/assign-provider`
+- `GET /candles`
+- `GET /runs`, `GET /runs/{run_id}`, `POST /runs/trigger`
+- `GET /latest/findings`, `GET /latest/signals`
+- `GET/POST /alerts/config`, `POST /alerts/test`
 
-## Migrations
-```bash
-make migrate
-```
+## Offline capability
+`DemoCSVProvider` reads `/data/*.csv` so XAU/XAG/SPX (and optionally crypto) can run end-to-end without external paid feeds.
 
-## Tests & lint
-```bash
-make test
-make lint
-```
-
-## Troubleshooting
-- If worker cannot fetch exchange data, check outbound network/rate-limits.
-- If migrations fail, ensure `db` is healthy and `POSTGRES_SYNC_DSN` points to reachable host.
-- If UI is empty, run seed + wait for first ingest/analysis cycle.
-
-## Scope guardrails
-- No live trading order execution.
-- Signals are paper-only.
-- Secrets only through environment variables.
+## Notes
+- Deterministic analysis works without LLM enabled.
+- Gemini integration in this environment is implemented as a safe stub client path for offline runs.

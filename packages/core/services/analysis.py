@@ -1,5 +1,3 @@
-import hashlib
-import json
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -13,48 +11,99 @@ from packages.agents.derivatives_stress import DerivativesStressAgent
 from packages.agents.framework import AgentContext
 from packages.agents.market_structure import MarketStructureAgent
 from packages.agents.regime_detection import RegimeDetectionAgent
-from packages.core.db.models import AnalysisRun, Candle, Finding, Instrument, Signal, SupervisorReport
-from packages.strategies.supervisors import (
-    drift_supervisor,
-    overfit_risk_supervisor,
-    risk_coherence_supervisor,
+from packages.core.config_hash import compute_config_hash
+from packages.core.db.models import (
+    AgentConfig,
+    AnalysisRun,
+    AppSetting,
+    Candle,
+    Finding,
+    Instrument,
+    ProviderConfig,
+    Signal,
+    SupervisorReport,
 )
 from packages.strategies.synthesis import synthesize_signal
+from packages.supervisors import DataQualitySupervisor, DriftSupervisor, OverfitRiskSupervisor, RiskCoherenceSupervisor
+
+
+async def _build_snapshot(session: AsyncSession) -> dict:
+    agents = (await session.execute(select(AgentConfig))).scalars().all()
+    providers = (await session.execute(select(ProviderConfig).where(ProviderConfig.enabled == True))).scalars().all()
+    instruments = (await session.execute(select(Instrument))).scalars().all()
+    app_settings = (await session.execute(select(AppSetting))).scalars().all()
+    return {
+        "agents": [
+            {
+                "agent_name": a.agent_name,
+                "enabled": a.enabled,
+                "mode": a.mode,
+                "provider": a.provider,
+                "model": a.model,
+                "temperature": a.temperature,
+                "max_tokens": a.max_tokens,
+                "timeout_s": a.timeout_s,
+            }
+            for a in agents
+        ],
+        "providers": [
+            {
+                "id": p.id,
+                "provider_type": p.provider_type,
+                "name": p.name,
+                "enabled": p.enabled,
+                "settings_jsonb": p.settings_jsonb,
+            }
+            for p in providers
+        ],
+        "instruments": [
+            {"symbol": i.symbol, "provider_id": i.provider_id, "asset_class": i.asset_class}
+            for i in instruments
+        ],
+        "app_settings": [{"key": s.key, "value": s.value_jsonb} for s in app_settings],
+    }
 
 
 async def run_analysis_for_symbol(session: AsyncSession, symbol: str, timeframe: str = "5m") -> str:
     run_id = str(uuid.uuid4())
-    config = {"symbol": symbol, "timeframe": timeframe, "agents": 5}
-    config_hash = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
+    now = datetime.now(UTC)
+    snapshot = await _build_snapshot(session)
+    config_hash = compute_config_hash(snapshot)
 
-    run = AnalysisRun(run_id=run_id, ts_start=datetime.now(UTC), config_hash=config_hash, status="running")
+    run = AnalysisRun(
+        run_id=run_id,
+        created_at=now,
+        window_start=now - timedelta(hours=24),
+        window_end=now,
+        status="running",
+        config_hash=config_hash,
+        metadata_jsonb=snapshot,
+    )
     session.add(run)
 
     inst = await session.scalar(select(Instrument).where(Instrument.symbol == symbol))
     if not inst:
         run.status = "failed"
-        run.ts_end = datetime.now(UTC)
         await session.commit()
         return run_id
 
-    rows = await session.execute(
-        select(Candle)
-        .where(Candle.instrument_id == inst.id, Candle.timeframe == timeframe)
-        .order_by(Candle.ts.desc())
-        .limit(300)
-    )
-    candles = list(reversed(rows.scalars().all()))
+    rows = (
+        await session.execute(
+            select(Candle)
+            .where(Candle.instrument_id == inst.id, Candle.timeframe == timeframe)
+            .order_by(Candle.ts.desc())
+            .limit(300)
+        )
+    ).scalars().all()
+    candles = list(reversed(rows))
     if not candles:
         run.status = "failed"
-        run.ts_end = datetime.now(UTC)
         await session.commit()
         return run_id
 
-    df = pd.DataFrame(
-        [{"ts": c.ts, "open": c.open, "high": c.high, "low": c.low, "close": c.close, "volume": c.volume} for c in candles]
-    )
-
+    df = pd.DataFrame([{"ts": c.ts, "open": c.o, "high": c.h, "low": c.l, "close": c.c, "volume": c.volume} for c in candles])
     context = AgentContext(run_id=run_id, symbol=symbol, timeframe=timeframe, candles=df)
+
     agents = [
         MarketStructureAgent(),
         RegimeDetectionAgent(),
@@ -62,20 +111,24 @@ async def run_analysis_for_symbol(session: AsyncSession, symbol: str, timeframe:
         AnomalyDetectionAgent(),
         CorrelationMacroAgent(),
     ]
-
     findings = []
     for agent in agents:
         findings.extend(agent.run(context))
 
-    for finding in findings:
+    for f in findings:
         session.add(
             Finding(
                 run_id=run_id,
-                agent_name=finding.agent_name,
-                symbol=symbol,
-                ts=finding.ts,
-                payload_json={**finding.payload, "tags": finding.tags, "confidence": finding.confidence},
-                severity=finding.severity,
+                instrument_id=inst.id,
+                agent_name=f.agent_name,
+                ts=f.ts,
+                kind=f.payload.get("state", f.payload.get("regime", "generic")),
+                severity=min(100, max(0, int(f.confidence * 100))),
+                confidence=f.confidence,
+                tags=f.tags,
+                payload_jsonb=f.payload,
+                llm_status="disabled",
+                created_at=now,
             )
         )
 
@@ -85,23 +138,31 @@ async def run_analysis_for_symbol(session: AsyncSession, symbol: str, timeframe:
             run_id=run_id,
             instrument_id=inst.id,
             ts=signal["ts"],
-            direction=signal["direction"],
+            direction="neutral" if signal["direction"] == "hold" else signal["direction"],
             confidence=signal["confidence"],
-            invalidation=signal["invalidation"],
-            metadata_json=signal["metadata"],
+            invalidation_level=signal["invalidation"],
+            horizon="1h",
+            metadata_jsonb=signal["metadata"],
+            created_at=now,
         )
     )
 
-    finding_dicts = [f.model_dump() for f in findings]
-    reports = [
-        drift_supervisor(run_id, finding_dicts),
-        overfit_risk_supervisor(run_id, signal),
-        risk_coherence_supervisor(run_id, finding_dicts, signal),
-    ]
-    for report in reports:
-        session.add(SupervisorReport(**report))
+    sup_instances = [DataQualitySupervisor(), DriftSupervisor(), OverfitRiskSupervisor(), RiskCoherenceSupervisor()]
+    finding_dicts = [dict(tags=f.tags, severity=f.severity, payload=f.payload) for f in findings]
+    for sup in sup_instances:
+        rep = sup.run(finding_dicts, signal)
+        session.add(
+            SupervisorReport(
+                run_id=run_id,
+                instrument_id=inst.id,
+                supervisor_name=rep.supervisor_name,
+                ts=rep.ts,
+                verdict=rep.verdict,
+                payload_jsonb=rep.payload,
+                created_at=now,
+            )
+        )
 
     run.status = "completed"
-    run.ts_end = datetime.now(UTC)
     await session.commit()
     return run_id

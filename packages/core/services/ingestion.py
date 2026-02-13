@@ -1,50 +1,46 @@
 from datetime import UTC, datetime
 
-import ccxt
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from packages.core.db.models import Candle, Instrument
+from packages.core.db.models import Candle, Instrument, ProviderConfig
+from packages.core.crypto import decrypt_secret
+from packages.core.config.settings import get_settings
+from packages.providers import build_provider
 
 
-async def upsert_instrument(session: AsyncSession, symbol: str, market_type: str = "spot") -> Instrument:
-    existing = await session.scalar(
-        select(Instrument).where(
-            Instrument.symbol == symbol,
-            Instrument.exchange == "binance",
-            Instrument.type == market_type,
-        )
-    )
-    if existing:
-        return existing
-
-    item = Instrument(symbol=symbol, exchange="binance", type=market_type)
-    session.add(item)
-    await session.flush()
-    return item
+async def get_provider_for_instrument(session: AsyncSession, instrument: Instrument):
+    if instrument.provider_id:
+        cfg = await session.scalar(select(ProviderConfig).where(ProviderConfig.id == instrument.provider_id))
+    else:
+        cfg = await session.scalar(select(ProviderConfig).where(ProviderConfig.enabled == True).order_by(ProviderConfig.id.asc()))
+    if not cfg:
+        return None
+    cfg_settings = dict(cfg.settings_jsonb or {})
+    if cfg.secret_encrypted:
+        cfg_settings["api_key"] = decrypt_secret(get_settings().chainalyze_master_key, cfg.secret_encrypted)
+    return build_provider(cfg.provider_type, cfg_settings)
 
 
-def fetch_ohlcv(symbol: str, timeframe: str, limit: int = 300) -> list[list[float]]:
-    exchange = ccxt.binance({"enableRateLimit": True})
-    return exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
-
-
-async def store_candles(session: AsyncSession, instrument_id: int, timeframe: str, rows: list[list[float]]) -> int:
+async def ingest_instrument_timeframe(session: AsyncSession, instrument: Instrument, timeframe: str) -> int:
+    provider = await get_provider_for_instrument(session, instrument)
+    if not provider:
+        return 0
+    rows = provider.fetch_ohlcv(instrument.symbol, timeframe)
     inserted = 0
     for row in rows:
-        ts = datetime.fromtimestamp(row[0] / 1000, tz=UTC)
         stmt = (
             insert(Candle)
             .values(
-                instrument_id=instrument_id,
+                instrument_id=instrument.id,
                 timeframe=timeframe,
-                ts=ts,
-                open=row[1],
-                high=row[2],
-                low=row[3],
-                close=row[4],
-                volume=row[5],
+                ts=row.ts,
+                o=row.o,
+                h=row.h,
+                l=row.l,
+                c=row.c,
+                volume=row.volume,
             )
             .on_conflict_do_nothing(index_elements=["instrument_id", "timeframe", "ts"])
         )
