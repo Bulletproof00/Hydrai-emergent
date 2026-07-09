@@ -3187,6 +3187,30 @@ async def get_unified_price(symbol: str = "BTC/USDT"):
         logger.error(f"Unified price error for {symbol}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# --- Admin introspection (read-only, token-gated). Disabled unless
+#     ADMIN_INTROSPECT_TOKEN is set in the environment. ---
+try:
+    from modules.admin_introspect import get_admin_router
+
+    _admin_router = get_admin_router(db)
+
+    @_admin_router.get("/routes")
+    async def _admin_routes(x_admin_token: str = Header(None)):
+        from modules.admin_introspect import _require_auth
+        _require_auth(x_admin_token)
+        routes = []
+        for r in app.routes:
+            methods = sorted(getattr(r, "methods", []) or [])
+            routes.append({"path": getattr(r, "path", None), "methods": methods, "name": getattr(r, "name", None)})
+        routes.sort(key=lambda x: (x["path"] or ""))
+        return {"count": len(routes), "routes": routes}
+
+    api_router.include_router(_admin_router, prefix="/admin")
+    logger.info("Admin introspection router mounted at /api/admin (enabled=%s)",
+                bool(os.environ.get("ADMIN_INTROSPECT_TOKEN")))
+except Exception as _admin_exc:  # pragma: no cover - never break startup over this
+    logger.warning(f"Admin introspection router not mounted: {_admin_exc}")
+
 # Include the router in the main app after all endpoints are defined
 app.include_router(api_router)
 
